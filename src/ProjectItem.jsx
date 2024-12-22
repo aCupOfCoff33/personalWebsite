@@ -2,26 +2,28 @@ import React from "react";
 
 const ProjectItem = ({ date, title, description, tags, link, icon }) => {
   return (
-    <div className="flex mb-10">
+    <div className="mb-10 flex flex-col lg:flex-row">
       {/* Date */}
-      <div className="w-1/4 text-gray-400 text-lg">{date}</div>
+      <div className="lg:w-1/4 lg:text-gray-400 lg:text-lg lg:pr-4 lg:flex-shrink-0">
+        <div className="text-gray-400 text-sm mb-2 lg:mb-0 lg:text-lg">
+          {date}
+        </div>
+      </div>
 
       {/* Details Section */}
-      <div className="w-3/4">
+      <div className="lg:w-3/4">
         {/* Title with Arrow */}
-        <div className="flex items-center mb-4">
+        <div className="lg:flex lg:items-center lg:space-x-4 mb-2 lg:mb-4">
           <a
             href={link}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center group"
           >
-            <span className="text-white text-2xl font-bold underline group-hover:text-gray-300 transition-colors duration-300">
+            <span className="text-white text-base sm:text-xl lg:text-2xl font-bold underline group-hover:text-gray-300 transition-colors duration-300">
               {title}
             </span>
-            <span
-              className="ml-3 text-gray-400 text-lg transition-transform duration-300 group-hover:translate-x-2 group-hover:-translate-y-1"
-            >
+            <span className="ml-3 text-gray-400 text-lg transition-transform duration-300 group-hover:translate-x-2 group-hover:-translate-y-1">
               ↗
             </span>
           </a>
@@ -29,20 +31,22 @@ const ProjectItem = ({ date, title, description, tags, link, icon }) => {
             <img
               src={icon}
               alt={`${title} icon`}
-              className="w-8 h-8 ml-4 rounded-lg hover:scale-110 transition-all duration-300"
+              className="w-6 h-6 sm:w-8 sm:h-8 ml-4 rounded-lg hover:scale-110 transition-all duration-300"
             />
           )}
         </div>
 
         {/* Description */}
-        <p className="text-gray-300 text-lg mb-4">{description}</p>
+        <p className="text-gray-300 text-sm sm:text-base lg:text-lg mb-4">
+          {description}
+        </p>
 
         {/* Tags */}
         <div className="flex flex-wrap gap-3">
           {tags.map((tag, index) => (
             <span
               key={index}
-              className="bg-gray-800 text-white text-base px-4 py-2 rounded-full"
+              className="bg-gray-800 text-white text-xs sm:text-sm px-3 py-1 rounded-full"
             >
               {tag}
             </span>

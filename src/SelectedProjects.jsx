@@ -6,7 +6,8 @@ const SelectedProjects = () => {
     {
       date: "dec 2024",
       title: "2 chatbots talking to each other",
-      description: "Used LLMs to communicate with each other.",
+      description:
+        "designed and deployed a real-time ai-powered chat platform with flan-t5 language models. implemented robust api management and advanced similarity checks to enable dynamic, interactive conversations.",
       tags: ["Python", "React", "Tailwind", "AI/ML"],
       link: "#",
     },
@@ -14,7 +15,7 @@ const SelectedProjects = () => {
       date: "sept 2024 - nov 2024",
       title: "western alumni database",
       description:
-        "Developed a networking platform connecting 300+ alumni and students for coffee chats and career opportunities.",
+        "developed a react-based alumni networking platform for seamless navigation and scalability. connected 2,000+ students with 300+ alumni, fostering meaningful professional relationships.",
       tags: ["JavaScript", "React", "Tailwind"],
       link: "#",
     },
@@ -22,7 +23,7 @@ const SelectedProjects = () => {
       date: "sept 2024 - oct 2024",
       title: "uwo tech system",
       description:
-        "Co-created a notification system enabling 1000+ users to receive personalized tech event alerts across the 3 biggest clubs at Western University.",
+        "co-created a notification platform for tech clubs using telnyx and google sheets apis. improved event alert efficiency by 30%, enabling personalized communication for 1,000+ users.",
       tags: ["Python", "HTML & CSS", "Google Telnyx"],
       link: "#",
     },
@@ -30,7 +31,7 @@ const SelectedProjects = () => {
       date: "dec 2024",
       title: "algorithmic trading bot",
       description:
-        "Built an algorithmic trading strategy using moving averages, improving profit analysis and performance evaluation with advanced data metrics.",
+        "built an algorithmic trading system leveraging python, pandas, and streamlit. used moving average crossover strategies and financial metrics to optimize trading workflows and enhance portfolio returns.",
       tags: ["Python", "React", "Tailwind"],
       link: "#",
     },
@@ -39,7 +40,7 @@ const SelectedProjects = () => {
   return (
     <div className="pt-12 px-6 sm:px-12">
       <h2 className="text-white text-3xl font-bold mb-8">Selected Projects</h2>
-      <div className="flex flex-col space-y-6">
+      <div className="flex flex-col space-y-6 justify-start">
         {projects.map((project, index) => (
           <ProjectItem key={index} {...project} />
         ))}
