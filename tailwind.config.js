@@ -11,7 +11,13 @@ export default {
       lg: '1024px',
       xl: '1280px',
     },
-    extend: {},
+    extend: {
+      colors: {
+        purpleTrail: {
+          500: "#9F7AEA",
+        },
+      },
+    },
   },
   plugins: [],
 }

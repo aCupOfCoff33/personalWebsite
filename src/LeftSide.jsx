@@ -21,13 +21,13 @@ const LeftSide = () => {
       {/* Buttons */}
       <div className="mt-8 flex space-x-6">
         <button className="bg-[#1c255b] px-8 py-3 rounded-xl text-lg font-bold text-white hover:bg-[#2b347d]">
-          Work
+          work
         </button>
         <button className="bg-[#1c255b] px-8 py-3 rounded-xl text-lg font-bold text-white hover:bg-[#2b347d]">
-          Projects
+          project
         </button>
         <button className="bg-[#1c255b] px-8 py-3 rounded-xl text-lg font-bold text-white hover:bg-[#2b347d]">
-          About
+          about
         </button>
       </div>
     </div>

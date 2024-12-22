@@ -1,4 +1,3 @@
-// src/components/SelectedWorks.jsx
 import React from "react";
 import WorkExperience from "./WorkExperience";
 import wdsLogo from "./assets/WDS.png";
@@ -49,8 +48,8 @@ const SelectedWorks = () => {
 
   return (
     <div className="pt-12 px-6 sm:px-12">
-      <h2 className="text-white text-2xl font-bold mb-8">selected work experiences</h2>
-      <div className="flex flex-col space-y-4">
+      <h2 className="text-white text-3xl font-bold mb-8">Selected Work Experiences</h2>
+      <div className="flex flex-col space-y-6">
         {experiences.map((experience, index) => (
           <WorkExperience key={index} {...experience} />
         ))}
