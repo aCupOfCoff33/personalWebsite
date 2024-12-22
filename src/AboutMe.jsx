@@ -2,20 +2,20 @@ import React from "react";
 
 const AboutMe = () => {
   return (
-    <div className="w-full max-w-[750px] mx-auto text-white text-2xl font-bold font-['DM Sans'] space-y-6">
-      <p>hey there!</p>
+    <div className="w-full max-w-[750px] text-white text-2xl font-bold font-['DM Sans'] space-y-6">
+      <p>Hey there!</p>
       <p>
-        i’m a software engineer, ui/ux enthusiast, and consultant located @
-        toronto, canada.
+        I’m a software engineer, UI/UX enthusiast, and consultant located in
+        Toronto, Canada.
       </p>
       <p>
-        i’m passionate about tackling challenges across diverse domains—whether
+        I’m passionate about tackling challenges across diverse domains—whether
         it’s crafting intuitive designs, building intelligent systems,
         navigating fintech innovations, or delivering strategic solutions as a
         consultant.
       </p>
       <p>
-        this space is my curated playground, where i share projects and ideas
+        This space is my curated playground, where I share projects and ideas
         that inspire me.
       </p>
     </div>

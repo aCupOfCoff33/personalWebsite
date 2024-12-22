@@ -6,27 +6,29 @@ import SelectedProjects from "./SelectedProjects";
 
 function App() {
   return (
-    <div className="flex h-screen bg-black text-white">
+    <div className="relative h-screen w-screen bg-black text-white">
       {/* Fixed Left Section */}
-      <div className="w-1/2 h-screen fixed flex items-center justify-end px-8">
+      <div className="fixed top-0 left-0 w-1/2 h-full flex items-center justify-end px-8 z-10 pointer-events-none">
         <LeftSide />
       </div>
 
       {/* Scrollable Right Section */}
-      <div className="w-1/2 ml-auto h-screen overflow-y-auto">
-        {/* About Me Section */}
-        <div className="h-screen flex items-center justify-center px-8">
-          <AboutMe />
-        </div>
+      <div className="absolute top-0 left-0 w-full h-full overflow-y-auto pl-[50%] pr-8">
+        <div className="py-8">
+          {/* About Me Section */}
+          <div className="min-h-screen flex items-center justify-center">
+            <AboutMe />
+          </div>
 
-        {/* Selected Work Experiences Section */}
-        <div className="px-8 py-8">
-          <SelectedWorks />
-        </div>
+          {/* Selected Work Experiences Section */}
+          <div className="py-8">
+            <SelectedWorks />
+          </div>
 
-        {/* Selected Projects Section */}
-        <div className="px-8 py-8">
-          <SelectedProjects />
+          {/* Selected Projects Section */}
+          <div className="py-8">
+            <SelectedProjects />
+          </div>
         </div>
       </div>
     </div>
