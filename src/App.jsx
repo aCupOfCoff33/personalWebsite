@@ -7,7 +7,7 @@ import SelectedProjects from "./components/SelectedProjects";
 import NewAboutPage from "./components/NewAboutPage";
 import { Background } from "./components/Background";
 import Footer from "./components/Footer";
-import "./App.css"; // Import for CSS animations
+import "./App.css"; 
 
 const App = () => {
   const rightSideRef = useRef(null);
