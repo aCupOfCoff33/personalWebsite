@@ -11,6 +11,21 @@
       name="description"
       content="Welcome to Aaryan's Personal Portfolio. Explore projects, experiences, and achievements. Learn about Aaryan's journey as a software engineer and consultant."
     />
+
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-MN2B3BC4HJ"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-MN2B3BC4HJ");
+    </script>
     <meta
       name="keywords"
       content="Aaryan, Portfolio, Software Engineer, Consultant, Projects, Web Development, AI, UI/UX, Toronto, Personal Website"
@@ -27,22 +42,8 @@
     <meta property="og:type" content="website" />
 
     <link rel="canonical" href="https://aaryanj.tech" />
-
-    <!-- Google tag (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-MN2B3BC4HJ"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-MN2B3BC4HJ");
-    </script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
