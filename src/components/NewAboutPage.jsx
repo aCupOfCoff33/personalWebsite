@@ -60,7 +60,7 @@ const NewAboutPage = () => {
           rel="noopener noreferrer"
           className="text-gray-400 hover:text-gray-300 transition duration-200"
         >
-          LinkedIn
+          linkedIn
         </a>
         , or follow along on{" "}
         <a
@@ -69,7 +69,7 @@ const NewAboutPage = () => {
           rel="noopener noreferrer"
           className="text-gray-400 hover:text-gray-300 transition duration-200"
         >
-          Instagram
+          instagram
         </a>{" "}
         for updates on my journey. i’m always eager to connect and learn from
         like-minded individuals!
