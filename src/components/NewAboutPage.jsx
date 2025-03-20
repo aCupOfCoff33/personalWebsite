@@ -34,7 +34,7 @@ const NewAboutPage = () => {
       <p className="text-base sm:text-lg lg:text-xl leading-relaxed mb-6 text-justify">
         beyond academics and projects, I find joy in music (
         <a
-          href="https://open.spotify.com" 
+          href="https://open.spotify.com/user/immortalmessi10" 
           target="_blank"
           rel="noopener noreferrer"
           className="text-gray-400 hover:text-gray-300 transition duration-200"
