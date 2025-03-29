@@ -56,6 +56,15 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
       <div className="mt-8">
         <div>
           <h2 className="text-lg font-semibold text-gray-400">
+            currently incoming at
+          </h2>
+          <p className="text-md text-white mt-1">
+            data analytics and strategy @ american global
+          </p>
+        </div>
+        <div className="mt-6">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-400">
             currently working as
           </h2>
           <p className="text-md text-white mt-1">
