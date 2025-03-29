@@ -62,7 +62,6 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
             data analytics and strategy @ american global
           </p>
         </div>
-        <div className="mt-6">
         <div>
           <h2 className="text-lg font-semibold text-gray-400">
             currently working as
