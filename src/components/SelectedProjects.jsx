@@ -4,6 +4,14 @@ import ProjectItem from "./ProjectItem";
 const SelectedProjects = () => {
   const projects = [
     {
+      date: "dec 2024 - march 2025",
+      title: "2275 feasibility project - onepack",
+      description:
+        "developed onepack, a sustainable packaging solution that combines reusability with convenience for eco-conscious consumers. conducted market research to identify demand for alternatives to single-use containers, then designed an affordable product using recycled materials. created a business model balancing environmental impact with practicality for on-the-go use.",
+      tags: ["market research", "financial projections", "react three fiber"],
+      link: "https://onepack.aaryanj.tech/", 
+    },
+    {
       date: "dec 2024",
       title: "algorithmic trading bot",
       description:
