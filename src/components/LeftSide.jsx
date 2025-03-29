@@ -63,7 +63,7 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
           </p>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-400">
+          <h2 className="mt-6 text-lg font-semibold text-gray-400">
             currently working as
           </h2>
           <p className="text-md text-white mt-1">
