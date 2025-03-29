@@ -5,6 +5,16 @@ import wdsLogo from "../assets/WDS.png";
 const SelectedWorks = () => {
   const experiences = [
     {
+      date: "may 2025 - august 2025",
+      title: "data analytics and strategy",
+      company: "american global",
+      description:
+        "becoming one of the first interns on the data analytics team and super excited to make a huge impact within the construction insurance sector!!",
+      tags: ["python", "power tools", "data analysis"],
+      link: "https://americanglobal.com//",
+      icon: "https://media.licdn.com/dms/image/v2/C4E0BAQFxOWSzcQlx7w/company-logo_200_200/company-logo_200_200/0/1672776000338/american_global_llc_logo?e=2147483647&v=beta&t=6eASPMK3qET6z-fVO8yv4YWrhgf7l7wjaAwu_iF8q2s",
+    },
+    {
       date: "sept 2023 — present",
       title: "vice president of dev/ops",
       company: "western developers society",
