@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const MAX_HIGHLIGHT_MOVEMENT = 1.5; // Max pixels the highlight can move from center
-const BLINK_DURATION_MS = 150;
+const BLINK_DURATION_MS = 120;
 
 const BearIconSVG_New = ({ className = '' }) => {
   const [isBlinking, setIsBlinking] = useState(false);
