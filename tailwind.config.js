@@ -11,7 +11,10 @@ export default {
         'icon-detail-dark': '#120b05',
         'icon-detail-brown': '#9e5719',
         'icon-detail-light': '#fbfdfc',  
-      }
+      },
+      fontFamily: {
+        adamant: ['"Adamant_BG"', 'sans-serif'],
+      },
     },
   },
   plugins: [],

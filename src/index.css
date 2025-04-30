@@ -18,16 +18,38 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-}
-a:hover {
-}
-
-body {
-}
-
-h1 {
+/* Regular */
+@font-face {
+  font-family: 'Adamant_BG';
+  src: url('/fonts/Adamant_BG.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-button {
+/* Bold */
+@font-face {
+  font-family: 'Adamant_BG';
+  src: url('/fonts/Adamant_BG_B.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Italic */
+@font-face {
+  font-family: 'Adamant_BG';
+  src: url('/fonts/Adamant_BG_I.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Bold-Italic */
+@font-face {
+  font-family: 'Adamant_BG';
+  src: url('/fonts/Adamant_BG_BI.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
 }

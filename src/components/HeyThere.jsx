@@ -1,157 +1,145 @@
-import React, { useEffect, useState } from "react";
+/* HeroTypingAnimation.jsx */
+import React, { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
 
-const HeroTypingAnimation = () => {
-  const [text, setText] = useState("");
-  const [showCursor, setShowCursor] = useState(false);
-  const [showOutline, setShowOutline] = useState(false);
-  const [showParagraph, setShowParagraph] = useState(false);
-  const [hasMoved, setHasMoved] = useState(false);
-  const [dragEnabled, setDragEnabled] = useState(false);
 
-  const name = "Hey there! I’m Aaryan!";
-  const x = useMotionValue(-80); // Starting position off-screen
+/* ── constants ─────────────────────────────────────────────── */
+const HEADLINE = "Hey there! I’m Aaryan!";
+const BORDER = 4; // 4-px outline from Figma
+const CORNER_SIZE = 12; // 12-px blue squares (w-3 / h-3)
+
+export default function HeroTypingAnimation() {
+  /* animation state */
+  const bodyRef = useRef(null);
+  const [typed, setTyped] = useState("");
+  const [showCursor, setCursor] = useState(false);
+  const [showFrame, setFrame] = useState(false);
+  const [showBody, setBody] = useState(false);
+  const [dragOK, setDragOK] = useState(false);
+
+  /* motion values for drag / snap */
+  const x = useMotionValue(-120);
   const y = useMotionValue(0);
+  const frameRef = useRef(null);
+  const [centreX, setCentreX] = useState(0);
 
+  /* ── orchestrate the sequence ───────────────────────────── */
   useEffect(() => {
-    const sequence = async () => {
-      // 1. Cursor appears
-      await new Promise((r) => setTimeout(r, 300));
-      setShowCursor(true);
+    (async () => {
+      /* 1 ▸ reveal the frame */
+      await new Promise((r) => setTimeout(r, 100));
+      setFrame(true);
 
-      // 2. Blue outline appears
-      await new Promise((r) => setTimeout(r, 400));
-      setShowOutline(true);
-
-      // 3. Type out name
-      for (let i = 0; i <= name.length; i++) {
-        setText(name.slice(0, i));
-        await new Promise((r) => setTimeout(r, 80));
+      /* 2 ▸ type the headline */
+      setCursor(true);
+      for (let i = 0; i <= HEADLINE.length; i++) {
+        setTyped(HEADLINE.slice(0, i));
+        await new Promise((r) => setTimeout(r, 65));
       }
+      setTimeout(() => setCursor(false), 900);
 
-      // 4. Hide cursor after typing
-      setTimeout(() => setShowCursor(false), 1000);
+      /* 3 ▸ fade-in body copy */
+      await new Promise((r) => setTimeout(r, 300));
+      setBody(true);
 
-      // 5. Show paragraph
-      await new Promise((r) => setTimeout(r, 500));
-      setShowParagraph(true);
-
-      // 6. Slide name into final position
-      await new Promise((r) => setTimeout(r, 1000));
-      await animate(x, 0, {
-        type: "spring",
-        stiffness: 50,
-        damping: 20,
-      });
-      setHasMoved(true);
-      setDragEnabled(true);
-    };
-
-    sequence();
+      /* 4 ▸ centre the frame, then enable drag */
+      await new Promise((r) => setTimeout(r, 400));
+      const frameLeft = frameRef.current.getBoundingClientRect().left;
+      const bodyLeft = bodyRef.current.getBoundingClientRect().left;
+      const delta = bodyLeft - frameLeft;
+      const finalX = x.get() + delta;
+      setCentreX(finalX);
+      await animate(x, finalX, { type: "spring", stiffness: 55, damping: 18 });
+      setDragOK(true);
+    })();
   }, []);
 
-  const handleDragEnd = () => {
+  /* snap the frame back after dragging */
+  const snapBack = () =>
     setTimeout(() => {
-      animate(x, 0, {
-        type: "spring",
-        stiffness: 60,
-        damping: 20,
-      });
-      animate(y, 0, {
-        type: "spring",
-        stiffness: 60,
-        damping: 20,
-      });
-    }, 1000);
-  };
+      animate(x, centreX, { type: "spring", stiffness: 65, damping: 18 });
+      animate(y, 0, { type: "spring", stiffness: 65, damping: 18 });
+    }, 800);
 
+  /* ── render ─────────────────────────────────────────────── */
   return (
-    <div className="text-white min-h-screen pt-12 font-sans">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className={`relative w-fit h-fit ${
-            dragEnabled
-              ? "cursor-grab active:cursor-grabbing"
-              : "cursor-default"
-          }`}
-          style={{ x, y }}
-          drag={dragEnabled}
-          dragMomentum={false}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="relative px-6 py-3 text-5xl font-bold">
-            {text}
-            {showCursor && <span className="animate-pulse">|</span>}
-            {showOutline && (
-              <>
-                <motion.div
-                  className="absolute inset-0 border-4 border-[#198ce7]"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.4 }}
-                />
-                {[
-                  ["top-[-4px]", "left-[-4px]"],
-                  ["top-[-4px]", "right-[-4px]"],
-                  ["bottom-[-4px]", "left-[-4px]"],
-                  ["bottom-[-4px]", "right-[-4px]"],
-                ].map(([top, left], i) => (
-                  <motion.div
-                    key={i}
-                    className={`absolute w-2 h-2 bg-[#198ce7] ${top} ${left} rounded-sm`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0.05 * i }}
-                  />
-                ))}
-              </>
-            )}
-          </div>
-        </motion.div>
+    <section className="relative w-full max-w-screen-xl mx-auto px-6 pt-32 text-white font-adamant">
+      {/* ── headline & draggable blue frame ── */}
+      <motion.div
+        ref={frameRef}
+        drag={dragOK}
+        dragMomentum={false}
+        onDragEnd={snapBack}
+        style={{ x, y }}
+        className={`relative inline-block px-10 py-6 ${
+          dragOK ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+        }`}
+      >
+        {showFrame && (
+          <>
+            {/* outline */}
+            <motion.div
+              className="absolute inset-0"
+              style={{ border: `${BORDER}px solid #198ce7` }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25 }}
+            />
 
-        {showParagraph && (
-          <motion.div
-            className="mt-10 max-w-[64rem] text-2xl font-bold text-white space-y-6 leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <p>
-              Studying <u>Software Engineering</u> and <u>Business</u> at
-              Western University to better serve people in fun and innovative
-              ways!
-            </p>
-            <p>
-              In other words, I move rectangles around and crash Excel sheets
-              repeatedly.
-            </p>
-            <p>Also might have an unhealthy obsession with bears…</p>
-            <p>
-              Previously at{" "}
-              <a
-                href="https://americanglobal.com"
-                className="underline hover:text-brand-blue transition-colors duration-200"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                American Global
-              </a>{" "}
-              and{" "}
-              <a
-                href="https://www.canada.ca/en/employment-social-development.html"
-                className="underline hover:text-brand-blue transition-colors duration-200"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                ESDC
-              </a>
-              .
-            </p>
-          </motion.div>
+            {/* 8 little squares (size = CORNER_SIZE) */}
+            {[
+              "-top-[4px] -left-[4px]",
+              "-top-[4px] left-1/2 -translate-x-1/2",
+              "-top-[4px] -right-[4px]",
+              "top-1/2 -left-[4px] -translate-y-1/2",
+              "top-1/2 -right-[4px] -translate-y-1/2",
+              "-bottom-[4px] -left-[4px]",
+              "-bottom-[4px] left-1/2 -translate-x-1/2",
+              "-bottom-[4px] -right-[4px]",
+            ].map((pos, i) => (
+              <div key={i} className={`absolute w-3 h-3 bg-[#198ce7] ${pos}`} />
+            ))}
+          </>
         )}
-      </div>
-    </div>
-  );
-};
 
-export default HeroTypingAnimation;
+        <h1 className="whitespace-nowrap text-5xl md:text-6xl font-bold leading-none">
+          {typed}
+          {showCursor && <span className="animate-pulse">|</span>}
+        </h1>
+      </motion.div>
+
+      {/* ── body: tagline + meta grid ── */}
+      <motion.div
+        ref={bodyRef}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showBody ? 1 : 0 }}
+        transition={{ duration: 0.55 }}
+        className="mt-12 space-y-12 max-w-[72rem]"
+      >
+        {/* tagline */}
+        <p className="text-2xl md:text-3xl leading-relaxed">
+          A Software Engineering&nbsp;&amp;&nbsp;Business student at Western U
+          based in Toronto, building tools that <em>(ideally)</em> make life
+          easier — or at least break things in more interesting ways.
+        </p>
+
+        {/* “currently / driven by” grid */}
+        <div className="grid gap-y-10 gap-x-24 sm:grid-cols-2 text-xl">
+          <div>
+            <p className="italic text-2xl mb-2">currently</p>
+            <p className="text-[#9b9cbe] font-semibold leading-snug">
+              data analytics &amp; strategy intern @ <br /> american global
+            </p>
+          </div>
+          <div>
+            <p className="italic text-2xl mb-2">driven by</p>
+            <p className="text-[#9b9cbe] font-semibold leading-snug">
+              curiosity, creative problem-solving &amp; an arguably unhealthy
+              obsession with bears.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    </section>
+  );
+}

@@ -1,34 +1,27 @@
-import "./App.css";
+import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/Navbar";
-import Hero from "./components/HeyThere";
-import SidebarWidgets from "./components/SidebarWidgets";
+import Home from "./components/Home";
+import AboutMe from "./components/AboutMe";
+import Work from "./components/Work";
+import Projects from "./components/Projects";
 
 function App() {
   return (
     <>
       <NavBar />
 
-      {/* overall content wrapper */}
-      <main className="max-w-screen-xl mx-24 mt-16">
-        {" "}
-        {/* grid on lg+   ──►   |  HERO  |  WIDGETS  |                 */}
-        <div className="grid lg:gap-x-32 gap-y-20 lg:grid-cols-[minmax(48rem,1fr)_auto]">
-          {" "}
-          {/* ---------------------------------------------------------------- */}
-          {/*  HERO  –  min‑width 32 rem ⇒ the column never shrinks as text     */}
-          {/*          types out, so nothing pushes the widgets sideways.      */}
-          {/* ---------------------------------------------------------------- */}
-          <div className="min-w-[56rem]">
-            <Hero />
-          </div>
-          {/* ---------------------------------------------------------------- */}
-          {/*  WIDGETS  –  auto‑sized column, but we justify it to the right   */}
-          {/* ---------------------------------------------------------------- */}
-          <div className="py-24">
-            <SidebarWidgets />
-          </div>
-        </div>
-      </main>
+      {/* ---- ROUTE OUTLET ---- */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/work" element={<Work />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/about" element={<AboutMe />} />
+      </Routes>
+
+      {/* Footer lives outside Routes so it shows on every page */}
+      <footer className="relative bg-black text-center py-10 text-gray-500 z-10">
+        Your Footer Content Here
+      </footer>
     </>
   );
 }
