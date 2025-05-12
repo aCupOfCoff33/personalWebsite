@@ -25,7 +25,7 @@ const BearIconSVG_New = ({ className = '' }) => {
 
   const schedulePeriodicBlink = useCallback(() => {
     if (periodicBlinkTimeoutRef.current) clearTimeout(periodicBlinkTimeoutRef.current);
-    const delay = Math.random() * 5000 + 5000;
+    const delay = Math.random() * 4000+1000;
     periodicBlinkTimeoutRef.current = setTimeout(() => {
       triggerBlink();
       schedulePeriodicBlink();

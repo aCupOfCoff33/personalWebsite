@@ -119,7 +119,7 @@ export default function HeroTypingAnimation() {
         {/* tagline */}
         <p className="text-2xl md:text-3xl leading-relaxed">
           A Software Engineering&nbsp;&amp;&nbsp;Business student at Western U
-          based in Toronto, building tools that <em>(ideally)</em> make life
+          based near Toronto, building tools that <em>(ideally)</em> make life
           easier — or at least break things in more interesting ways.
         </p>
 
@@ -128,7 +128,7 @@ export default function HeroTypingAnimation() {
           <div>
             <p className="italic text-2xl mb-2">currently</p>
             <p className="text-[#9b9cbe] font-semibold leading-snug">
-              data analytics &amp; strategy intern @ <br /> american global
+              data analytics &amp; strategy intern @ american global
             </p>
           </div>
           <div>
