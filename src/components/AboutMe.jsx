@@ -36,7 +36,7 @@ const AboutMe = () => (
           <h2 className="mb-6 text-3xl italic lg:text-4xl">About Me</h2>
 
           <p className="text-lg leading-relaxed lg:text-xl">
-            Technically a Western U student studying SWE + Business but most of what I care about happens outside the syllabus.
+            Technically a Western U student studying SWE + Ivey Business but most of what I care about happens outside the syllabus.
             <br/><br/>
 
             I’m in third year, graduating in 2028 and based near Toronto. I make UI that doesn’t fight the user and data that actually answers something.

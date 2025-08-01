@@ -1,5 +1,6 @@
 /* HeroTypingAnimation.jsx */
 import React, { useEffect, useState, useRef } from "react";
+import AnimatedCursor from "./AnimatedCursor";
 import { motion, useMotionValue, animate } from "framer-motion";
 
 
@@ -22,6 +23,8 @@ export default function HeroTypingAnimation() {
   const y = useMotionValue(0);
   const frameRef = useRef(null);
   const [centreX, setCentreX] = useState(0);
+  const [frameFrozen, setFrameFrozen] = useState(true);
+  const [frameThick, setFrameThick] = useState(false);
 
   /* ── orchestrate the sequence ───────────────────────────── */
   useEffect(() => {
@@ -36,23 +39,58 @@ export default function HeroTypingAnimation() {
         setTyped(HEADLINE.slice(0, i));
         await new Promise((r) => setTimeout(r, 65));
       }
-      setTimeout(() => setCursor(false), 900);
+      setTimeout(() => setCursor(false), 200);
 
       /* 3 ▸ fade-in body copy */
       await new Promise((r) => setTimeout(r, 300));
       setBody(true);
 
-      /* 4 ▸ centre the frame, then enable drag */
-      await new Promise((r) => setTimeout(r, 400));
+      /* 4 ▸ freeze frame, wait for cursor to move it */
+      setFrameFrozen(true);
+      // Frame will move only after cursor signals
+    })();
+  }, [x]);
+
+  // AnimatedCursor orchestration
+  const [showAnimatedCursor, setShowAnimatedCursor] = useState(false);
+  const [cursorShouldExit, setCursorShouldExit] = useState(false);
+  // Called by cursor after pause, triggers frame movement
+  const handleCursorReadyToDrag = async () => {
+    // Calculate final position and animate frame
+    if (frameRef.current && bodyRef.current) {
       const frameLeft = frameRef.current.getBoundingClientRect().left;
       const bodyLeft = bodyRef.current.getBoundingClientRect().left;
       const delta = bodyLeft - frameLeft;
       const finalX = x.get() + delta;
       setCentreX(finalX);
+      // Unfreeze and animate to final position
+      setFrameFrozen(false);
+      setFrameThick(true); // Thicken border when cursor is over
       await animate(x, finalX, { type: "spring", stiffness: 55, damping: 18 });
-      setDragOK(true);
-    })();
-  }, []);
+      // Pause for 0.5s before cursor exits
+      await new Promise((r) => setTimeout(r, 100));
+     // Reset outline immediately when cursor starts to leave (not when it finishes)
+      setFrameThick(false);
+      // Now tell cursor to exit
+      setCursorShouldExit(true);
+    }
+  };
+  // Called by cursor after exit, hides cursor and enables drag
+  const handleCursorDragComplete = () => {
+    setShowAnimatedCursor(false);
+    setDragOK(true);
+    // frameThick already reset when cursor started exiting, no need to reset again
+  };
+
+  // Show cursor only after typing and frame is ready
+  // Only trigger cursor animation once
+  const [cursorTriggered, setCursorTriggered] = useState(false);
+  useEffect(() => {
+    if (showFrame && showBody && frameFrozen && !showAnimatedCursor && !cursorTriggered) {
+      setCursorTriggered(true);
+      setTimeout(() => setShowAnimatedCursor(true), 100); // delay after typing before cursor enters
+    }
+  }, [showFrame, showBody, showAnimatedCursor, cursorTriggered, frameFrozen]);
 
   /* snap the frame back after dragging */
   const snapBack = () =>
@@ -64,41 +102,54 @@ export default function HeroTypingAnimation() {
   /* ── render ─────────────────────────────────────────────── */
   return (
     <section className="relative w-full max-w-screen-xl mx-auto px-6 pt-32 text-white font-adamant">
+      {/* Animated cursor overlay */}
+      {showAnimatedCursor && (
+        <AnimatedCursor
+          targetRef={frameRef}
+          onDragComplete={handleCursorDragComplete}
+          onCursorReadyToDrag={handleCursorReadyToDrag}
+          shouldExit={cursorShouldExit}
+        />
+      )}
       {/* ── headline & draggable blue frame ── */}
       <motion.div
         ref={frameRef}
         drag={dragOK}
         dragMomentum={false}
         onDragEnd={snapBack}
-        style={{ x, y }}
+        style={{ x: frameFrozen ? -120 : x, y }}
         className={`relative inline-block px-10 py-6 ${
           dragOK ? "cursor-grab active:cursor-grabbing" : "cursor-default"
         }`}
       >
         {showFrame && (
           <>
-            {/* outline */}
+            {/* outline - thinner initially, thicker when cursor is over */}
             <motion.div
               className="absolute inset-0"
-              style={{ border: `${BORDER}px solid #198ce7` }}
+              style={{ border: `${frameThick ? 6 : 2}px solid #198ce7` }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.25 }}
             />
 
-            {/* 8 little squares (size = CORNER_SIZE) */}
-            {[
-              "-top-[4px] -left-[4px]",
-              "-top-[4px] left-1/2 -translate-x-1/2",
-              "-top-[4px] -right-[4px]",
-              "top-1/2 -left-[4px] -translate-y-1/2",
-              "top-1/2 -right-[4px] -translate-y-1/2",
-              "-bottom-[4px] -left-[4px]",
-              "-bottom-[4px] left-1/2 -translate-x-1/2",
-              "-bottom-[4px] -right-[4px]",
-            ].map((pos, i) => (
-              <div key={i} className={`absolute w-3 h-3 bg-[#198ce7] ${pos}`} />
-            ))}
+            {/* Only 4 corner squares, white inside */}
+            {/* top-left */}
+            <div className="absolute w-3 h-3 bg-[#198ce7] -top-[4px] -left-[4px] flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded" />
+            </div>
+            {/* top-right */}
+            <div className="absolute w-3 h-3 bg-[#198ce7] -top-[4px] -right-[4px] flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded" />
+            </div>
+            {/* bottom-left */}
+            <div className="absolute w-3 h-3 bg-[#198ce7] -bottom-[4px] -left-[4px] flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded" />
+            </div>
+            {/* bottom-right */}
+            <div className="absolute w-3 h-3 bg-[#198ce7] -bottom-[4px] -right-[4px] flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded" />
+            </div>
           </>
         )}
 
