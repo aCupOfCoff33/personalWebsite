@@ -13,7 +13,16 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <nav className="fixed inset-x-0 top-0 z-50 overflow-hidden font-dmsans text-white">
-      <div className="absolute inset-0 bg-navbar-bg/70 backdrop-blur-lg" />
+      {/* Performance-optimized blur alternative using pseudo-element */}
+      <div className="absolute inset-0 bg-navbar-bg/70" />
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'rgba(235, 235, 235, 0.08)',
+          filter: 'blur(12px)',
+          zIndex: -1,
+        }}
+      />
       <div className="pointer-events-none absolute inset-x-0 -bottom-6 h-6 bg-gradient-to-b from-navbar-bg/70 to-transparent" />
 
       <div className="relative container mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">

@@ -1,7 +1,4 @@
-
 // AnimatedCursor.jsx
-// This component simulates a cursor moving, dragging, and exiting for onboarding/animation.
-// If cursor animation logic is reused elsewhere, consider extracting it into a custom hook.
 import React, { useEffect, useRef, useState } from 'react';
 import CursorSVG from './CursorSVG';
 
@@ -21,31 +18,35 @@ const DRAG_DURATION = 600; // match frame drag speed
 const EXIT_DURATION = 1200; // slower exit
 
 const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, shouldExit }) => {
-  // phase: 'enter' (move in), 'drag' (attached to target), 'exit' (move out)
   const cursorRef = useRef(null);
   const [phase, setPhase] = useState('enter'); // enter, drag, exit
   const [cursorPos, setCursorPos] = useState({ x: -CURSOR_SIZE, y: 200 });
+  const animationFrameRef = useRef(null);
 
-  // Track frame position during drag phase (optimized with requestAnimationFrame)
+  // Track frame position during drag phase with requestAnimationFrame for better performance
   useEffect(() => {
-    let animationFrameId;
     if (phase === 'drag' && targetRef.current) {
       const updateCursorPosition = () => {
-        if (!targetRef.current) return;
-        const rect = targetRef.current.getBoundingClientRect();
-        const targetX = rect.left + rect.width / 2 - CURSOR_SIZE / 2;
-        const targetY = rect.bottom - 10;
-        // Only update state if position actually changes
-        setCursorPos((prev) => {
-          if (prev.x !== targetX || prev.y !== targetY) {
-            return { x: targetX, y: targetY };
-          }
-          return prev;
-        });
-        animationFrameId = requestAnimationFrame(updateCursorPosition);
+        if (targetRef.current) {
+          const rect = targetRef.current.getBoundingClientRect();
+          // Keep cursor at bottom center of the frame during drag
+          const targetX = rect.left + rect.width / 2 - CURSOR_SIZE / 2;
+          const targetY = rect.bottom - 10;
+          setCursorPos({ x: targetX, y: targetY });
+          
+          // Continue animation loop
+          animationFrameRef.current = requestAnimationFrame(updateCursorPosition);
+        }
       };
-      animationFrameId = requestAnimationFrame(updateCursorPosition);
-      return () => cancelAnimationFrame(animationFrameId);
+
+      // Start the animation loop
+      animationFrameRef.current = requestAnimationFrame(updateCursorPosition);
+      
+      return () => {
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+      };
     }
   }, [phase, targetRef]);
 
@@ -56,7 +57,7 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
     }
   }, [shouldExit, phase]);
 
-  // Animate cursor in, drag, and out (orchestrates the full sequence)
+  // Animate cursor in, drag, and out
   useEffect(() => {
     let timeout1, pauseTimeout;
     if (phase === 'enter') {
@@ -97,7 +98,7 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
     };
   }, [phase, targetRef, onDragComplete, onCursorReadyToDrag, cursorPos.y]);
 
-  // Cursor style (positioned absolutely, follows animation state)
+  // Cursor style (use user's image as background)
   const cursorStyle = {
     position: 'fixed',
     left: cursorPos.x,
@@ -118,7 +119,7 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
     justifyContent: 'center',
   };
 
-  // Label style (styled to match design)
+  // Label style
   const labelStyle = {
     position: 'absolute',
     left: '50%',
@@ -136,7 +137,6 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
   };
 
   return (
-    // If you need to reuse this cursor animation, extract the logic above into a custom hook.
     <div ref={cursorRef} style={cursorStyle}>
       <CursorSVG color={CURSOR_COLOR} size={CURSOR_SIZE} />
       <div style={labelStyle}>{LABEL}</div>

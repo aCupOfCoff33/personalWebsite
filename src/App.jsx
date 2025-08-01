@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/Navbar";
+import HeroBackground from "./components/HeroBackground";
 import Home from "./components/Home";
 import AboutMe from "./components/AboutMe";
 import Work from "./components/Work";
@@ -8,6 +9,8 @@ import Projects from "./components/Projects";
 function App() {
   return (
     <>
+      {/* Global background - prevents remounting between pages */}
+      <HeroBackground />
       <NavBar />
 
       {/* ---- ROUTE OUTLET ---- */}

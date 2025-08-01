@@ -1,10 +1,8 @@
 import Hero from './HeyThere';
-import HeroBackground from './HeroBackground';
 
 export default function Home() {
     return (
       <>
-        <HeroBackground />
         <section className="relative min-h-screen flex items-start pt-32 md:pt-48">
           <div className="mx-auto max-w-screen-xl px-6 w-full z-10">
             <Hero />

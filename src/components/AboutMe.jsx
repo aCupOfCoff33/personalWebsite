@@ -1,13 +1,9 @@
 import React from "react";
 import AaryanImage from "/aaryan.png";    // Ensure these paths are correct
 import Background from "/background.png";  // Ensure these paths are correct
-import HeroBackground from "./HeroBackground";
 
 const AboutMe = () => (
   <>
-    {/* ---- Blurred mesh gradient (fixed, sits behind) ---- */}
-    <HeroBackground />
-
     {/* ---- Foreground content ---- */}
     <section className="relative z-10 w-full px-6 py-48 text-white font-adamant">
       <div className="mx-auto flex max-w-screen-xl flex-col gap-16 lg:flex-row lg:items-start">

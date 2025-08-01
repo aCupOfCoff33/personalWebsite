@@ -1,13 +1,10 @@
-
 // src/components/BearIconSVG_New.jsx
-// This SVG component animates blinking and highlight tracking for a bear icon.
-// If blinking or highlight tracking logic is reused, consider extracting as custom hooks.
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const MAX_HIGHLIGHT_MOVEMENT = 1.5; // Max pixels the highlight can move from center
 const BLINK_DURATION_MS = 120;
 
-const BearIconSVG_New = ({ className = '' }) => {
+const BearIconSVG_New = React.memo(({ className = '' }) => {
   const [isBlinking, setIsBlinking] = useState(false);
   const svgRef = useRef(null);
   // Refs for the white highlight circles in the NEW SVG
@@ -15,8 +12,9 @@ const BearIconSVG_New = ({ className = '' }) => {
   const rightHighlightRef = useRef(null);
   const blinkTimeoutRef = useRef(null);
   const periodicBlinkTimeoutRef = useRef(null);
+  const rafRef = useRef(null);
 
-  // --- Blinking Logic (can be extracted to a custom hook if reused) ---
+  // --- Blinking Logic (Optimized to avoid double setState) ---
   const triggerBlink = useCallback(() => {
     if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
     setIsBlinking(true);
@@ -43,7 +41,7 @@ const BearIconSVG_New = ({ className = '' }) => {
     };
   }, [schedulePeriodicBlink]);
 
-  // --- Cursor Tracking Logic (can be extracted to a custom hook if reused) ---
+  // --- Cursor Tracking Logic (Optimized with requestAnimationFrame throttling) ---
   useEffect(() => {
     const svgElement = svgRef.current;
     const leftHighlight = leftHighlightRef.current;
@@ -51,9 +49,23 @@ const BearIconSVG_New = ({ className = '' }) => {
 
     if (!svgElement || !leftHighlight || !rightHighlight) return;
 
+    let currentMouseX = 0;
+    let currentMouseY = 0;
+
     const handleMouseMove = (event) => {
-      const { clientX, clientY } = event;
+      currentMouseX = event.clientX;
+      currentMouseY = event.clientY;
+      
+      // Only update if there's no pending animation frame
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(() => {
+          updateHighlights(currentMouseX, currentMouseY);
+          rafRef.current = null;
+        });
+      }
+    };
     
+    const updateHighlights = (clientX, clientY) => {
       const moveHighlight = (highlightRef) => {
         const el = highlightRef.current;
         if (!el) return;
@@ -79,29 +91,34 @@ const BearIconSVG_New = ({ className = '' }) => {
       moveHighlight(leftHighlightRef);
       moveHighlight(rightHighlightRef);
     };
-    
 
     const handleMouseLeave = () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
       leftHighlightRef.current.style.transform = `translate(0px, 0px)`;
       rightHighlightRef.current.style.transform = `translate(0px, 0px)`;
     };
-    
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseleave', handleMouseLeave);
     
     return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, []);
 
-  // --- Click Handler (triggers blink) ---
+  // --- Click Handler ---
   const handleClick = () => {
     triggerBlink();
   };
 
-  // --- Styles (SVG animation styles) ---
+  // --- Styles (Identical) ---
   const trackingTransitionStyle = {
     transition: `transform 0.1s ease-out`,
   };
@@ -112,7 +129,6 @@ const BearIconSVG_New = ({ className = '' }) => {
   };
 
   return (
-    // If you need to reuse blinking or highlight tracking, extract the logic above into custom hooks.
     <svg
       ref={svgRef}
       xmlns="http://www.w3.org/2000/svg"
@@ -154,6 +170,8 @@ const BearIconSVG_New = ({ className = '' }) => {
       </g>
     </svg>
   );
-};
+});
+
+BearIconSVG_New.displayName = 'BearIconSVG_New';
 
 export default BearIconSVG_New;
