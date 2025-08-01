@@ -27,7 +27,10 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
       if (phase === 'drag' && targetRef.current) {
         const updateCursorPosition = () => {
           const rect = targetRef.current.getBoundingClientRect();
-          setCursorPos({ x: rect.left + 32, y: rect.top + 28 });
+          // Keep cursor at bottom center of the frame during drag
+          const targetX = rect.left + rect.width / 2 - CURSOR_SIZE / 2;
+          const targetY = rect.bottom - 10;
+          setCursorPos({ x: targetX, y: targetY });
         };
   
         // Update cursor position continuously during drag
@@ -47,10 +50,13 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
   useEffect(() => {
     let timeout1, pauseTimeout;
     if (phase === 'enter') {
-      // Move cursor to top-left corner of frame
+      // Move cursor to bottom center of frame (for both mobile and desktop)
       if (targetRef.current) {
         const rect = targetRef.current.getBoundingClientRect();
-        setCursorPos({ x: rect.left + 32, y: rect.top + 28 });
+        // Position cursor at bottom center of the frame
+        const targetX = rect.left + rect.width / 2 - CURSOR_SIZE / 2;
+        const targetY = rect.bottom - 10; // Slightly above the bottom edge
+        setCursorPos({ x: targetX, y: targetY });
         // Pause for 1s after arrival before drag
         timeout1 = setTimeout(() => {
           pauseTimeout = setTimeout(() => {
@@ -63,7 +69,10 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
       // Stay attached to frame during movement - no timeout, wait for shouldExit signal
       if (targetRef.current) {
         const rect = targetRef.current.getBoundingClientRect();
-        setCursorPos({ x: rect.left + 32, y: rect.top + 28 });
+        // Keep cursor at bottom center during drag
+        const targetX = rect.left + rect.width / 2 - CURSOR_SIZE / 2;
+        const targetY = rect.bottom - 10;
+        setCursorPos({ x: targetX, y: targetY });
       }
     } else if (phase === 'exit') {
       // Move cursor out to left from current position

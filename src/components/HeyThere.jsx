@@ -10,21 +10,79 @@ const BORDER = 4; // 4-px outline from Figma
 const CORNER_SIZE = 12; // 12-px blue squares (w-3 / h-3)
 
 export default function HeroTypingAnimation() {
+  const [frameAligned, setFrameAligned] = useState(false);
   /* animation state */
   const bodyRef = useRef(null);
   const [typed, setTyped] = useState("");
   const [showCursor, setCursor] = useState(false);
   const [showFrame, setFrame] = useState(false);
+  const [phase, setPhase] = useState('initial');
   const [showBody, setBody] = useState(false);
   const [dragOK, setDragOK] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Track window size for responsive behavior
+  useEffect(() => {
+    const updateScreenSize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    
+    // Set initial value
+    updateScreenSize();
+    
+    // Add resize listener
+    window.addEventListener('resize', updateScreenSize);
+    
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
 
   /* motion values for drag / snap */
-  const x = useMotionValue(-120);
-  const y = useMotionValue(0);
   const frameRef = useRef(null);
   const [centreX, setCentreX] = useState(0);
   const [frameFrozen, setFrameFrozen] = useState(true);
   const [frameThick, setFrameThick] = useState(false);
+  
+  // Calculate proper initial position based on screen size and text width
+  const getInitialX = () => {
+    if (typeof window !== 'undefined') {
+      const screenWidth = window.innerWidth;
+      const mobile = screenWidth < 768;
+      
+      if (mobile) {
+        // On mobile: start at left edge of screen (accounting for padding)
+        // px-4 = 16px padding on each side
+        return 16;
+      } else {
+        // On desktop: start off-screen left like before
+        return -120;
+      }
+    }
+    return -120;
+  };
+  
+  const x = useMotionValue(getInitialX());
+  const y = useMotionValue(0);
+  
+  // Update x position when screen size changes
+  useEffect(() => {
+    if (frameAligned && frameRef.current && bodyRef.current) {
+      // Frame is already aligned, set position directly
+      const frameRect = frameRef.current.getBoundingClientRect();
+      const bodyRect = bodyRef.current.getBoundingClientRect();
+      const targetLeft = bodyRect.left;
+      const currentLeft = frameRect.left;
+      const deltaNeeded = targetLeft - currentLeft;
+      const finalX = x.get() + deltaNeeded;
+      setCentreX(finalX);
+      x.set(finalX);
+      setFrameFrozen(false);
+    } else {
+      // Not aligned yet, use initial position
+      const newX = getInitialX();
+      x.set(newX);
+    }
+  }, [isMobile, x, frameAligned]);
 
   /* ── orchestrate the sequence ───────────────────────────── */
   useEffect(() => {
@@ -34,9 +92,11 @@ export default function HeroTypingAnimation() {
       setFrame(true);
 
       /* 2 ▸ type the headline */
+      setPhase('initial');
       setCursor(true);
       for (let i = 0; i <= HEADLINE.length; i++) {
         setTyped(HEADLINE.slice(0, i));
+      setPhase('typing');
         await new Promise((r) => setTimeout(r, 65));
       }
       setTimeout(() => setCursor(false), 200);
@@ -56,22 +116,23 @@ export default function HeroTypingAnimation() {
   const [cursorShouldExit, setCursorShouldExit] = useState(false);
   // Called by cursor after pause, triggers frame movement
   const handleCursorReadyToDrag = async () => {
-    // Calculate final position and animate frame
     if (frameRef.current && bodyRef.current) {
-      const frameLeft = frameRef.current.getBoundingClientRect().left;
-      const bodyLeft = bodyRef.current.getBoundingClientRect().left;
-      const delta = bodyLeft - frameLeft;
-      const finalX = x.get() + delta;
+      const frameRect = frameRef.current.getBoundingClientRect();
+      const bodyRect = bodyRef.current.getBoundingClientRect();
+      // Calculate how much to move left to align with body text
+      const targetLeft = bodyRect.left;
+      const currentLeft = frameRect.left;
+      const deltaNeeded = targetLeft - currentLeft;
+      const finalX = x.get() + deltaNeeded;
       setCentreX(finalX);
-      // Unfreeze and animate to final position
       setFrameFrozen(false);
-      setFrameThick(true); // Thicken border when cursor is over
+      setFrameThick(true);
       await animate(x, finalX, { type: "spring", stiffness: 55, damping: 18 });
-      // Pause for 0.5s before cursor exits
-      await new Promise((r) => setTimeout(r, 100));
-     // Reset outline immediately when cursor starts to leave (not when it finishes)
       setFrameThick(false);
-      // Now tell cursor to exit
+      setPhase('frameMoved');
+      setFrameAligned(true);
+      // Pause for 0.5s before cursor exits
+      await new Promise((r) => setTimeout(r, 500));
       setCursorShouldExit(true);
     }
   };
@@ -101,7 +162,7 @@ export default function HeroTypingAnimation() {
 
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <section className="relative w-full max-w-screen-xl mx-auto px-6 pt-32 text-white font-adamant">
+    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-0 md:px-6 md:pt-32 text-white font-adamant">
       {/* Animated cursor overlay */}
       {showAnimatedCursor && (
         <AnimatedCursor
@@ -117,10 +178,10 @@ export default function HeroTypingAnimation() {
         drag={dragOK}
         dragMomentum={false}
         onDragEnd={snapBack}
-        style={{ x: frameFrozen ? -120 : x, y }}
-        className={`relative inline-block px-10 py-6 ${
+        style={{ x: frameFrozen && !frameAligned ? getInitialX() : x, y }}
+        className={`relative inline-block px-4 py-6 md:px-10 ${
           dragOK ? "cursor-grab active:cursor-grabbing" : "cursor-default"
-        }`}
+        } max-w-full`}
       >
         {showFrame && (
           <>
@@ -153,8 +214,19 @@ export default function HeroTypingAnimation() {
           </>
         )}
 
-        <h1 className="whitespace-nowrap text-5xl md:text-6xl font-bold leading-none">
-          {typed}
+        <h1
+          className="text-4xl md:text-6xl font-bold leading-none break-words whitespace-pre-line"
+        >
+          {/* On mobile, split headline into two lines. On desktop, keep as one line. */}
+          {(() => {
+            if (isMobile) {
+              // Mobile: force split after "Hey there!"
+              if (typed.includes('!')) {
+                return typed.replace('! ', '!\n');
+              }
+            }
+            return typed;
+          })()}
           {showCursor && <span className="animate-pulse">|</span>}
         </h1>
       </motion.div>
@@ -179,7 +251,9 @@ export default function HeroTypingAnimation() {
           <div>
             <p className="italic text-2xl mb-2">currently</p>
             <p className="text-[#9b9cbe] font-semibold leading-snug">
-              data analytics &amp; strategy intern @ american global
+              data analytics &amp; strategy intern 
+              <br />
+              @ american global
             </p>
           </div>
           <div>
