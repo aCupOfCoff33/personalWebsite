@@ -77,7 +77,7 @@ const MeshBackground = () => (
     />
 
     {/* CSS Keyframes for Living Animations */}
-    <style jsx>{`
+    <style>{`
       @keyframes breathe1 {
         0%, 100% { 
           transform: scale(1) translate(0%, 0%);

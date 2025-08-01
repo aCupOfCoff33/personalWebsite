@@ -1,7 +1,21 @@
 /* HeroTypingAnimation.jsx */
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useReducer, useRef } from "react";
 import AnimatedCursor from "./AnimatedCursor";
 import { motion, useMotionValue, animate } from "framer-motion";
+
+// Custom hook for responsive mobile detection
+function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState(false);
+  useEffect(() => {
+    const updateScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
+  return isMobile;
+}
 
 
 /* ── constants ─────────────────────────────────────────────── */
@@ -10,185 +24,170 @@ const BORDER = 4; // 4-px outline from Figma
 const CORNER_SIZE = 12; // 12-px blue squares (w-3 / h-3)
 
 export default function HeroTypingAnimation() {
-  const [frameAligned, setFrameAligned] = useState(false);
-  /* animation state */
+  // Animation state managed by useReducer for clarity
+  const initialState = {
+    frameAligned: false,
+    typed: "",
+    showCursor: false,
+    showFrame: false,
+    phase: 'initial',
+    showBody: false,
+    dragOK: false,
+    centreX: 0,
+    frameFrozen: true,
+    frameThick: false,
+    showAnimatedCursor: false,
+    cursorShouldExit: false,
+    cursorTriggered: false,
+  };
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'SET_FRAME_ALIGNED': return { ...state, frameAligned: action.value };
+      case 'SET_TYPED': return { ...state, typed: action.value };
+      case 'SET_SHOW_CURSOR': return { ...state, showCursor: action.value };
+      case 'SET_SHOW_FRAME': return { ...state, showFrame: action.value };
+      case 'SET_PHASE': return { ...state, phase: action.value };
+      case 'SET_SHOW_BODY': return { ...state, showBody: action.value };
+      case 'SET_DRAG_OK': return { ...state, dragOK: action.value };
+      case 'SET_CENTRE_X': return { ...state, centreX: action.value };
+      case 'SET_FRAME_FROZEN': return { ...state, frameFrozen: action.value };
+      case 'SET_FRAME_THICK': return { ...state, frameThick: action.value };
+      case 'SET_SHOW_ANIMATED_CURSOR': return { ...state, showAnimatedCursor: action.value };
+      case 'SET_CURSOR_SHOULD_EXIT': return { ...state, cursorShouldExit: action.value };
+      case 'SET_CURSOR_TRIGGERED': return { ...state, cursorTriggered: action.value };
+      default: return state;
+    }
+  }
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const isMobile = useIsMobile();
   const bodyRef = useRef(null);
-  const [typed, setTyped] = useState("");
-  const [showCursor, setCursor] = useState(false);
-  const [showFrame, setFrame] = useState(false);
-  const [phase, setPhase] = useState('initial');
-  const [showBody, setBody] = useState(false);
-  const [dragOK, setDragOK] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Track window size for responsive behavior
-  useEffect(() => {
-    const updateScreenSize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
-    
-    // Set initial value
-    updateScreenSize();
-    
-    // Add resize listener
-    window.addEventListener('resize', updateScreenSize);
-    
-    return () => window.removeEventListener('resize', updateScreenSize);
-  }, []);
-
-  /* motion values for drag / snap */
   const frameRef = useRef(null);
-  const [centreX, setCentreX] = useState(0);
-  const [frameFrozen, setFrameFrozen] = useState(true);
-  const [frameThick, setFrameThick] = useState(false);
-  
+
   // Calculate proper initial position based on screen size and text width
   const getInitialX = () => {
     if (typeof window !== 'undefined') {
       const screenWidth = window.innerWidth;
       const mobile = screenWidth < 768;
-      
-      if (mobile) {
-        // On mobile: start at left edge of screen (accounting for padding)
-        // px-4 = 16px padding on each side
-        return 16;
-      } else {
-        // On desktop: start off-screen left like before
-        return -120;
-      }
+      if (mobile) return 16;
+      else return -120;
     }
     return -120;
   };
-  
   const x = useMotionValue(getInitialX());
   const y = useMotionValue(0);
-  
-  // Update x position when screen size changes
+
+  // Update x position when screen size changes or frame aligns
   useEffect(() => {
-    if (frameAligned && frameRef.current && bodyRef.current) {
-      // Frame is already aligned, set position directly
+    if (state.frameAligned && frameRef.current && bodyRef.current) {
       const frameRect = frameRef.current.getBoundingClientRect();
       const bodyRect = bodyRef.current.getBoundingClientRect();
       const targetLeft = bodyRect.left;
       const currentLeft = frameRect.left;
       const deltaNeeded = targetLeft - currentLeft;
       const finalX = x.get() + deltaNeeded;
-      setCentreX(finalX);
+      dispatch({ type: 'SET_CENTRE_X', value: finalX });
       x.set(finalX);
-      setFrameFrozen(false);
+      dispatch({ type: 'SET_FRAME_FROZEN', value: false });
     } else {
-      // Not aligned yet, use initial position
       const newX = getInitialX();
       x.set(newX);
     }
-  }, [isMobile, x, frameAligned]);
+  }, [isMobile, x, state.frameAligned]);
 
-  /* ── orchestrate the sequence ───────────────────────────── */
+  // Orchestrate the animation sequence
   useEffect(() => {
     (async () => {
-      /* 1 ▸ reveal the frame */
       await new Promise((r) => setTimeout(r, 100));
-      setFrame(true);
-
-      /* 2 ▸ type the headline */
-      setPhase('initial');
-      setCursor(true);
+      dispatch({ type: 'SET_SHOW_FRAME', value: true });
+      dispatch({ type: 'SET_PHASE', value: 'initial' });
+      dispatch({ type: 'SET_SHOW_CURSOR', value: true });
       for (let i = 0; i <= HEADLINE.length; i++) {
-        setTyped(HEADLINE.slice(0, i));
-      setPhase('typing');
+        dispatch({ type: 'SET_TYPED', value: HEADLINE.slice(0, i) });
+        dispatch({ type: 'SET_PHASE', value: 'typing' });
         await new Promise((r) => setTimeout(r, 65));
       }
-      setTimeout(() => setCursor(false), 200);
-
-      /* 3 ▸ fade-in body copy */
+      setTimeout(() => dispatch({ type: 'SET_SHOW_CURSOR', value: false }), 200);
       await new Promise((r) => setTimeout(r, 300));
-      setBody(true);
-
-      /* 4 ▸ freeze frame, wait for cursor to move it */
-      setFrameFrozen(true);
-      // Frame will move only after cursor signals
+      dispatch({ type: 'SET_SHOW_BODY', value: true });
+      dispatch({ type: 'SET_FRAME_FROZEN', value: true });
     })();
   }, [x]);
 
   // AnimatedCursor orchestration
-  const [showAnimatedCursor, setShowAnimatedCursor] = useState(false);
-  const [cursorShouldExit, setCursorShouldExit] = useState(false);
-  // Called by cursor after pause, triggers frame movement
   const handleCursorReadyToDrag = async () => {
     if (frameRef.current && bodyRef.current) {
       const frameRect = frameRef.current.getBoundingClientRect();
       const bodyRect = bodyRef.current.getBoundingClientRect();
-      // Calculate how much to move left to align with body text
       const targetLeft = bodyRect.left;
       const currentLeft = frameRect.left;
       const deltaNeeded = targetLeft - currentLeft;
       const finalX = x.get() + deltaNeeded;
-      setCentreX(finalX);
-      setFrameFrozen(false);
-      setFrameThick(true);
+      dispatch({ type: 'SET_CENTRE_X', value: finalX });
+      dispatch({ type: 'SET_FRAME_FROZEN', value: false });
+      dispatch({ type: 'SET_FRAME_THICK', value: true });
       await animate(x, finalX, { type: "spring", stiffness: 55, damping: 18 });
-      setFrameThick(false);
-      setPhase('frameMoved');
-      setFrameAligned(true);
-      // Pause for 0.5s before cursor exits
+      dispatch({ type: 'SET_FRAME_THICK', value: false });
+      dispatch({ type: 'SET_PHASE', value: 'frameMoved' });
+      dispatch({ type: 'SET_FRAME_ALIGNED', value: true });
       await new Promise((r) => setTimeout(r, 500));
-      setCursorShouldExit(true);
+      dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: true });
     }
   };
-  // Called by cursor after exit, hides cursor and enables drag
   const handleCursorDragComplete = () => {
-    setShowAnimatedCursor(false);
-    setDragOK(true);
-    // frameThick already reset when cursor started exiting, no need to reset again
+    dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
+    dispatch({ type: 'SET_DRAG_OK', value: true });
   };
 
   // Show cursor only after typing and frame is ready
-  // Only trigger cursor animation once
-  const [cursorTriggered, setCursorTriggered] = useState(false);
   useEffect(() => {
-    if (showFrame && showBody && frameFrozen && !showAnimatedCursor && !cursorTriggered) {
-      setCursorTriggered(true);
-      setTimeout(() => setShowAnimatedCursor(true), 100); // delay after typing before cursor enters
+    if (
+      state.showFrame &&
+      state.showBody &&
+      state.frameFrozen &&
+      !state.showAnimatedCursor &&
+      !state.cursorTriggered
+    ) {
+      dispatch({ type: 'SET_CURSOR_TRIGGERED', value: true });
+      setTimeout(() => dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true }), 100);
     }
-  }, [showFrame, showBody, showAnimatedCursor, cursorTriggered, frameFrozen]);
+  }, [state.showFrame, state.showBody, state.showAnimatedCursor, state.cursorTriggered, state.frameFrozen]);
 
-  /* snap the frame back after dragging */
+  // Snap the frame back after dragging
   const snapBack = () =>
     setTimeout(() => {
-      animate(x, centreX, { type: "spring", stiffness: 65, damping: 18 });
+      animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 });
       animate(y, 0, { type: "spring", stiffness: 65, damping: 18 });
     }, 800);
 
-  /* ── render ─────────────────────────────────────────────── */
+  // --- render ---
   return (
     <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-0 md:px-6 md:pt-32 text-white font-adamant">
       {/* Animated cursor overlay */}
-      {showAnimatedCursor && (
+      {state.showAnimatedCursor && (
         <AnimatedCursor
           targetRef={frameRef}
           onDragComplete={handleCursorDragComplete}
           onCursorReadyToDrag={handleCursorReadyToDrag}
-          shouldExit={cursorShouldExit}
+          shouldExit={state.cursorShouldExit}
         />
       )}
       {/* ── headline & draggable blue frame ── */}
       <motion.div
         ref={frameRef}
-        drag={dragOK}
+        drag={state.dragOK}
         dragMomentum={false}
         onDragEnd={snapBack}
-        style={{ x: frameFrozen && !frameAligned ? getInitialX() : x, y }}
+        style={{ x: state.frameFrozen && !state.frameAligned ? getInitialX() : x, y }}
         className={`relative inline-block px-4 py-6 md:px-10 ${
-          dragOK ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+          state.dragOK ? "cursor-grab active:cursor-grabbing" : "cursor-default"
         } max-w-full`}
       >
-        {showFrame && (
+        {state.showFrame && (
           <>
             {/* outline - thinner initially, thicker when cursor is over */}
             <motion.div
               className="absolute inset-0"
-              style={{ border: `${frameThick ? 6 : 2}px solid #198ce7` }}
+          style={{ border: `${state.frameThick ? 6 : 2}px solid #198ce7` }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.25 }}
@@ -221,13 +220,13 @@ export default function HeroTypingAnimation() {
           {(() => {
             if (isMobile) {
               // Mobile: force split after "Hey there!"
-              if (typed.includes('!')) {
-                return typed.replace('! ', '!\n');
+              if (state.typed.includes('!')) {
+                return state.typed.replace('! ', '!\n');
               }
             }
-            return typed;
+            return state.typed;
           })()}
-          {showCursor && <span className="animate-pulse">|</span>}
+          {state.showCursor && <span className="animate-pulse">|</span>}
         </h1>
       </motion.div>
 
@@ -235,7 +234,7 @@ export default function HeroTypingAnimation() {
       <motion.div
         ref={bodyRef}
         initial={{ opacity: 0 }}
-        animate={{ opacity: showBody ? 1 : 0 }}
+        animate={{ opacity: state.showBody ? 1 : 0 }}
         transition={{ duration: 0.55 }}
         className="mt-12 space-y-12 max-w-[72rem]"
       >

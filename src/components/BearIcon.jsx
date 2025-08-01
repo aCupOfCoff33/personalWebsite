@@ -1,4 +1,7 @@
+
 // src/components/BearIconSVG_New.jsx
+// This SVG component animates blinking and highlight tracking for a bear icon.
+// If blinking or highlight tracking logic is reused, consider extracting as custom hooks.
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const MAX_HIGHLIGHT_MOVEMENT = 1.5; // Max pixels the highlight can move from center
@@ -13,7 +16,7 @@ const BearIconSVG_New = ({ className = '' }) => {
   const blinkTimeoutRef = useRef(null);
   const periodicBlinkTimeoutRef = useRef(null);
 
-  // --- Blinking Logic (Identical to previous version) ---
+  // --- Blinking Logic (can be extracted to a custom hook if reused) ---
   const triggerBlink = useCallback(() => {
     if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
     setIsBlinking(true);
@@ -40,7 +43,7 @@ const BearIconSVG_New = ({ className = '' }) => {
     };
   }, [schedulePeriodicBlink]);
 
-  // --- Cursor Tracking Logic (Identical calculation, targets new refs) ---
+  // --- Cursor Tracking Logic (can be extracted to a custom hook if reused) ---
   useEffect(() => {
     const svgElement = svgRef.current;
     const leftHighlight = leftHighlightRef.current;
@@ -93,12 +96,12 @@ const BearIconSVG_New = ({ className = '' }) => {
     };
   }, []);
 
-  // --- Click Handler ---
+  // --- Click Handler (triggers blink) ---
   const handleClick = () => {
     triggerBlink();
   };
 
-  // --- Styles (Identical) ---
+  // --- Styles (SVG animation styles) ---
   const trackingTransitionStyle = {
     transition: `transform 0.1s ease-out`,
   };
@@ -109,6 +112,7 @@ const BearIconSVG_New = ({ className = '' }) => {
   };
 
   return (
+    // If you need to reuse blinking or highlight tracking, extract the logic above into custom hooks.
     <svg
       ref={svgRef}
       xmlns="http://www.w3.org/2000/svg"
