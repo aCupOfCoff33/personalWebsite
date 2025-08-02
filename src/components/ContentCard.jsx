@@ -7,6 +7,7 @@ export default function ContentCard({
   dates, 
   description, 
   image, 
+  logo, // Add logo prop
   accent = 'blue',
   variant = 'glass', // 'glass' or 'story'
   href = '#',
@@ -51,7 +52,17 @@ export default function ContentCard({
         
         {/* Glass footer */}
         <div className="flex flex-col gap-1 px-5 py-4 bg-black/60 backdrop-blur-md">
-          <h3 className="text-base font-semibold text-white truncate">{title}</h3>
+          {/* Company title with logo */}
+          <div className="flex items-center gap-3">
+            {logo && (
+              <img 
+                src={logo} 
+                alt={`${title} logo`} 
+                className="w-8 h-8 rounded-lg group-hover:rounded-md transition-all duration-300 flex-shrink-0" 
+              />
+            )}
+            <h3 className="text-base font-semibold text-white truncate">{title}</h3>
+          </div>
           <p className="text-sm text-gray-300 truncate">{subtitle}</p>
           {dates && <p className="text-xs text-gray-500">{dates}</p>}
           <p className="mt-2 text-sm text-gray-400">{description}</p>
