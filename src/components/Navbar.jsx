@@ -76,8 +76,8 @@ function Navbar() {
       maxWidth: `${interpolateValue(100, 64, easedProgress)}%`,
       marginLeft: 'auto',
       marginRight: 'auto',
-      paddingLeft: `${interpolateValue(24, 40, easedProgress)}px`,
-      paddingRight: `${interpolateValue(24, 40, easedProgress)}px`,
+      paddingLeft: `${interpolateValue(20, 40, easedProgress)}px`,
+      paddingRight: `${interpolateValue(20, 40, easedProgress)}px`,
       backgroundColor: scrollProgress > 0 ? `rgba(15, 16, 16, ${interpolateValue(0, 1, easedProgress)})` : 'transparent',
       backdropFilter: scrollProgress > 0 ? `blur(${interpolateValue(0, 20, easedProgress)}px)` : 'none',
       borderRadius: '20px',
@@ -89,8 +89,6 @@ function Navbar() {
     rightStyle = { transform: `translateX(${interpolateValue(0, -travelDistance, easedProgress)}px)`, transition: 'none' };
   }
 
-  const finalContainerWidth = viewportWidth * 0.64; // 64% of viewport
-  const travelDistance = (viewportWidth - finalContainerWidth) / 4; // Quarter of the difference
   
   // ...existing code...
 
