@@ -52,7 +52,7 @@ export default function ContentCard({
         
         {/* Glass footer */}
         <div className="flex flex-col gap-1 px-5 py-4 bg-black/60 backdrop-blur-md">
-          {/* Company title with logo */}
+          {/* Company title with optional logo */}
           <div className="flex items-center gap-3">
             {logo && (
               <img 

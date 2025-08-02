@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { useReveal } from './useReveal';
 import { HIDDEN } from './RevealStarter';
 import ContentCarousel from './ContentCarousel';
@@ -16,9 +16,13 @@ export default function ContentSection({
   cardVariant, // Auto-determined based on layout if not provided
   className = '',
   containerClassName = '',
+  showViewAll = false,
+  maxItems = 6,
+  onViewAllClick = () => {},
   ...props
 }) {
   const revealRef = useReveal();
+  const carouselId = useId(); // Generate unique ID for this carousel instance
 
   // Auto-determine card variant based on layout
   const finalCardVariant = cardVariant || (layout === 'carousel' ? 'glass' : 'story');
@@ -60,7 +64,7 @@ export default function ContentSection({
             <div className="flex space-x-2">
               <button
                 onClick={() => {
-                  const carousel = document.querySelector('[data-carousel-container]');
+                  const carousel = document.querySelector(`[data-carousel-id="${carouselId}"]`);
                   carousel?.scrollBy({ left: -300, behavior: 'smooth' });
                 }}
                 className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 text-white hover:bg-white/10 focus:outline-none transition-colors"
@@ -69,7 +73,7 @@ export default function ContentSection({
               </button>
               <button
                 onClick={() => {
-                  const carousel = document.querySelector('[data-carousel-container]');
+                  const carousel = document.querySelector(`[data-carousel-id="${carouselId}"]`);
                   carousel?.scrollBy({ left: 300, behavior: 'smooth' });
                 }}
                 className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 text-white hover:bg-white/10 focus:outline-none transition-colors"
@@ -85,8 +89,11 @@ export default function ContentSection({
           <div data-reveal className={HIDDEN}>
             <ContentCarousel 
               items={items}
-              showControls={showControls}
               cardVariant={finalCardVariant}
+              carouselId={carouselId}
+              showViewAll={showViewAll}
+              maxItems={maxItems}
+              onViewAllClick={onViewAllClick}
             />
           </div>
         ) : (

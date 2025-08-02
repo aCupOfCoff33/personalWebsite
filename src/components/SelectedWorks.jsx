@@ -1,130 +1,110 @@
 import React from "react";
-import { useReveal } from './useReveal';
-import { HIDDEN } from './RevealStarter';
-// ...existing experiences data and accentMap...
-const experiences = [
+import ContentSection from './ContentSection';
+
+// Selected Works data - converted to ContentSection format
+const selectedWorksData = [
   {
-    company: 'American Global',
-    role: 'Data Analytics & Strategy Intern',
+    id: 'american-global',
+    title: 'American Global',
+    subtitle: 'Data Analytics & Strategy Intern',
     dates: 'May 2025 – Present',
-    blurb:
-      'Built a loss-ratio dashboard adopted by 30+ brokers, using React, Sanity, and Python ETL.',
-    image: 'https://placehold.co/481x280',
+    description: 'Built a loss-ratio dashboard adopted by 30+ brokers, using React, Sanity, and Python ETL.',
+    image: 'https://placehold.co/481x280/3b82f6/ffffff?text=American+Global',
     accent: 'blue',
+    category: 'Internship',
   },
   {
-    company: 'Government of Canada',
-    role: 'Financial Services Intern',
+    id: 'government-canada',
+    title: 'Government of Canada',
+    subtitle: 'Financial Services Intern',
     dates: 'May 2024 – Aug 2024',
-    blurb:
-      'Automated reconciliation for 10+ accounts, saving 20 hrs/month; built reporting tools in R.',
-    image: 'https://placehold.co/481x280',
+    description: 'Automated reconciliation for 10+ accounts, saving 20 hrs/month; built reporting tools in R.',
+    image: 'https://placehold.co/481x280/dc2626/ffffff?text=Gov+Canada',
     accent: 'red',
+    category: 'Internship',
   },
   {
-    company: 'Western Developers Society',
-    role: 'VP of Development',
+    id: 'western-dev-society',
+    title: 'Western Developers Society',
+    subtitle: 'VP of Development',
     dates: 'Sept 2023 – Present',
-    blurb:
-      'Led a team of 8 to launch 3 web apps for student orgs; mentored new devs and ran weekly code-reviews.',
-    image: 'https://placehold.co/481x280',
+    description: 'Led a team of 8 to launch 3 web apps for student orgs; mentored new devs and ran weekly code-reviews.',
+    image: 'https://placehold.co/481x280/3b82f6/ffffff?text=WDS',
     accent: 'blue',
+    category: 'Leadership',
   },
   {
-    company: 'Ivey Fintech',
-    role: 'Consultant Analyst',
+    id: 'ivey-fintech',
+    title: 'Ivey Fintech',
+    subtitle: 'Consultant Analyst',
     dates: 'Sept 2024 – Apr 2025',
-    blurb:
-      'Analysed fintech trends and presented findings to 50+ students; built a Python tool for market-sizing.',
-    image: 'https://placehold.co/481x280',
+    description: 'Analysed fintech trends and presented findings to 50+ students; built a Python tool for market-sizing.',
+    image: 'https://placehold.co/481x280/10b981/ffffff?text=Ivey+Fintech',
     accent: 'emerald',
+    category: 'Consulting',
+  },
+  {
+    id: 'project-5',
+    title: 'Project Alpha',
+    subtitle: 'Full Stack Developer',
+    dates: 'Jan 2024 – May 2024',
+    description: 'Built a real-time collaboration platform using Next.js, Socket.io, and MongoDB.',
+    image: 'https://placehold.co/481x280/f59e0b/ffffff?text=Project+Alpha',
+    accent: 'orange',
+    category: 'Project',
+  },
+  {
+    id: 'project-6',
+    title: 'DataViz Pro',
+    subtitle: 'Data Visualization Specialist',
+    dates: 'Aug 2023 – Dec 2023',
+    description: 'Created interactive dashboards for healthcare analytics using D3.js and Python.',
+    image: 'https://placehold.co/481x280/8b5cf6/ffffff?text=DataViz+Pro',
+    accent: 'purple',
+    category: 'Project',
+  },
+  {
+    id: 'project-7',
+    title: 'EcoTrack',
+    subtitle: 'Mobile App Developer',
+    dates: 'Jun 2023 – Aug 2023',
+    description: 'Developed a carbon footprint tracking app with React Native and Firebase.',
+    image: 'https://placehold.co/481x280/059669/ffffff?text=EcoTrack',
+    accent: 'emerald',
+    category: 'Project',
+  },
+  {
+    id: 'project-8',
+    title: 'TechMentors',
+    subtitle: 'Community Platform Lead',
+    dates: 'Mar 2023 – Jun 2023',
+    description: 'Built a mentorship platform connecting students with industry professionals.',
+    image: 'https://placehold.co/481x280/0ea5e9/ffffff?text=TechMentors',
+    accent: 'cyan',
+    category: 'Project',
   },
 ];
-const accentMap = {
-  blue:   { ring: 'ring-blue-500',   bar: 'bg-blue-500',    tag: 'text-blue-400' },
-  red:    { ring: 'ring-red-500',    bar: 'bg-red-500',     tag: 'text-red-400' },
-  emerald:{ ring: 'ring-emerald-500',bar: 'bg-emerald-500', tag: 'text-emerald-400' },
-};
-function GlassCard({ company, role, dates, blurb, image, accent }) {
-  const { ring, bar, tag } = accentMap[accent] || accentMap.blue;
-  return (
-    <a
-      href="#"
-      className={
-        `group snap-start shrink-0 w-[90vw] sm:w-[48vw] md:w-[32vw] lg:w-[28vw] xl:w-[24vw] ` +
-        `flex flex-col overflow-hidden rounded-3xl ` +
-        `backdrop-blur-xl bg-white/5 ` +
-        `shadow-[0_8px_24px_rgba(0,0,0,0.45)] transition-transform duration-150 ` +
-        `hover:shadow-xl hover:scale-[1.02] focus-visible:outline-none ` +
-        `focus-visible:ring-2 focus-visible:${ring}`
-      }
-    >
-      {/* static accent bar, no hover glow */}
-      <span
-        className={`${bar} absolute inset-px rounded-[calc(1.5rem-1px)] opacity-0 transition`}
-      />
-      {/* media */}
-      <img src={image} alt={company} className="w-full aspect-video object-cover" />
-      {/* glass footer */}
-      <div className="flex flex-col gap-1 px-5 py-4 bg-black/60 backdrop-blur-md">
-        <h3 className="text-base font-semibold text-white truncate">{company}</h3>
-        <p className="text-sm text-gray-300 truncate">{role}</p>
-        <p className="text-xs text-gray-500">{dates}</p>
-        <p className="mt-2 text-sm text-gray-400">{blurb}</p>
-        <span className={`mt-3 inline-block text-xs font-medium ${tag}`}>View case →</span>
-      </div>
-    </a>
-  );
-}
+
+// Selected Works section using ContentSection with ViewAll functionality
 export default function SelectedWorks() {
-  const carouselRef = React.useRef(null);
-  const revealRef = useReveal();
-  const scrollPrev = () => carouselRef.current?.scrollBy({ left: -300, behavior: 'smooth' });
-  const scrollNext = () => carouselRef.current?.scrollBy({ left: 300, behavior: 'smooth' });
+  const handleViewAllClick = () => {
+    // You can implement navigation to a full works page here
+    console.log('Navigate to all selected works page');
+    // For example: navigate('/works') or window.location.href = '/works'
+  };
+
   return (
-    <section ref={revealRef} className="relative w-full py-24 bg-black">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* heading with controls */}
-        <div className="mb-12 flex items-center justify-between">
-          <div>
-            <span data-reveal className={HIDDEN + " inline-block h-1 w-16 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"} />
-            <h2 data-reveal className={HIDDEN + " mt-4 text-4xl font-semibold italic text-white"}>Selected Works</h2>
-            <p data-reveal className={HIDDEN + " mt-2 max-w-xl text-lg text-gray-400"}>
-              Projects, roles, and highlights from my journey.
-            </p>
-          </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={scrollPrev}
-              className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 text-white hover:bg-white/10 focus:outline-none"
-            >
-              {/* Left arrow */}
-              <span className="text-xl font-bold">‹</span>
-            </button>
-            <button
-              onClick={scrollNext}
-              className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 text-white hover:bg-white/10 focus:outline-none"
-            >
-              {/* Right arrow */}
-              <span className="text-xl font-bold">›</span>
-            </button>
-          </div>
-        </div>
-        {/* --- CAROUSEL ------------------------------------------------ */}
-        <div
-          ref={carouselRef}
-          className="mt-12 flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden"
-        >
-          {experiences.map(e => (
-            <div key={e.company} data-reveal className={HIDDEN}>
-              <GlassCard {...e} />
-            </div>
-          ))}
-        </div>
-        {/* gradient edge masks */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent" />
-      </div>
-    </section>
+    <ContentSection
+      title="Selected Works"
+      subtitle="Projects, roles, and highlights from my journey."
+      items={selectedWorksData}
+      layout="carousel"
+      showGradientBar={true}
+      showControls={true}
+      cardVariant="glass" // Use glass variant for horizontal carousel
+      showViewAll={true}
+      maxItems={6}
+      onViewAllClick={handleViewAllClick}
+    />
   );
 }
