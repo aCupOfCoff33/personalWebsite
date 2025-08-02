@@ -2,9 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import BearIconSVG from "./BearIcon";
 
-
-
-
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -51,13 +48,14 @@ function Navbar() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
   // Responsive container styles with animation for mobile
   const isMobile = viewportWidth < 768;
   let containerStyle, leftStyle, rightStyle;
   if (isMobile) {
     // Animate from original to final mobile layout on scroll
     // Original: maxWidth 100%, padding 24px, bg transparent, no blur
-    // Final: maxWidth 80.25%, padding 32.78px, bg rgba(15,16,16,0.55), blur 10.97px
+    // Final: maxWidth 80.25%, padding 32.78px, bg rgba(15,16,16,1), blur 10.97px
     containerStyle = {
       maxWidth: `${interpolateValue(100, 80.25, easedProgress)}%`,
       marginLeft: 'auto',
@@ -89,9 +87,6 @@ function Navbar() {
     rightStyle = { transform: `translateX(${interpolateValue(0, -travelDistance, easedProgress)}px)`, transition: 'none' };
   }
 
-  
-  // ...existing code...
-
   return (
     <nav className="w-full mt-6 flex items-center justify-between py-3 rounded-2xl sticky top-4 z-50" style={containerStyle}>
       {/* Left: Name and Bear Icon */}
@@ -103,9 +98,9 @@ function Navbar() {
       </div>
       {/* Right: Links (Desktop) */}
       <div className="hidden md:flex items-center space-x-8" style={rightStyle}>
-        <a href="/work" className="text-white font-medium hover:text-blue-400 transition">Work</a>
-        <a href="/stories" className="text-white font-medium hover:text-blue-400 transition">Stories</a>
-        <a href="/about" className="text-white font-medium hover:text-blue-400 transition">About</a>
+        <Link to="/work" className="text-white font-medium hover:text-blue-400 transition">Work</Link>
+        <Link to="/stories" className="text-white font-medium hover:text-blue-400 transition">Stories</Link>
+        <Link to="/about" className="text-white font-medium hover:text-blue-400 transition">About</Link>
       </div>
       {/* Hamburger (Mobile) - always visible on mobile */}
       <div className="flex md:hidden items-center">
@@ -140,9 +135,9 @@ function Navbar() {
           >
             &times;
           </button>
-          <a href="/work" className="text-white font-bold text-2xl mb-6 hover:text-blue-400 transition">Work</a>
-          <a href="/stories" className="text-white font-bold text-2xl mb-6 hover:text-blue-400 transition">Stories</a>
-          <a href="/about" className="text-white font-bold text-2xl hover:text-blue-400 transition">About</a>
+          <Link to="/work" className="text-white font-bold text-2xl mb-6 hover:text-blue-400 transition" onClick={() => setMenuOpen(false)}>Work</Link>
+          <Link to="/stories" className="text-white font-bold text-2xl mb-6 hover:text-blue-400 transition" onClick={() => setMenuOpen(false)}>Stories</Link>
+          <Link to="/about" className="text-white font-bold text-2xl hover:text-blue-400 transition" onClick={() => setMenuOpen(false)}>About</Link>
         </div>
       )}
     </nav>
