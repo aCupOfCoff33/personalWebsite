@@ -95,15 +95,14 @@ export default function SelectedWorks() {
 
   return (
     <ContentSection
-      title="Selected Works"
+      title="Things I've Built in My Cave"
       subtitle="Projects, roles, and highlights from my journey."
       items={selectedWorksData}
       layout="carousel"
       showGradientBar={true}
       showControls={true}
       cardVariant="glass" // Use glass variant for horizontal carousel
-      showViewAll={true}
-      maxItems={6}
+      showViewAll={false}
       onViewAllClick={handleViewAllClick}
     />
   );

@@ -24,6 +24,10 @@ export default function ContentSection({
   const revealRef = useReveal();
   const carouselId = useId(); // Generate unique ID for this carousel instance
 
+  // Debug: Log items received by ContentSection
+  console.log('ContentSection received items:', items.length);
+  console.log('ContentSection items:', items.map(item => item.title));
+
   // Auto-determine card variant based on layout
   const finalCardVariant = cardVariant || (layout === 'carousel' ? 'glass' : 'story');
 

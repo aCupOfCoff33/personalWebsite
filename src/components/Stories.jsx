@@ -63,7 +63,7 @@ const storiesData = [
 export default function Stories() {
   return (
     <ContentSection
-      title="Stories"
+      title="Notes from Hibernation"
       subtitle="Insights, learnings, and thoughts from my journey in tech."
       items={storiesData}
       layout="carousel"
