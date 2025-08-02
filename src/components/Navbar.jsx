@@ -1,90 +1,150 @@
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import BearIconSVG from "./BearIcon";
 
-const links = [
-  { to: "/work",    label: "work" },
-  { to: "/projects", label: "projects" },
-  { to: "/about",    label: "about" },
-];
 
-import { useState } from "react";
+
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const scrollRef = React.useRef(0);
+  const ticking = React.useRef(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      scrollRef.current = window.scrollY;
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const startPoint = window.innerHeight * 0.7;
+          const endPoint = window.innerHeight * 1.2;
+          const currentScroll = scrollRef.current;
+          let progress = 0;
+          if (currentScroll > startPoint) {
+            progress = Math.min((currentScroll - startPoint) / (endPoint - startPoint), 1);
+          }
+          // Only update state if progress changes enough to affect UI
+          if (Math.abs(progress - scrollProgress) > 0.01) {
+            setScrollProgress(progress);
+          }
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [scrollProgress]);
+
+  // Interpolate values based on scroll progress
+  const interpolateValue = (start, end, progress) => start + (end - start) * progress;
+  
+  // Calculate dynamic styles with proper easing
+  const easedProgress = scrollProgress * scrollProgress * (3 - 2 * scrollProgress); // Smooth easing
+  
+  // Use state for viewport width to trigger re-render on resize
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+  React.useEffect(() => {
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  // Responsive container styles with animation for mobile
+  const isMobile = viewportWidth < 768;
+  let containerStyle, leftStyle, rightStyle;
+  if (isMobile) {
+    // Animate from original to final mobile layout on scroll
+    // Original: maxWidth 100%, padding 24px, bg transparent, no blur
+    // Final: maxWidth 80.25%, padding 32.78px, bg rgba(15,16,16,0.55), blur 10.97px
+    containerStyle = {
+      maxWidth: `${interpolateValue(100, 80.25, easedProgress)}%`,
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      paddingLeft: `${interpolateValue(24, 32.78, easedProgress)}px`,
+      paddingRight: `${interpolateValue(24, 32.78, easedProgress)}px`,
+      backgroundColor: `rgba(15, 16, 16, ${interpolateValue(0, 1, easedProgress)})`,
+      backdropFilter: `blur(${interpolateValue(0, 10.97, easedProgress)}px)`,
+      borderRadius: '20px',
+      boxShadow: 'none',
+    };
+    leftStyle = { transform: `translateX(${interpolateValue(0, 21.23, easedProgress)}px)`, transition: 'none' };
+    rightStyle = { transform: `translateX(${interpolateValue(0, -21.23, easedProgress)}px)`, transition: 'none' };
+  } else {
+    containerStyle = {
+      maxWidth: `${interpolateValue(100, 64, easedProgress)}%`,
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      paddingLeft: `${interpolateValue(24, 40, easedProgress)}px`,
+      paddingRight: `${interpolateValue(24, 40, easedProgress)}px`,
+      backgroundColor: scrollProgress > 0 ? `rgba(15, 16, 16, ${interpolateValue(0, 1, easedProgress)})` : 'transparent',
+      backdropFilter: scrollProgress > 0 ? `blur(${interpolateValue(0, 20, easedProgress)}px)` : 'none',
+      borderRadius: '20px',
+      boxShadow: 'none',
+    };
+    const finalContainerWidth = viewportWidth * 0.64; // 64% of viewport
+    const travelDistance = (viewportWidth - finalContainerWidth) / 4; // Quarter of the difference
+    leftStyle = { transform: `translateX(${interpolateValue(0, travelDistance, easedProgress)}px)`, transition: 'none' };
+    rightStyle = { transform: `translateX(${interpolateValue(0, -travelDistance, easedProgress)}px)`, transition: 'none' };
+  }
+
+  const finalContainerWidth = viewportWidth * 0.64; // 64% of viewport
+  const travelDistance = (viewportWidth - finalContainerWidth) / 4; // Quarter of the difference
+  
+  // ...existing code...
+
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 overflow-hidden font-dmsans text-white">
-      {/* Performance-optimized blur alternative using pseudo-element */}
-      <div className="absolute inset-0 bg-navbar-bg/70" />
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: 'rgba(235, 235, 235, 0.08)',
-          filter: 'blur(12px)',
-          zIndex: -1,
-        }}
-      />
-      <div className="pointer-events-none absolute inset-x-0 -bottom-6 h-6 bg-gradient-to-b from-navbar-bg/70 to-transparent" />
-
-      <div className="relative container mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
-        <div className="flex items-center">
-          <Link to="/" className="text-4xl font-bold lg:text-5xl">
-            aaryan
-          </Link>
-          <BearIconSVG className="ml-3 h-24 w-24" />
-        </div>
-
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center space-x-3 md:space-x-4">
-          {links.map(({ to, label }) => (
-            <Link
-              key={label}
-              to={to}
-              className="rounded-xl bg-brand-blue px-5 py-2 text-sm font-bold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-brand-blue-hover md:px-6 md:text-base"
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-
-        {/* Hamburger for mobile */}
+    <nav className="w-full mt-6 flex items-center justify-between py-3 rounded-2xl sticky top-4 z-50" style={containerStyle}>
+      {/* Left: Name and Bear Icon */}
+      <div className="flex items-center" style={leftStyle}>
+        <span className="font-bold text-2xl text-white select-none mr-6">
+          aaryan
+        </span>
+        <BearIconSVG className="h-20 w-20" />
+      </div>
+      {/* Right: Links (Desktop) */}
+      <div className="hidden md:flex items-center space-x-8" style={rightStyle}>
+        <a href="/work" className="text-white font-medium hover:text-blue-400 transition">Work</a>
+        <a href="/stories" className="text-white font-medium hover:text-blue-400 transition">Stories</a>
+        <a href="/about" className="text-white font-medium hover:text-blue-400 transition">About</a>
+      </div>
+      {/* Hamburger (Mobile) - always visible on mobile */}
+      <div className="flex md:hidden items-center">
         <button
-          className="md:hidden flex items-center justify-center p-2 rounded focus:outline-none"
+          className="flex items-center justify-center rounded-full p-3 bg-neutral-900/60 text-white hover:bg-neutral-800 transition focus:outline-none"
           aria-label="Open menu"
-          onClick={() => setMenuOpen((v) => !v)}
+          onClick={() => setMenuOpen(!menuOpen)}
         >
-          <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-            <line x1="4" y1="7" x2="20" y2="7" />
-            <line x1="4" y1="12" x2="20" y2="12" />
-            <line x1="4" y1="17" x2="20" y2="17" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            className="h-7 w-7"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         </button>
       </div>
-
-      {/* Mobile menu overlay */}
+      {/* Mobile Menu - full width on mobile */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center md:hidden">
+        <div className="fixed inset-0 bg-neutral-900/95 rounded-none border-none flex flex-col items-center justify-center p-8 z-[100] md:hidden">
           <button
-            className="absolute top-6 right-6 p-2 text-white"
+            className="absolute top-6 right-6 text-white text-3xl"
             aria-label="Close menu"
             onClick={() => setMenuOpen(false)}
           >
-            <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <line x1="6" y1="6" x2="18" y2="18" />
-              <line x1="6" y1="18" x2="18" y2="6" />
-            </svg>
+            &times;
           </button>
-          <div className="flex flex-col gap-8 mt-12">
-            {links.map(({ to, label }) => (
-              <Link
-                key={label}
-                to={to}
-                className="text-3xl font-bold uppercase tracking-wider text-white px-8 py-4 rounded-xl bg-brand-blue shadow-lg"
-                onClick={() => setMenuOpen(false)}
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
+          <a href="/work" className="text-white font-bold text-2xl mb-6 hover:text-blue-400 transition">Work</a>
+          <a href="/stories" className="text-white font-bold text-2xl mb-6 hover:text-blue-400 transition">Stories</a>
+          <a href="/about" className="text-white font-bold text-2xl hover:text-blue-400 transition">About</a>
         </div>
       )}
     </nav>
