@@ -13,8 +13,8 @@ function Navbar() {
       scrollRef.current = window.scrollY;
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
-          const startPoint = window.innerHeight * 0.7;
-          const endPoint = window.innerHeight * 1.2;
+          const startPoint = window.innerHeight * 0.7; // Start animation at 70% of viewport height scrolled
+          const endPoint = window.innerHeight * 1.25; // Complete animation by middle of top half of next screen
           const currentScroll = scrollRef.current;
           let progress = 0;
           if (currentScroll > startPoint) {
