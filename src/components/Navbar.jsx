@@ -91,9 +91,9 @@ function Navbar() {
     <nav className="w-full mt-6 flex items-center justify-between py-3 rounded-2xl sticky top-4 z-50" style={containerStyle}>
       {/* Left: Name and Bear Icon */}
       <div className="flex items-center" style={leftStyle}>
-        <span className="font-bold text-2xl text-white select-none mr-6">
+        <Link to="/" className="font-bold text-2xl text-white select-none mr-6 hover:text-blue-400 transition-colors cursor-pointer">
           aaryan
-        </span>
+        </Link>
         <BearIconSVG className="h-20 w-20" />
       </div>
       {/* Right: Links (Desktop) */}

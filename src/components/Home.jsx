@@ -1,6 +1,7 @@
 import Hero from './HeyThere';
 import Experiences from './Experiences';
 import Stories from './Stories';
+import Experience from './Experience';
 
 export default function Home() {
     return (
@@ -18,6 +19,10 @@ export default function Home() {
         {/* Stories Section */}
         <div className="w-full flex justify-center items-center">
           <Stories />
+        </div>
+        {/* Experience Section */}
+        <div className="w-full flex justify-center items-center">
+          <Experience />
         </div>
       </>
     );
