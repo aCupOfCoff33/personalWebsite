@@ -4,7 +4,7 @@ import ContentCard from './ContentCard';
 // View All Projects Button Component - Pill Style
 function ViewAllButton({ onClick, className = '' }) {
   return (
-    <div className="snap-start shrink-0 w-[90vw] sm:w-[48vw] md:w-[32vw] lg:w-[28vw] xl:w-[24vw] flex items-center justify-center min-h-[320px]">
+    <div className=" snap-start shrink-0 w-[90vw] sm:w-[48vw] md:w-[32vw] lg:w-[28vw] xl:w-[24vw] flex items-center justify-center min-h-[320px]">
       <button
         onClick={onClick}
         className={`
@@ -66,7 +66,7 @@ export default function ContentCarousel({
       <div
         data-carousel-container
         data-carousel-id={carouselId}
-        className="flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden"
+        className="pt-4 pl-4 pr-4 flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden"
       >
         {displayItems.map((item, index) => (
           <ContentCard
