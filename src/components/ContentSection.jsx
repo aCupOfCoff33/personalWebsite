@@ -34,12 +34,12 @@ export default function ContentSection({
   return (
     <section 
       ref={revealRef} 
-      className={`relative w-full py-24 ${layout === 'carousel' ? 'bg-black' : 'bg-white'} ${className}`}
+      className={`relative w-full z-1 py-24 ${layout === 'carousel' ? 'bg-black' : 'bg-white'} ${className}`}
       {...props}
     >
       <div className={`container mx-auto px-4 sm:px-6 lg:px-8 ${containerClassName}`}>
         {/* Section Header */}
-        <div className={`mb-12 ${layout === 'carousel' ? 'flex items-center justify-between' : ''}`}>
+        <div className={`mb-12 z-1 ${layout === 'carousel' ? 'flex items-center justify-between' : ''}`}>
           <div>
             {showGradientBar && (
               <span 

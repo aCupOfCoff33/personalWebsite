@@ -17,7 +17,7 @@ function ViewAllButton({ onClick, className = '' }) {
         `}
       >
         {/* Text */}
-        <span className="text-white font-medium group-hover:text-blue-300 transition-colors duration-300">
+        <span className="z-10 text-white font-medium group-hover:text-blue-300 transition-colors duration-300">
           Venture Deeper into the Woods
         </span>
         

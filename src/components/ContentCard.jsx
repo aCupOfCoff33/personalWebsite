@@ -5,70 +5,87 @@ export default function ContentCard({
   title, 
   subtitle, 
   dates, 
-  description, 
   image, 
-  logo, // Add logo prop
-  accent = 'blue',
+  logo,
+  gradient = 'bg-gradient-to-r from-cyan-400 to-blue-500', // Dynamic gradient prop
   variant = 'glass', // 'glass' or 'story'
   href = '#',
   className = '',
   readTime,
-  category,
   ...props 
 }) {
-  // Accent color mapping
-  const accentMap = {
-    blue: { ring: 'ring-blue-500', bar: 'bg-blue-500', tag: 'text-blue-400' },
-    red: { ring: 'ring-red-500', bar: 'bg-red-500', tag: 'text-red-400' },
-    emerald: { ring: 'ring-emerald-500', bar: 'bg-emerald-500', tag: 'text-emerald-400' },
-    orange: { ring: 'ring-orange-500', bar: 'bg-orange-500', tag: 'text-orange-400' },
-    cyan: { ring: 'ring-cyan-500', bar: 'bg-cyan-500', tag: 'text-cyan-400' },
-    purple: { ring: 'ring-purple-500', bar: 'bg-purple-500', tag: 'text-purple-400' },
-  };
+  // Extract tag color from gradient for categories
 
-  const { ring, bar, tag } = accentMap[accent] || accentMap.blue;
 
-  // Glass card variant (for Selected Works)
+  // Glass card variant (for Selected Works) - New Glassmorphism Design
   if (variant === 'glass') {
     return (
-      <a
-        href={href}
-        className={`
-          group snap-start shrink-0 w-[90vw] sm:w-[48vw] md:w-[32vw] lg:w-[28vw] xl:w-[24vw]
-          flex flex-col overflow-hidden rounded-3xl
-          backdrop-blur-xl bg-white/5
-          shadow-[0_8px_24px_rgba(0,0,0,0.45)] transition-transform duration-150
-          hover:shadow-xl hover:scale-[1.02] focus-visible:outline-none
-          focus-visible:ring-2 focus-visible:${ring}
-          ${className}
-        `}
-        {...props}
-      >
-        {/* Static accent bar */}
-        <span className={`${bar} absolute inset-px rounded-[calc(1.5rem-1px)] opacity-0 transition`} />
+      <div className={`
+        group snap-start shrink-0 w-[340px] h-[520px]
+        relative
+        transition-transform duration-300 ease-out
+        hover:scale-[1.02]
+        will-change-transform
+        transform-gpu
+        isolation-isolate
+        p-1
+        ${className}
+      `}>
+        {/* Background gradient layer at 20% opacity */}
+        <div className={`
+          absolute inset-1 rounded-[47px] ${gradient} opacity-20
+        `} />
         
-        {/* Image */}
-        <img src={image} alt={title} className="w-full aspect-video object-cover" />
-        
-        {/* Glass footer */}
-        <div className="flex flex-col gap-1 px-5 py-4 bg-black/60 backdrop-blur-md">
-          {/* Company title with optional logo */}
-          <div className="flex items-center gap-3">
-            {logo && (
-              <img 
-                src={logo} 
-                alt={`${title} logo`} 
-                className="w-8 h-8 rounded-lg group-hover:rounded-md transition-all duration-300 flex-shrink-0" 
-              />
+        {/* Glassmorphism card with white border */}
+        <a
+          href={href}
+          className={`
+            relative w-full h-full rounded-[48px] 
+            border-[2px] border-solid border-white
+            backdrop-blur-xl bg-gradient-to-b from-white/40 to-white/10
+            shadow-[0_8px_24px_rgba(0,0,0,0.3)]
+            transition-shadow duration-300 ease-out
+            group-hover:shadow-[0_12px_32px_rgba(0,0,0,0.4)]
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+            overflow-hidden
+            p-3
+            flex flex-col
+            will-change-auto
+            box-border
+          `}
+          {...props}
+        >
+          {/* Large company gradient header taking most of the space */}
+          <div className={`
+            flex-1 min-h-[340px] mb-6 rounded-[40px] ${gradient}
+          `} />
+          
+          {/* Content at bottom */}
+          <div className="flex-shrink-0">
+            {/* Company logo and name */}
+            <div className="flex items-center gap-3 mb-4">
+              {logo && (
+                <img 
+                  src={logo} 
+                  alt={`${title} logo`} 
+                  className="w-12 h-12 object-cover rounded-lg flex-shrink-0" 
+                />
+              )}
+              <h3 className="text-xl font-semibold text-white leading-tight">{title}</h3>
+            </div>
+            
+            {/* Role - only show if it exists */}
+            {subtitle && (
+              <p className="text-sm font-semibold text-white mb-2 uppercase tracking-wide">{subtitle}</p>
             )}
-            <h3 className="text-base font-semibold text-white truncate">{title}</h3>
+            
+            {/* Dates */}
+            {dates && (
+              <p className="text-sm font-semibold text-white opacity-90 mb-3">{dates}</p>
+            )}
           </div>
-          <p className="text-sm text-gray-300 truncate">{subtitle}</p>
-          {dates && <p className="text-xs text-gray-500">{dates}</p>}
-          <p className="mt-2 text-sm text-gray-400">{description}</p>
-          <span className={`mt-3 inline-block text-xs font-medium ${tag}`}>View case →</span>
-        </div>
-      </a>
+        </a>
+      </div>
     );
   }
 
@@ -112,15 +129,7 @@ export default function ContentCard({
             <p className="text-sm text-gray-600 mb-3">{subtitle}</p>
           )}
           
-          {description && (
-            <p className="text-sm text-gray-700 line-clamp-3">{description}</p>
-          )}
-          
-          {category && (
-            <div className={`inline-block mt-4 px-3 py-1 text-xs rounded-full ${tag} bg-current/10`}>
-              {category}
-            </div>
-          )}
+    
         </div>
       </a>
     );
