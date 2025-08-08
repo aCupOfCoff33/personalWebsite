@@ -1,147 +1,201 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { NavLink, Link } from "react-router-dom";
+import { AnimatePresence, motion as Motion } from "framer-motion";
+import {
+  Home as HomeIcon,
+  UserRound,
+  Briefcase,
+  FileText,
+  Menu,
+  X,
+  Mail,
+  Linkedin,
+} from "lucide-react";
 import BearIconSVG from "./BearIcon";
 
-function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const scrollRef = React.useRef(0);
-  const ticking = React.useRef(false);
+const sections = [
+  {
+    title: "Navigation",
+    items: [
+      { kind: "internal", to: "/", label: "Home", Icon: HomeIcon },
+      { kind: "internal", to: "/about", label: "About", Icon: UserRound },
+      { kind: "internal", to: "/work", label: "Work", Icon: Briefcase },
+      { kind: "internal", to: "/projects", label: "Projects", Icon: FileText },
+    ],
+  },
+  {
+    title: "Contact",
+    items: [
+      // Fill these with your real links any time
+      { kind: "external", href: "mailto:hello@example.com", label: "Email", Icon: Mail },
+      { kind: "external", href: "https://www.linkedin.com/", label: "LinkedIn", Icon: Linkedin },
+    ],
+  },
+];
 
-  React.useEffect(() => {
-    const handleScroll = () => {
-      scrollRef.current = window.scrollY;
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          const startPoint = window.innerHeight * 0.7; // Start animation at 70% of viewport height scrolled
-          const endPoint = window.innerHeight * 1.25; // Complete animation by middle of top half of next screen
-          const currentScroll = scrollRef.current;
-          let progress = 0;
-          if (currentScroll > startPoint) {
-            progress = Math.min((currentScroll - startPoint) / (endPoint - startPoint), 1);
-          }
-          // Only update state if progress changes enough to affect UI
-          if (Math.abs(progress - scrollProgress) > 0.01) {
-            setScrollProgress(progress);
-          }
-          ticking.current = false;
-        });
-        ticking.current = true;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrollProgress]);
+const SectionLabel = ({ children }) => (
+  <div className="px-1">
+    <p className="text-[12px] tracking-[0.08em] uppercase text-neutral-400/60">{children}</p>
+  </div>
+);
 
-  // Interpolate values based on scroll progress
-  const interpolateValue = (start, end, progress) => start + (end - start) * progress;
-  
-  // Calculate dynamic styles with proper easing
-  const easedProgress = scrollProgress * scrollProgress * (3 - 2 * scrollProgress); // Smooth easing
-  
-  // Use state for viewport width to trigger re-render on resize
-  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
-  React.useEffect(() => {
-    const handleResize = () => {
-      setViewportWidth(window.innerWidth);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // Responsive container styles with animation for mobile
-  const isMobile = viewportWidth < 768;
-  let containerStyle, leftStyle, rightStyle;
-  if (isMobile) {
-    // Animate from original to final mobile layout on scroll
-    // Original: maxWidth 100%, padding 24px, bg transparent, no blur
-    // Final: maxWidth 80.25%, padding 32.78px, bg rgba(15,16,16,1), blur 10.97px
-    containerStyle = {
-      maxWidth: `${interpolateValue(100, 80.25, easedProgress)}%`,
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      paddingLeft: `${interpolateValue(24, 32.78, easedProgress)}px`,
-      paddingRight: `${interpolateValue(24, 32.78, easedProgress)}px`,
-      backgroundColor: `rgba(15, 16, 16, ${interpolateValue(0, 1, easedProgress)})`,
-      backdropFilter: `blur(${interpolateValue(0, 10.97, easedProgress)}px)`,
-      borderRadius: '20px',
-      boxShadow: 'none',
-    };
-    leftStyle = { transform: `translateX(${interpolateValue(0, 21.23, easedProgress)}px)`, transition: 'none' };
-    rightStyle = { transform: `translateX(${interpolateValue(0, -21.23, easedProgress)}px)`, transition: 'none' };
-  } else {
-    containerStyle = {
-      maxWidth: `${interpolateValue(100, 64, easedProgress)}%`,
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      paddingLeft: `${interpolateValue(20, 40, easedProgress)}px`,
-      paddingRight: `${interpolateValue(20, 40, easedProgress)}px`,
-      backgroundColor: scrollProgress > 0 ? `rgba(15, 16, 16, ${interpolateValue(0, 1, easedProgress)})` : 'transparent',
-      backdropFilter: scrollProgress > 0 ? `blur(${interpolateValue(0, 20, easedProgress)}px)` : 'none',
-      borderRadius: '20px',
-      boxShadow: 'none',
-    };
-    const finalContainerWidth = viewportWidth * 0.64; // 64% of viewport
-    const travelDistance = (viewportWidth - finalContainerWidth) / 4; // Quarter of the difference
-    leftStyle = { transform: `translateX(${interpolateValue(0, travelDistance, easedProgress)}px)`, transition: 'none' };
-    rightStyle = { transform: `translateX(${interpolateValue(0, -travelDistance, easedProgress)}px)`, transition: 'none' };
-  }
-
+const CardButton = React.memo(function CardButton({ label, icon: IconComponent, className = "", children, active = false }) {
   return (
-    <nav className="w-full mt-6 flex items-center justify-between py-3 rounded-2xl sticky top-4 z-50" style={containerStyle}>
-      {/* Left: Name and Bear Icon */}
-      <div className="flex items-center" style={leftStyle}>
-        <Link to="/" className="font-bold text-2xl text-white select-none mr-6 hover:text-blue-400 transition-colors cursor-pointer">
-          aaryan
-        </Link>
-        <BearIconSVG className="h-20 w-20" />
-      </div>
-      {/* Right: Links (Desktop) */}
-      <div className="hidden md:flex items-center space-x-8" style={rightStyle}>
-        <Link to="/work" className="text-white font-medium hover:text-blue-400 transition">Work</Link>
-        <Link to="/stories" className="text-white font-medium hover:text-blue-400 transition">Stories</Link>
-        <Link to="/about" className="text-white font-medium hover:text-blue-400 transition">About</Link>
-      </div>
-      {/* Hamburger (Mobile) - always visible on mobile */}
-      <div className="flex md:hidden items-center">
-        <button
-          className="flex items-center justify-center rounded-full p-3 bg-neutral-900/60 text-white hover:bg-neutral-800 transition focus:outline-none"
-          aria-label="Open menu"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="h-7 w-7"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-      </div>
-      {/* Mobile Menu - full width on mobile */}
-      {menuOpen && (
-        <div className="fixed inset-0 bg-neutral-900/95 rounded-none border-none flex flex-col items-center justify-center p-8 z-[100] md:hidden">
-          <button
-            className="absolute top-6 right-6 text-white text-3xl"
-            aria-label="Close menu"
-            onClick={() => setMenuOpen(false)}
-          >
-            &times;
-          </button>
-          <Link to="/work" className="text-white font-bold text-2xl mb-6 hover:text-blue-400 transition" onClick={() => setMenuOpen(false)}>Work</Link>
-          <Link to="/stories" className="text-white font-bold text-2xl mb-6 hover:text-blue-400 transition" onClick={() => setMenuOpen(false)}>Stories</Link>
-          <Link to="/about" className="text-white font-bold text-2xl hover:text-blue-400 transition" onClick={() => setMenuOpen(false)}>About</Link>
+    <div
+      className={[
+        "w-full rounded-xl border transition-colors min-h-[32px]",
+        active
+          ? "border-transparent bg-neutral-800/80 text-neutral-100 ring-1 ring-white/10 hover:bg-neutral-800/90"
+          : "border-white/10 bg-neutral-900/40 hover:bg-white/5 text-neutral-300",
+        className,
+      ].join(" ")}
+    >
+      <div className="flex items-center gap-2.5 px-3 py-1.5">
+        <div className="shrink-0 opacity-90">
+          {IconComponent ? <IconComponent className="h-4 w-4" /> : null}
         </div>
-      )}
-    </nav>
+        <span className={["text-md leading-none font-normal font-adamant", active ? "text-neutral-100" : "text-neutral-200"].join(" ")}>{label}</span>
+        <div className="ml-auto opacity-50">{children}</div>
+      </div>
+    </div>
+  );
+});
+
+function InternalLink({ to, label, Icon: IconComponent, onClick }) {
+  return (
+    <NavLink
+      to={to}
+      onClick={onClick}
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-xl"
+      aria-label={label}
+    >
+      {({ isActive }) => <CardButton label={label} icon={IconComponent} active={isActive} />}
+    </NavLink>
   );
 }
 
-export default Navbar;
+function ExternalLink({ href, label, Icon: IconComponent }) {
+  return (
+    <a
+      href={href}
+      target={href.startsWith("http") ? "_blank" : undefined}
+      rel={href.startsWith("http") ? "noopener" : undefined}
+      aria-label={label}
+      className="text-neutral-300 hover:text-white"
+    >
+      <CardButton label={label} icon={IconComponent} />
+    </a>
+  );
+}
+
+function Navbar() {
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  // Lock body scroll when mobile menu is open
+  React.useEffect(() => {
+    if (menuOpen) {
+      const original = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = original;
+      };
+    }
+  }, [menuOpen]);
+
+  const year = new Date().getFullYear();
+
+  return (
+    <>
+      {/* Desktop vertical sidebar */}
+      <aside
+        className="hidden md:flex fixed left-0 top-0 h-screen w-60 pt-8 px-4 border-r border-white/10 bg-[#0C100D]/95 backdrop-blur flex-col gap-4 z-40"
+        style={{ "--left-color": "#121813" }}
+      >
+        {/* Brand */}
+        <div className="w-full pb-5 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <BearIconSVG className="h-16 w-16" />
+            <Link to="/" className="text-white text-2xl font-semibold leading-none">
+              aaryan
+            </Link>
+          </div>
+        </div>
+
+        {/* Sections */}
+        <div className="flex-1 w-full overflow-y-auto pr-1">
+          <nav className="w-full flex flex-col gap-4">
+            {sections.map((section) => (
+              <div key={section.title} className="w-full">
+                <SectionLabel>{section.title}</SectionLabel>
+                <div className="mt-2 grid grid-cols-1 gap-2.5">
+                  {section.items.map((item) =>
+                    item.kind === "internal" ? (
+                      <InternalLink key={item.label} {...item} />
+                    ) : (
+                      <ExternalLink key={item.label} {...item} />
+                    ),
+                  )}
+                </div>
+              </div>
+            ))}
+          </nav>
+        </div>
+
+        {/* Footer */}
+        <div className="pt-3 border-t border-white/10 w-full">
+          <p className="text-[11px] text-neutral-400/70">© Aaryan, {year}</p>
+        </div>
+      </aside>
+
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-4 py-2.5 z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <BearIconSVG className="h-8 w-8" />
+          <Link to="/" className="text-white text-lg font-semibold">
+            aaryan
+          </Link>
+        </div>
+        <button
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          className="rounded-full p-2.5 bg-neutral-900/70 text-white hover:bg-neutral-800 transition"
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
+
+      {/* Mobile dropdown panel - slides from top */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="mobile-panel"
+            initial={{ y: "-100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "-100%", opacity: 0 }}
+            transition={{ type: "tween", duration: 0.26 }}
+            className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#0C100D]/95 backdrop-blur border-b border-white/10 rounded-b-2xl pt-20 pb-6 px-4"
+          >
+            <nav className="flex flex-col gap-5">
+              {sections.map((section) => (
+                <div key={section.title}>
+                  <SectionLabel>{section.title}</SectionLabel>
+                  <div className="mt-2 grid grid-cols-1 gap-2.5">
+                    {section.items.map((item) =>
+                      item.kind === "internal" ? (
+                        <InternalLink key={item.label} {...item} onClick={() => setMenuOpen(false)} />
+                      ) : (
+                        <ExternalLink key={item.label} {...item} />
+                      ),
+                    )}
+                  </div>
+                </div>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+export default React.memo(Navbar);

@@ -16,6 +16,7 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "framer-motion": "^12.7.3",
+    "lucide-react": "^0.539.0",
     "open": "^10.1.1",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",

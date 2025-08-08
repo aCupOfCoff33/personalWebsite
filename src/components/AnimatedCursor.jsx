@@ -28,11 +28,11 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
   const posRef = useRef({ x: -CURSOR_SIZE, y: 200 });
   const isMountedRef = useRef(false);
 
-  // Compute a stable grab point on the target: mid-left edge so it looks like it "grabs" the box from the left
+  // Compute a stable grab point on the target: middle edge so it looks like it "grabs" the box from the middle
   const computeGrabPosition = useCallback(() => {
     if (!targetRef.current) return { x: -CURSOR_SIZE, y: 200 };
     const rect = targetRef.current.getBoundingClientRect();
-    const anchorX = rect.left + rect.width / 2; // left edge
+    const anchorX = rect.left + rect.width / 2; // middle edge
     const anchorY = rect.bottom - 10; // vertical center
     // Place the top-left of the cursor container so its tip sits on (anchorX, anchorY)
     const targetX = anchorX - CURSOR_TIP_OFFSET_X;

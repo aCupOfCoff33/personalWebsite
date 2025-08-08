@@ -23,6 +23,7 @@ const HeroTypingAnimation = React.memo(() => {
     centreX: 0,
     frameFrozen: true,
     frameThick: false,
+    pointerHover: false,
     showAnimatedCursor: false,
     cursorShouldExit: false,
     cursorTriggered: false,
@@ -39,6 +40,7 @@ const HeroTypingAnimation = React.memo(() => {
       case 'SET_CENTRE_X': return { ...state, centreX: action.value };
       case 'SET_FRAME_FROZEN': return { ...state, frameFrozen: action.value };
       case 'SET_FRAME_THICK': return { ...state, frameThick: action.value };
+      case 'SET_POINTER_HOVER': return { ...state, pointerHover: action.value };
       case 'SET_SHOW_ANIMATED_CURSOR': return { ...state, showAnimatedCursor: action.value };
       case 'SET_CURSOR_SHOULD_EXIT': return { ...state, cursorShouldExit: action.value };
       case 'SET_CURSOR_TRIGGERED': return { ...state, cursorTriggered: action.value };
@@ -67,13 +69,26 @@ const HeroTypingAnimation = React.memo(() => {
   const x = useMotionValue(getInitialX());
   const y = useMotionValue(0);
 
-  // Manual clamping during drag – consistent regardless of where the drag starts
-  // Use symmetric margins so the visible gap is the same on all sides
-  const SAFE_MARGIN = React.useMemo(() => ({ left: 24, right: 24, top: 24, bottom: 24 }), []);
+  // Dynamic safe margins that respect the new layout:
+  // - desktop: reserve space for the fixed left sidebar (16rem) + padding
+  // - mobile: reserve space for the top bar height
+  const getSafeMargin = React.useCallback(() => {
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    const isDesktop = viewportWidth >= 768; // md breakpoint
+    const SIDEBAR_WIDTH_PX = 240; // md:ml-60 (15rem)
+    const MOBILE_TOPBAR_PX = 64; // pt-16 on main
+    return {
+      left: isDesktop ? SIDEBAR_WIDTH_PX + 24 : 24,
+      right: 24,
+      top: isDesktop ? 24 : 24 + MOBILE_TOPBAR_PX,
+      bottom: 24,
+    };
+  }, []);
 
   const clampIntoViewport = React.useCallback(() => {
     if (!frameRef.current) return;
     const rect = frameRef.current.getBoundingClientRect();
+    const SAFE_MARGIN = getSafeMargin();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
@@ -95,11 +110,12 @@ const HeroTypingAnimation = React.memo(() => {
 
     if (dx !== 0) x.set(x.get() + dx);
     if (dy !== 0) y.set(y.get() + dy);
-  }, [SAFE_MARGIN, x, y]);
+  }, [getSafeMargin, x, y]);
 
   const handleDrag = React.useCallback((event, info) => {
     if (!frameRef.current) return;
     const frame = frameRef.current.getBoundingClientRect();
+    const SAFE_MARGIN = getSafeMargin();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
@@ -118,7 +134,7 @@ const HeroTypingAnimation = React.memo(() => {
     const correctionY = nextDeltaY - info.delta.y;
     if (correctionX !== 0) x.set(x.get() + correctionX);
     if (correctionY !== 0) y.set(y.get() + correctionY);
-  }, [x, y, SAFE_MARGIN]);
+  }, [x, y, getSafeMargin]);
   
   // Update x position when screen size changes
   useEffect(() => {
@@ -209,11 +225,15 @@ const HeroTypingAnimation = React.memo(() => {
   // When the cursor reaches the box (after user drag), snap the box back in sync
   const handleCursorReadyToDragSnap = React.useCallback(async () => {
     if (pendingSnapBack) {
+      // Thicken border while the frame animates back
+      dispatch({ type: 'SET_FRAME_THICK', value: true });
       // Animate both x and y simultaneously for diagonal movement
       await Promise.all([
         animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
         animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
       ]);
+      // Return border to thin after reaching target
+      dispatch({ type: 'SET_FRAME_THICK', value: false });
       setPendingSnapBack(false);
       // Signal cursor to exit after the snap animation completes
       dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: true });
@@ -225,7 +245,7 @@ const HeroTypingAnimation = React.memo(() => {
 
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-0 md:px-6 md:pt-32 text-white font-adamant overflow-visible">
+    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-24 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
       {/* Animated cursor overlay */}
       {state.showAnimatedCursor && (
         <AnimatedCursor
@@ -242,7 +262,14 @@ const HeroTypingAnimation = React.memo(() => {
         dragMomentum={false}
         dragElastic={0}
         onDrag={handleDrag}
-        onDragEnd={() => { clampIntoViewport(); snapBack(); }}
+        onDragEnd={() => { 
+          clampIntoViewport(); 
+          // Ensure thin border right after user drops
+          dispatch({ type: 'SET_FRAME_THICK', value: false });
+          snapBack(); 
+        }}
+        onMouseEnter={() => dispatch({ type: 'SET_POINTER_HOVER', value: true })}
+        onMouseLeave={() => dispatch({ type: 'SET_POINTER_HOVER', value: false })}
         dragConstraints={false}
         style={{ x: state.frameFrozen && !state.frameAligned ? getInitialX() : x, y }}
         className={`relative inline-block px-4 py-6 md:px-10 ${
@@ -251,13 +278,13 @@ const HeroTypingAnimation = React.memo(() => {
       >
         {state.showFrame && (
           <>
-            {/* outline - thinner initially, thicker when cursor is over */}
+            {/* outline - dynamic thickness on hover and during animations */}
             <motion.div
-              className="absolute inset-0"
-              style={{ border: `${state.frameThick ? 6 : 2}px solid #198ce7` }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.25 }}
+              className="absolute inset-0 border-solid"
+              style={{ borderColor: '#198ce7' }}
+              initial={{ opacity: 0, borderWidth: 2 }}
+              animate={{ opacity: 1, borderWidth: (state.frameThick || state.pointerHover) ? 6 : 2 }}
+              transition={{ duration: 0.2 }}
             />
 
             {/* Only 4 corner squares, white inside */}
@@ -300,7 +327,7 @@ const HeroTypingAnimation = React.memo(() => {
         >
           {/* tagline */}
           <p className="text-2xl md:text-3xl leading-relaxed">
-            A Software Engineering&nbsp;&amp;&nbsp;Business student at Western U
+            A Software Engineering&nbsp;&amp;&nbsp;Business student at Ivey Business School
             based near Toronto, building tools that <em>(ideally)</em> make life
             easier — or at least break things in more interesting ways.
           </p>

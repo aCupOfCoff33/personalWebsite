@@ -1,0 +1,6 @@
+/* Parallax helper classes (optional hooks) */
+.parallax-slow, .parallax-medium, .parallax-fast {
+  transform: translateZ(0);
+  will-change: transform;
+}
+

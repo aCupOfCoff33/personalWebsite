@@ -34,7 +34,7 @@ export default function ContentSection({
   return (
     <section 
       ref={revealRef} 
-      className={`relative w-full z-1 py-24 ${layout === 'carousel' ? 'bg-black' : 'bg-white'} ${className}`}
+      className={`relative w-full z-1 py-24 bg-transparent ${className}`}
       {...props}
     >
       <div className={`container mx-auto px-4 sm:px-6 lg:px-8 ${containerClassName}`}>
@@ -49,14 +49,14 @@ export default function ContentSection({
             )}
             <h2 
               data-reveal 
-              className={`${HIDDEN} mt-4 text-4xl font-semibold italic ${layout === 'carousel' ? 'text-white' : 'text-gray-900'}`}
+              className={`${HIDDEN} mt-4 text-4xl font-semibold italic text-white`}
             >
               {title}
             </h2>
             {subtitle && (
               <p 
                 data-reveal 
-                className={`${HIDDEN} mt-2 max-w-xl text-lg ${layout === 'carousel' ? 'text-gray-400' : 'text-gray-600'}`}
+                className={`${HIDDEN} mt-2 max-w-xl text-lg text-gray-300`}
               >
                 {subtitle}
               </p>

@@ -6,22 +6,23 @@ import Experience from './Experience';
 export default function Home() {
     return (
       <>
-        <section className="relative min-h-screen flex items-start pt-4 md:pt-8">
+        <section className="relative min-h-screen flex items-start pt-4 md:pt-8" data-bg-scene="hero">
           <div className="mx-auto max-w-screen-xl px-6 w-full z-10">
             <Hero />
           </div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-gray-900 z-0" />
+          {/* remove previous black fade to keep continuous background */}
+          {/* spacer removed intentionally */}
         </section>
         {/* Experiences Section */}
-        <div className="w-full flex justify-center items-center">
+        <div className="w-full flex justify-center items-center" data-bg-scene="projects">
           <Experiences />
         </div>
         {/* Stories Section */}
-        <div className="w-full flex justify-center items-center">
+        <div className="w-full flex justify-center items-center" data-bg-scene="stories">
           <Stories />
         </div>
         {/* Experience Section */}
-        <div className="w-full flex justify-center items-center">
+        <div className="w-full flex justify-center items-center" data-bg-scene="experience">
           <Experience />
         </div>
       </>
