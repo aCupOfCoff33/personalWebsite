@@ -7,8 +7,6 @@ import { motion, useMotionValue, animate } from "framer-motion";
 
 /* ── constants ─────────────────────────────────────────────── */
 const HEADLINE = "Hey there! I’m Aaryan!";
-const BORDER = 4; // 4-px outline from Figma
-const CORNER_SIZE = 12; // 12-px blue squares (w-3 / h-3)
 
 const HeroTypingAnimation = React.memo(() => {
   const bodyRef = useRef(null);
@@ -50,41 +48,9 @@ const HeroTypingAnimation = React.memo(() => {
   
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Drag constraints for blue box: always within viewport (moved after useReducer)
-  const [dragConstraints, setDragConstraints] = React.useState({ left: 0, right: 0, top: 0, bottom: 0 });
-  
-  const updateDragConstraints = React.useCallback(() => {
-    if (!frameRef.current) return;
-    const frame = frameRef.current.getBoundingClientRect();
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    setDragConstraints({
-      left: -frame.left,
-      right: width - frame.right,
-      top: -frame.top,
-      bottom: height - frame.bottom,
-    });
-  }, []);
-  
-  // Debounce resize handler for better performance
-  React.useEffect(() => {
-    let timeoutId;
-    const debouncedUpdate = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(updateDragConstraints, 100);
-    };
-    
-    updateDragConstraints();
-    window.addEventListener('resize', debouncedUpdate);
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', debouncedUpdate);
-    };
-  }, [state.showFrame, state.dragOK, updateDragConstraints]);
-
   /* motion values for drag / snap */
   const frameRef = useRef(null);
-  
+
   // Calculate proper initial position based on screen size and text width
   const getInitialX = () => {
     if (typeof window !== 'undefined') {
@@ -100,6 +66,59 @@ const HeroTypingAnimation = React.memo(() => {
   
   const x = useMotionValue(getInitialX());
   const y = useMotionValue(0);
+
+  // Manual clamping during drag – consistent regardless of where the drag starts
+  // Use symmetric margins so the visible gap is the same on all sides
+  const SAFE_MARGIN = React.useMemo(() => ({ left: 24, right: 24, top: 24, bottom: 24 }), []);
+
+  const clampIntoViewport = React.useCallback(() => {
+    if (!frameRef.current) return;
+    const rect = frameRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let dx = 0;
+    let dy = 0;
+
+    if (rect.left < SAFE_MARGIN.left) {
+      dx += SAFE_MARGIN.left - rect.left;
+    }
+    if (rect.right > viewportWidth - SAFE_MARGIN.right) {
+      dx += (viewportWidth - SAFE_MARGIN.right) - rect.right;
+    }
+    if (rect.top < SAFE_MARGIN.top) {
+      dy += SAFE_MARGIN.top - rect.top;
+    }
+    if (rect.bottom > viewportHeight - SAFE_MARGIN.bottom) {
+      dy += (viewportHeight - SAFE_MARGIN.bottom) - rect.bottom;
+    }
+
+    if (dx !== 0) x.set(x.get() + dx);
+    if (dy !== 0) y.set(y.get() + dy);
+  }, [SAFE_MARGIN, x, y]);
+
+  const handleDrag = React.useCallback((event, info) => {
+    if (!frameRef.current) return;
+    const frame = frameRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Compute allowed delta window relative to current on-screen rect
+    const minDeltaX = SAFE_MARGIN.left - frame.left;
+    const maxDeltaX = (viewportWidth - SAFE_MARGIN.right) - frame.right;
+    const minDeltaY = SAFE_MARGIN.top - frame.top;
+    const maxDeltaY = (viewportHeight - SAFE_MARGIN.bottom) - frame.bottom;
+
+    // Clamp the incoming delta so we never exceed viewport bounds
+    const nextDeltaX = Math.max(minDeltaX, Math.min(maxDeltaX, info.delta.x));
+    const nextDeltaY = Math.max(minDeltaY, Math.min(maxDeltaY, info.delta.y));
+
+    // Framer already applied info.delta.* to x/y; only apply the correction diff
+    const correctionX = nextDeltaX - info.delta.x;
+    const correctionY = nextDeltaY - info.delta.y;
+    if (correctionX !== 0) x.set(x.get() + correctionX);
+    if (correctionY !== 0) y.set(y.get() + correctionY);
+  }, [x, y, SAFE_MARGIN]);
   
   // Update x position when screen size changes
   useEffect(() => {
@@ -206,7 +225,7 @@ const HeroTypingAnimation = React.memo(() => {
 
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-0 md:px-6 md:pt-32 text-white font-adamant">
+    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-0 md:px-6 md:pt-32 text-white font-adamant overflow-visible">
       {/* Animated cursor overlay */}
       {state.showAnimatedCursor && (
         <AnimatedCursor
@@ -221,8 +240,10 @@ const HeroTypingAnimation = React.memo(() => {
         ref={frameRef}
         drag={state.dragOK}
         dragMomentum={false}
-        onDragEnd={snapBack}
-        dragConstraints={dragConstraints}
+        dragElastic={0}
+        onDrag={handleDrag}
+        onDragEnd={() => { clampIntoViewport(); snapBack(); }}
+        dragConstraints={false}
         style={{ x: state.frameFrozen && !state.frameAligned ? getInitialX() : x, y }}
         className={`relative inline-block px-4 py-6 md:px-10 ${
           state.dragOK ? "cursor-grab active:cursor-grabbing" : "cursor-default"

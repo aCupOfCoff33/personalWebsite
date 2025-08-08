@@ -1,5 +1,5 @@
 // AnimatedCursor.jsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import CursorSVG from './CursorSVG';
 
 /**
@@ -11,44 +11,59 @@ import CursorSVG from './CursorSVG';
  * - onDragComplete: callback when drag animation finishes
  */
 const CURSOR_SIZE = 40;
+// Approximate tip position of the arrow pointer within the 40x40 viewbox
+// Tune these to visually align the tip on the target edge
+const CURSOR_TIP_OFFSET_X = 6;
+const CURSOR_TIP_OFFSET_Y = 6;
 const LABEL = 'paddington';
 const CURSOR_COLOR = '#9B7CF6'; // Match label background
-const ENTRANCE_DURATION = 1200; // slower entrance
-const DRAG_DURATION = 600; // match frame drag speed
-const EXIT_DURATION = 1200; // slower exit
+const ENTRANCE_DURATION = 1200; // entrance duration
+const DRAG_DURATION = 600; // match frame drag speed (kept for reference)
+const EXIT_DURATION = 1200; // exit duration
 
 const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, shouldExit }) => {
   const cursorRef = useRef(null);
   const [phase, setPhase] = useState('enter'); // enter, drag, exit
-  const [cursorPos, setCursorPos] = useState({ x: -CURSOR_SIZE, y: 200 });
-  const animationFrameRef = useRef(null);
+  const rafRef = useRef(null);
+  const posRef = useRef({ x: -CURSOR_SIZE, y: 200 });
+  const isMountedRef = useRef(false);
+
+  // Compute a stable grab point on the target: mid-left edge so it looks like it "grabs" the box from the left
+  const computeGrabPosition = useCallback(() => {
+    if (!targetRef.current) return { x: -CURSOR_SIZE, y: 200 };
+    const rect = targetRef.current.getBoundingClientRect();
+    const anchorX = rect.left + rect.width / 2; // left edge
+    const anchorY = rect.bottom - 10; // vertical center
+    // Place the top-left of the cursor container so its tip sits on (anchorX, anchorY)
+    const targetX = anchorX - CURSOR_TIP_OFFSET_X;
+    const targetY = anchorY - CURSOR_TIP_OFFSET_Y;
+    return { x: targetX, y: targetY };
+  }, [targetRef]);
+
+  const setCursorTransform = (x, y) => {
+    if (!cursorRef.current) return;
+    posRef.current = { x, y };
+    // Use transform for better performance
+    cursorRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  };
 
   // Track frame position during drag phase with requestAnimationFrame for better performance
   useEffect(() => {
     if (phase === 'drag' && targetRef.current) {
+      // Disable transition during drag to follow target precisely
+      if (cursorRef.current) cursorRef.current.style.transition = 'transform 0ms linear';
       const updateCursorPosition = () => {
-        if (targetRef.current) {
-          const rect = targetRef.current.getBoundingClientRect();
-          // Keep cursor at bottom center of the frame during drag
-          const targetX = rect.left + rect.width / 2 - CURSOR_SIZE / 2;
-          const targetY = rect.bottom - 10;
-          setCursorPos({ x: targetX, y: targetY });
-          
-          // Continue animation loop
-          animationFrameRef.current = requestAnimationFrame(updateCursorPosition);
-        }
+        const { x, y } = computeGrabPosition();
+        setCursorTransform(x, y);
+        rafRef.current = requestAnimationFrame(updateCursorPosition);
       };
 
-      // Start the animation loop
-      animationFrameRef.current = requestAnimationFrame(updateCursorPosition);
-      
+      rafRef.current = requestAnimationFrame(updateCursorPosition);
       return () => {
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current);
-        }
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
       };
     }
-  }, [phase, targetRef]);
+  }, [phase, targetRef, computeGrabPosition]);
 
   // Exit when parent signals
   useEffect(() => {
@@ -57,66 +72,80 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
     }
   }, [shouldExit, phase]);
 
-  // Animate cursor in, drag, and out
-  useEffect(() => {
-    let timeout1, pauseTimeout;
+  // Animate cursor in, drag, and out using transform to avoid re-renders
+  useLayoutEffect(() => {
+    isMountedRef.current = true;
+    let enterTimeout;
+    let readyTimeout;
+    let scrollHandler;
+
+    if (!cursorRef.current) return undefined;
+
     if (phase === 'enter') {
-      // Move cursor to bottom center of frame (for both mobile and desktop)
-      if (targetRef.current) {
-        const rect = targetRef.current.getBoundingClientRect();
-        // Position cursor at bottom center of the frame
-        const targetX = rect.left + rect.width / 2 - CURSOR_SIZE / 2;
-        const targetY = rect.bottom - 10; // Slightly above the bottom edge
-        setCursorPos({ x: targetX, y: targetY });
-        // Pause for 1s after arrival before drag
-        timeout1 = setTimeout(() => {
-          pauseTimeout = setTimeout(() => {
-            if (onCursorReadyToDrag) onCursorReadyToDrag();
-            setPhase('drag');
-          }, 300);
-        }, ENTRANCE_DURATION);
-      }
-    } else if (phase === 'drag') {
-      // Stay attached to frame during movement - no timeout, wait for shouldExit signal
-      if (targetRef.current) {
-        const rect = targetRef.current.getBoundingClientRect();
-        // Keep cursor at bottom center during drag
-        const targetX = rect.left + rect.width / 2 - CURSOR_SIZE / 2;
-        const targetY = rect.bottom - 10;
-        setCursorPos({ x: targetX, y: targetY });
-      }
-    } else if (phase === 'exit') {
-      // Move cursor out to left from current position
-      setCursorPos({ x: -CURSOR_SIZE, y: cursorPos.y });
-      setTimeout(() => {
+      // Prepare styles
+      const el = cursorRef.current;
+      el.style.willChange = 'transform';
+      el.style.transition = `transform ${ENTRANCE_DURATION}ms cubic-bezier(0.4,0,0.2,1)`;
+
+      // Start just off-screen left, aligned on Y with current target
+      const { y } = computeGrabPosition();
+      setCursorTransform(-CURSOR_SIZE, y);
+
+      // Ensure we animate to live target (updates if user scrolls before arrival)
+      const applyTarget = () => {
+        const { x: tx, y: ty } = computeGrabPosition();
+        setCursorTransform(tx, ty);
+      };
+      // Kick entrance
+      requestAnimationFrame(applyTarget);
+
+      // During entrance, keep adjusting on scroll to reduce mismatch
+      scrollHandler = () => applyTarget();
+      window.addEventListener('scroll', scrollHandler, { passive: true });
+
+      // After arrival + slight pause, signal ready and switch to drag phase
+      enterTimeout = setTimeout(() => {
+        readyTimeout = setTimeout(() => {
+          if (onCursorReadyToDrag) onCursorReadyToDrag();
+          setPhase('drag');
+        }, 200);
+      }, ENTRANCE_DURATION);
+    }
+
+    if (phase === 'exit') {
+      const el = cursorRef.current;
+      if (el) el.style.transition = `transform ${EXIT_DURATION}ms cubic-bezier(0.4,0,0.2,1)`;
+      // Slide out to the left, keep current Y
+      const { y } = posRef.current;
+      setCursorTransform(-CURSOR_SIZE, y);
+      enterTimeout = setTimeout(() => {
         if (onDragComplete) onDragComplete();
       }, EXIT_DURATION);
     }
+
     return () => {
-      clearTimeout(timeout1);
-      clearTimeout(pauseTimeout);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      clearTimeout(enterTimeout);
+      clearTimeout(readyTimeout);
+      if (scrollHandler) window.removeEventListener('scroll', scrollHandler);
+      isMountedRef.current = false;
     };
-  }, [phase, targetRef, onDragComplete, onCursorReadyToDrag, cursorPos.y]);
+  }, [phase, onCursorReadyToDrag, onDragComplete, computeGrabPosition]);
 
   // Cursor style (use user's image as background)
   const cursorStyle = {
     position: 'fixed',
-    left: cursorPos.x,
-    top: cursorPos.y,
+    left: 0,
+    top: 0,
     width: CURSOR_SIZE,
     height: CURSOR_SIZE,
     zIndex: 9999,
     pointerEvents: 'none',
-    transition:
-      phase === 'enter'
-        ? `left ${ENTRANCE_DURATION}ms cubic-bezier(0.4,0,0.2,1), top ${ENTRANCE_DURATION}ms cubic-bezier(0.4,0,0.2,1)`
-        : phase === 'exit'
-        ? `left ${EXIT_DURATION}ms cubic-bezier(0.4,0,0.2,1), top ${EXIT_DURATION}ms cubic-bezier(0.4,0,0.2,1)`
-        : 'none', // No transition during drag so it follows smoothly
     background: 'none',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`,
   };
 
   // Label style
