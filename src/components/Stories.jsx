@@ -60,7 +60,7 @@ const storiesData = [
 ];
 
 // Stories section using the reusable ContentSection with horizontal carousel layout
-export default function Stories() {
+function Stories() {
   return (
     <ContentSection
       title="Notes from Hibernation"
@@ -73,3 +73,6 @@ export default function Stories() {
     />
   );
 }
+
+// Optimized for performance by adding React.memo
+export default React.memo(Stories);

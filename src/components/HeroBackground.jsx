@@ -4,18 +4,28 @@ import React from "react";
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 const ease = (t) => t * t * (3 - 2 * t); // smoothstep
 
-export default function HeroBackground() {
+function HeroBackground() {
   const containerRef = React.useRef(null);
   const rafRef = React.useRef(null);
   const sectionsRef = React.useRef([]);
+  const centersRef = React.useRef([]); // precomputed absolute centers to avoid layout thrash on scroll
   const currentVarsRef = React.useRef({ hue: 0, magenta: 0.18, blue: 0.18 });
+  const lastAppliedRef = React.useRef({
+    radialX: null,
+    radialY: null,
+    sat: null,
+    bright: null,
+    hue: null,
+    magenta: null,
+    blue: null,
+  });
 
   const scenes = React.useMemo(
     () => ({
-      hero:       { hue: 0,   magenta: 0.18, blue: 0.18 },
-      projects:   { hue: 8,   magenta: 0.28, blue: 0.12 },
-      stories:    { hue: -10, magenta: 0.14, blue: 0.26 },
-      experience: { hue: -4,  magenta: 0.20, blue: 0.20 },
+      hero:       { hue: 0,   magenta: 0.16, blue: 0.16 },
+      projects:   { hue: 6,   magenta: 0.22, blue: 0.10 },
+      stories:    { hue: -8,  magenta: 0.12, blue: 0.20 },
+      experience: { hue: -4,  magenta: 0.16, blue: 0.16 },
     }),
     []
   );
@@ -23,18 +33,27 @@ export default function HeroBackground() {
   const lerp = (a, b, t) => a + (b - a) * t;
 
   React.useEffect(() => {
-    // Cache scenes anchors once on mount
-    sectionsRef.current = Array.from(document.querySelectorAll('[data-bg-scene]'));
+    // Cache scenes anchors once on mount and on resize
+    const computeAnchors = () => {
+      sectionsRef.current = Array.from(document.querySelectorAll('[data-bg-scene]'));
+      centersRef.current = sectionsRef.current.map((el) => {
+        const rect = el.getBoundingClientRect();
+        const centerAbs = rect.top + window.scrollY + rect.height / 2;
+        const key = el.getAttribute('data-bg-scene') || 'hero';
+        return { key, centerAbs };
+      });
+    };
+    const debounced = (() => {
+      let t; return () => { clearTimeout(t); t = setTimeout(computeAnchors, 150); };
+    })();
+    computeAnchors();
 
     const pickActiveScene = () => {
-      const viewportCenter = window.innerHeight / 2;
+      const viewportCenterAbs = window.scrollY + window.innerHeight / 2;
       let closest = { key: 'hero', dist: Infinity };
-      for (const el of sectionsRef.current) {
-        const rect = el.getBoundingClientRect();
-        const elCenter = rect.top + rect.height / 2;
-        const dist = Math.abs(elCenter - viewportCenter);
-        const key = el.getAttribute('data-bg-scene') || 'hero';
-        if (dist < closest.dist) closest = { key, dist };
+      for (const item of centersRef.current) {
+        const dist = Math.abs(item.centerAbs - viewportCenterAbs);
+        if (dist < closest.dist) closest = { key: item.key, dist };
       }
       return closest.key in scenes ? closest.key : 'hero';
     };
@@ -54,24 +73,38 @@ export default function HeroBackground() {
       const activeKey = pickActiveScene();
       const target = scenes[activeKey];
       const current = currentVarsRef.current;
-      const speed = 0.08; // smoothing factor
+      const speed = 0.06; // smoothing factor
       current.hue = lerp(current.hue, target.hue, speed);
       current.magenta = lerp(current.magenta, target.magenta, speed);
       current.blue = lerp(current.blue, target.blue, speed);
 
       if (containerRef.current) {
         const el = containerRef.current;
-        el.style.setProperty("--radial-x", `${radialX}%`);
-        el.style.setProperty("--radial-y", `${radialY}%`);
-        el.style.setProperty("--sat", String(saturate));
-        el.style.setProperty("--bright", String(brighten));
-        el.style.setProperty("--hue", `${current.hue}deg`);
-        el.style.setProperty("--magenta", String(current.magenta));
-        el.style.setProperty("--blue", String(current.blue));
+        // Apply only when values change beyond small epsilon to avoid extra paints
+        const last = lastAppliedRef.current;
+        const eps = 0.001;
+        const setIfChanged = (name, value) => {
+          if (last[name] === null || Math.abs(last[name] - value) > eps) {
+            el.style.setProperty(`--${name}`, typeof value === 'number' ? String(value) : value);
+            last[name] = value;
+          }
+        };
+        setIfChanged('radial-x', `${radialX}%`);
+        setIfChanged('radial-y', `${radialY}%`);
+        setIfChanged('sat', saturate);
+        setIfChanged('bright', brighten);
+        setIfChanged('hue', `${current.hue}deg`);
+        setIfChanged('magenta', current.magenta);
+        setIfChanged('blue', current.blue);
       }
     };
 
+    let lastY = window.scrollY;
     const onScroll = () => {
+      const currentY = window.scrollY;
+      // Skip micro scroll updates under 2px to reduce RAF churn
+      if (Math.abs(currentY - lastY) < 2) return;
+      lastY = currentY;
       if (rafRef.current) return;
       rafRef.current = requestAnimationFrame(() => {
         update();
@@ -80,12 +113,27 @@ export default function HeroBackground() {
     };
 
     update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener('resize', debounced, { passive: true });
+    // Prefer scrollend where supported to reduce RAF churn; fallback to scroll
+    const opts = { passive: true };
+    const supportsScrollEnd = 'onscrollend' in window;
+    if (supportsScrollEnd) {
+      window.addEventListener('scrollend', onScroll, opts);
+    } else {
+      window.addEventListener('scroll', onScroll, opts);
+    }
+    return () => {
+      window.removeEventListener('resize', debounced);
+      if (supportsScrollEnd) {
+        window.removeEventListener('scrollend', onScroll);
+      } else {
+        window.removeEventListener('scroll', onScroll);
+      }
+    };
   }, [scenes]);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
+    <div ref={containerRef} className="fixed inset-0 w-full h-full -z-10 overflow-hidden will-change-[filter]">
       {/* Base blackish canvas */}
       <div className="absolute inset-0" style={{ backgroundColor: "#0C100D" }} />
 
@@ -161,8 +209,8 @@ export default function HeroBackground() {
         }}
       />
 
-      {/* Grain / texture layer using SVG turbulence */}
-      <div className="absolute inset-0 opacity-[0.08] mix-blend-soft-light pointer-events-none">
+      {/* Grain / texture layer using SVG turbulence (reduced opacity for less overdraw) */}
+      <div className="absolute inset-0 opacity-[0.05] mix-blend-soft-light pointer-events-none">
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           <filter id="noiseFilter">
             <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch" />
@@ -173,3 +221,6 @@ export default function HeroBackground() {
     </div>
   );
 }
+
+// Optimized for performance by adding React.memo since component has no props
+export default React.memo(HeroBackground);

@@ -1,6 +1,5 @@
 import React from 'react';
-import { useReveal } from './useReveal';
-import { HIDDEN } from './RevealStarter';
+// Figma-aligned simplified layout without reveal animations
 
 // Experience data structure designed for easy SQL/MongoDB migration
 // Each entry represents a row/document that could be stored in a database
@@ -9,7 +8,8 @@ const experienceData = [
     id: 'american-global-2025',
     companyName: 'American Global',
     position: 'Data Analytics & Strategy Intern',
-    dateRange: 'May 2025 - August 2025',
+    dateRange: 'May 2025 - Present',
+    logo: 'https://media.licdn.com/dms/image/v2/C4E0BAQFxOWSzcQlx7w/company-logo_200_200/company-logo_200_200/0/1672776000338/american_global_llc_logo?e=2147483647&v=beta&t=6eASPMK3qET6z-fVO8yv4YWrhgf7l7wjaAwu_iF8q2s',
     location: "Oakville, ON",
     description: 'One of the first interns on the Data Analytics team, contributing to impactful initiatives within the construction insurance sector.',
     technologies: ['Python', 'Power Tools', 'Data Analysis'],
@@ -24,6 +24,7 @@ const experienceData = [
     companyName: 'Western Developers Society',
     position: 'Vice President of Developers',
     dateRange: 'Sept 2023 – Present',
+    logo: 'https://media.licdn.com/dms/image/v2/D4E0BAQEuc4ov6cWAtw/company-logo_200_200/company-logo_200_200/0/1736450937302/western_dev_society_logo?e=2147483647&v=beta&t=oYKXg7b_w-tYzt847EjXLG_VgKi9qecWt6vndmafe_g',
     location: "University Campus",
     description: 'Led 120+ developers on AI/ML and robotics projects, driving innovation through agile methods and building competition-ready systems.',
     technologies: ['AI/ML', 'Robotics', 'Agile'],
@@ -38,6 +39,7 @@ const experienceData = [
     companyName: 'Ivey FinTech',
     position: 'Consultant Analyst',
     dateRange: 'Sept 2024 – Present',
+    logo: 'https://miro.medium.com/v2/resize:fit:512/1*429tXOeB5sYvQ37L-zasBQ.jpeg',
     location: "Ivey Business School",
     description: 'Provided strategic recommendations to enhance mortgage UX, integrate AI, and improve operational efficiency for a digital mortgage company.',
     technologies: ['UX', 'AI', 'FinTech'],
@@ -52,6 +54,7 @@ const experienceData = [
     companyName: 'ESDC / Government of Canada',
     position: 'Financial Services Intern',
     dateRange: 'May 2024 – Aug 2024',
+    logo: 'https://yt3.googleusercontent.com/ddUhKuKyfw_os57z9BTnVKo5FK_tWb5KD6ujp3nJdg1NqbE9fLf98zOH0ChubscuGblCKfvT=s900-c-k-c0x00ffffff-no-rj',
     location: "North York, ON",
     description: 'Streamlined financial processes using SAP and Power BI, clearing $150,000 in suspense transactions and optimizing workflows across Canada.',
     technologies: ['SAP', 'Power BI', 'Finance'],
@@ -66,6 +69,7 @@ const experienceData = [
     companyName: 'Minimart',
     position: 'Business Analyst',
     dateRange: 'Sept 2022 – Mar 2023',
+    logo: 'https://banner2.cleanpng.com/20180630/xcw/aax01zjeu.webp',
     location: "London, ON",
     description: 'Designed financial models and collaborated with stakeholders to enable sustainable growth, increasing profitability in competitive markets.',
     technologies: ['Business Analysis', 'Finance', 'Sustainability'],
@@ -78,139 +82,68 @@ const experienceData = [
 ];
 
 
-// Individual experience item component
-const ExperienceItem = React.memo(({ experience, index }) => {
-  const revealRef = useReveal();
-
-  return (
-    <div 
-      ref={revealRef}
-      className="group flex items-start justify-between py-6 border-b border-gray-700 last:border-b-0 hover:bg-gray-800/50 transition-colors duration-200 px-4 -mx-4 rounded-lg"
-    >
-      {/* Left side: Number and Content */}
-      <div className="flex items-start space-x-6 flex-1 min-w-0">
-        {/* Number */}
-        <div 
-          data-reveal
-          className={`${HIDDEN} flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-bold rounded-full flex items-center justify-center`}
-        >
-          {String(index + 1).padStart(2, '0')}
-        </div>
-        
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h3 
-            data-reveal
-            className={`${HIDDEN} text-lg md:text-xl font-semibold text-white mb-1 group-hover:text-blue-400 transition-colors`}
-          >
-            {experience.companyName}
-          </h3>
-          <p 
-            data-reveal
-            className={`${HIDDEN} text-base text-gray-300 mb-2`}
-          >
-            {experience.position}
-          </p>
-          {experience.location && (
-            <p 
-              data-reveal
-              className={`${HIDDEN} text-sm text-gray-400 mb-2`}
-            >
-              📍 {experience.location}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Right side: Date */}
-      <div className="flex-shrink-0 text-right ml-4">
-        <span 
-          data-reveal
-          className={`${HIDDEN} text-sm md:text-base text-gray-400 font-medium`}
-        >
-          {experience.dateRange}
-        </span>
-      </div>
-    </div>
-  );
-});
-
-ExperienceItem.displayName = 'ExperienceItem';
+// Helper: format date range as years
+function formatYears(dateRange) {
+  if (!dateRange) return '';
+  const years = dateRange.match(/\d{4}/g);
+  if (!years) return dateRange;
+  const hasPresent = /present/i.test(dateRange);
+  if (hasPresent) return `${years[0]}-Present`;
+  if (years.length >= 2) return `${years[0]}-${years[years.length - 1]}`;
+  return years[0];
+}
 
 // Main Experience component
-const Experience = () => {
-  const sectionRef = useReveal();
-
-  // Filter and sort data (useful for database queries later)
+const Experience = React.memo(() => {
+  // Filter and sort data
   const activeExperiences = experienceData
     .filter(exp => exp.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
-    <section 
-      ref={sectionRef}
-      className="relative w-full bg-transparent py-24"
-    >
+    <section className="w-full bg-transparent py-12 lg:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header - Following ContentSection pattern */}
-        <div className="mb-12">
-          <span 
-            data-reveal 
-            className={`${HIDDEN} inline-block h-1 w-16 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500`} 
-          />
-          <h2 
-            data-reveal 
-            className={`${HIDDEN} mt-4 text-4xl font-semibold italic text-white`}
-          >
-            Experience
-          </h2>
-          <p 
-            data-reveal 
-            className={`${HIDDEN} mt-2 max-w-xl text-lg text-gray-300`}
-          >
-            A timeline of my professional journey, internships, and leadership roles.
-          </p>
+        {/* Title */}
+        <div className="inline-flex items-center gap-2.5 mb-2">
+          <h2 className="text-white text-3xl sm:text-4xl italic font-normal font-adamant">Experience</h2>
         </div>
 
-        {/* Experience List */}
-        <div 
-          data-reveal
-          className={`${HIDDEN} bg-gray-900/50 rounded-2xl shadow-sm border border-gray-800 p-6 md:p-8`}
-        >
-          <div className="space-y-0">
-            {activeExperiences.map((experience, index) => (
-              <ExperienceItem 
-                key={experience.id} 
-                experience={experience} 
-                index={index}
-              />
-            ))}
-          </div>
-        </div>
+        {/* List */}
+        <div className="w-full flex flex-col">
+          {activeExperiences.map((exp) => (
+            <div
+              key={exp.id}
+              className="w-full py-5 md:py-6 px-4 sm:px-5 relative inline-flex items-center gap-4
+                         after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-0 after:h-px
+                         after:bg-gradient-to-r after:from-white/10 after:to-transparent
+                         first:before:content-[''] first:before:absolute first:before:left-0 first:before:right-0 first:before:top-0 first:before:h-px
+                         first:before:bg-gradient-to-r first:before:from-white/10 first:before:to-transparent
+                         hover:bg-white/5 transition-colors"
+            >
+              {/* Logo */}
+              <div className="size-10 sm:size-[42px] p-[5px] rounded-[10px] flex justify-center items-center shadow-[0_1px_8px_rgba(255,255,255,0.08)] bg-gradient-to-br from-white to-white/90 flex-shrink-0">
+                <img className="h-8 w-8 sm:h-9 sm:w-9 rounded-md object-contain" src={exp.logo} alt="" loading="lazy" decoding="async" />
+              </div>
 
-        {/* Optional: Statistics or Call to Action */}
-        <div 
-          data-reveal
-          className={`${HIDDEN} mt-12 text-center`}
-        >
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 text-sm text-gray-400">
-            <span className="flex items-center">
-              <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-              {activeExperiences.filter(exp => exp.category === 'internship').length} Internships
-            </span>
-            <span className="flex items-center">
-              <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-              {activeExperiences.filter(exp => exp.category === 'leadership').length} Leadership Role
-            </span>
-            <span className="flex items-center">
-              <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
-              {activeExperiences.filter(exp => exp.category === 'research').length} Research Position
-            </span>
-          </div>
+              {/* Company / Role */}
+              <div className="flex flex-wrap items-baseline gap-[6px]">
+                <div className="text-white text-xl md:text-2xl font-normal font-adamant">{exp.companyName}</div>
+                {exp.position && (
+                  <div className="text-white/70 md:text-white/75 text-base md:text-lg font-normal font-adamant">{`/ ${exp.position}`}</div>
+                )}
+              </div>
+
+              {/* Years */}
+              <div className="ml-auto text-right text-white/70 md:text-white/80 text-xs sm:text-sm font-normal font-adamant drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]"
+                   style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {formatYears(exp.dateRange)}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
   );
-};
+});
 
-export default Experience;
+export default Experience; // Already memoized above

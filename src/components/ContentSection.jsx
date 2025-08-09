@@ -5,7 +5,7 @@ import ContentCarousel from './ContentCarousel';
 import ContentGrid from './ContentGrid';
 
 // Main content section wrapper
-export default function ContentSection({
+function ContentSection({
   title,
   subtitle,
   items = [],
@@ -23,10 +23,7 @@ export default function ContentSection({
 }) {
   const revealRef = useReveal();
   const carouselId = useId(); // Generate unique ID for this carousel instance
-
-  // Debug: Log items received by ContentSection
-  console.log('ContentSection received items:', items.length);
-  console.log('ContentSection items:', items.map(item => item.title));
+  // Removed dev logs to reduce noise/re-renders
 
   // Auto-determine card variant based on layout
   const finalCardVariant = cardVariant || (layout === 'carousel' ? 'glass' : 'story');
@@ -34,12 +31,13 @@ export default function ContentSection({
   return (
     <section 
       ref={revealRef} 
-      className={`relative w-full z-1 py-24 bg-transparent ${className}`}
+      className={`relative w-full z-[1] py-24 bg-transparent ${className}`}
       {...props}
     >
       <div className={`container mx-auto px-4 sm:px-6 lg:px-8 ${containerClassName}`}>
         {/* Section Header */}
-        <div className={`mb-12 z-1 ${layout === 'carousel' ? 'flex items-center justify-between' : ''}`}>
+        {/* Fixed invalid z-index utility: use z-[1] instead of z-1 */}
+        <div className={`mb-12 z-[1] ${layout === 'carousel' ? 'flex items-center justify-between' : ''}`}>
           <div>
             {showGradientBar && (
               <span 
@@ -113,3 +111,5 @@ export default function ContentSection({
     </section>
   );
 }
+// Optimized for performance by adding React.memo
+export default React.memo(ContentSection);

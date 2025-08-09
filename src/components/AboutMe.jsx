@@ -15,6 +15,7 @@ const AboutMe = () => (
             src={Background}
             alt="accent"
             className="absolute top-24 left-0 w-full h-96 -z-10"
+            loading="lazy" decoding="async" /* Reduce initial cost */
           />
 
           {/* Foreground portrait */}
@@ -22,6 +23,7 @@ const AboutMe = () => (
             src={AaryanImage}
             alt="Aaryan"
             className="relative z-10 w-full h-full  shadow-xl"
+            loading="lazy" decoding="async" /* Reduce initial cost */
           />
         </div>
 
@@ -56,4 +58,5 @@ const AboutMe = () => (
   </>
 );
 
-export default AboutMe;
+// Optimized for performance by adding React.memo to avoid unnecessary re-renders
+export default React.memo(AboutMe);

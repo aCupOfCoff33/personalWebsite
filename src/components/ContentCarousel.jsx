@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import ContentCard from './ContentCard';
 
 // View All Projects Button Component - Pill Style
@@ -43,7 +43,7 @@ function ViewAllButton({ onClick, className = '' }) {
 }
 
 // Horizontal carousel layout component
-export default function ContentCarousel({ 
+function ContentCarousel({ 
   items = [], 
   className = '',
   cardVariant = 'glass',
@@ -53,12 +53,9 @@ export default function ContentCarousel({
   onViewAllClick = () => {}
 }) {
   // Show first maxItems only if showViewAll is true, otherwise show all items
-  const displayItems = showViewAll ? items.slice(0, maxItems) : items;
-  
-  // Debug: Log the items being displayed
-  console.log('ContentCarousel received items:', items.length);
-  console.log('ContentCarousel displayItems:', displayItems.length);
-  console.log('ContentCarousel displayItems:', displayItems.map(item => item.title));
+  const displayItems = useMemo(() => (showViewAll ? items.slice(0, maxItems) : items), [items, showViewAll, maxItems]);
+  // Removed console logs to avoid noisy renders in production
+  // Optimized for performance: memoize derived array
   
   return (
     <div className={`relative ${className}`}>
@@ -66,7 +63,7 @@ export default function ContentCarousel({
       <div
         data-carousel-container
         data-carousel-id={carouselId}
-        className="pt-4 pl-4 pr-4 flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden"
+        className="pt-4 pl-4 pr-4 flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory will-change-transform [&::-webkit-scrollbar]:hidden"
       >
         {displayItems.map((item, index) => (
           <ContentCard
@@ -86,3 +83,5 @@ export default function ContentCarousel({
     </div>
   );
 }
+// Optimized for performance by adding React.memo
+export default React.memo(ContentCarousel);

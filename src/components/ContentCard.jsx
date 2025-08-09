@@ -1,7 +1,8 @@
+import React from 'react';
 import clsx from 'clsx';
 
 
-export default function ContentCard({
+function ContentCard({
   title,
   subtitle,
   dates,
@@ -16,7 +17,7 @@ export default function ContentCard({
       className={clsx(
         'group shrink-0 snap-start',
         'relative isolate p-px z-[100]',           // 1-px padding for gradient border and high z-index
-        'w-80 md:w-88',                    // 320 / 352 (8-pt)
+        'w-80',                            // Removed invalid md:w-88 (not in default scale)
         'h-[512px]',                       // 8-pt multiple
         'transition-transform duration-300 ease-out hover:scale-[1.02]',
         className,
@@ -33,12 +34,12 @@ export default function ContentCard({
         {...props}
       >
         {/* hero panel */}
-        <div className={`flex-1 min-h-[288px] rounded-2xl bg-gradient-to-r ${gradient}`} />
+        <div className={`flex-1 min-h-[288px] rounded-2xl bg-gradient-to-r ${gradient}`} style={{ willChange: 'transform' }} />
 
         {/* meta */}
         <div className="flex items-center gap-4">
           {logo && (
-            <img src={logo} alt="" className="h-12 w-12 flex-shrink-0 rounded-lg object-cover" />
+            <img src={logo} alt="" className="h-12 w-12 flex-shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
           )}
           <h3 className="text-lg font-semibold leading-tight text-white">{title}</h3>
         </div>
@@ -52,3 +53,5 @@ export default function ContentCard({
     </div>
   );
 }
+// Optimized for performance by adding React.memo
+export default React.memo(ContentCard);

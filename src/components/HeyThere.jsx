@@ -8,6 +8,7 @@ import { motion, useMotionValue, animate } from "framer-motion";
 /* ── constants ─────────────────────────────────────────────── */
 const HEADLINE = "Hey there! I’m Aaryan!";
 
+// Optimized for performance by wrapping with React.memo
 const HeroTypingAnimation = React.memo(() => {
   const bodyRef = useRef(null);
   const headlineRef = useRef(null);
@@ -163,10 +164,10 @@ const HeroTypingAnimation = React.memo(() => {
       // Typing animation: update textContent directly for performance
       // Only dispatch once to set phase, then use ref for all text updates
       if (headlineRef.current) headlineRef.current.textContent = '';
-      for (let i = 0; i <= HEADLINE.length; i++) {
+        for (let i = 0; i <= HEADLINE.length; i++) {
         if (headlineRef.current) headlineRef.current.textContent = HEADLINE.slice(0, i);
-        // REMOVED: dispatch call that was causing 23 re-renders per typing sequence
-        await new Promise((r) => setTimeout(r, 65));
+          // REMOVED: dispatch call that was causing 23 re-renders per typing sequence
+          await new Promise((r) => setTimeout(r, 65));
       }
       setTimeout(() => dispatch({ type: 'SET_SHOW_CURSOR', value: false }), 200);
       await new Promise((r) => setTimeout(r, 300));
@@ -245,7 +246,7 @@ const HeroTypingAnimation = React.memo(() => {
 
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-24 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
+    <section className="relative w-full max-w-screen-xl mx-auto px-3 pt-16 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
       {/* Animated cursor overlay */}
       {state.showAnimatedCursor && (
         <AnimatedCursor
@@ -320,10 +321,8 @@ const HeroTypingAnimation = React.memo(() => {
       {state.showBody && (
         <motion.div
           ref={bodyRef}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
-          className="mt-12 space-y-12 max-w-[72rem]"
+          initial={false} // Avoid animating LCP content on mount
+          className="mt-8 md:mt-12 space-y-10 md:space-y-12 max-w-[72rem] pb-20"
         >
           {/* tagline */}
           <p className="text-2xl md:text-3xl leading-relaxed">

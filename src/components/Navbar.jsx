@@ -1,16 +1,18 @@
 import React from "react";
 import { NavLink, Link } from "react-router-dom";
-import { AnimatePresence, motion as Motion } from "framer-motion";
+import { AnimatePresence, motion as Motion } from "framer-motion"; // Use alias 'Motion' to satisfy linter usage
 import {
   Home as HomeIcon,
   UserRound,
   Briefcase,
   FileText,
   Menu,
-  X,
   Mail,
   Linkedin,
+  Github,
+  Instagram,
 } from "lucide-react";
+import XIcon from "./icons/XIcon";
 import BearIconSVG from "./BearIcon";
 
 const sections = [
@@ -27,8 +29,11 @@ const sections = [
     title: "Contact",
     items: [
       // Fill these with your real links any time
-      { kind: "external", href: "mailto:hello@example.com", label: "Email", Icon: Mail },
-      { kind: "external", href: "https://www.linkedin.com/", label: "LinkedIn", Icon: Linkedin },
+      { kind: "external", href: "mailto:aaryanj@outlook.com", label: "Email", Icon: Mail },
+      { kind: "external", href: "https://www.linkedin.com/in/aaryanj/", label: "LinkedIn", Icon: Linkedin },
+      { kind: "external", href: "https://github.com/aCupOfCoff33", label: "GitHub", Icon: Github },
+      { kind: "external", href: "https://x.com/aaryanj05", label: "X", Icon: XIcon },
+      { kind: "external", href: "https://www.instagram.com/aaryan.s/", label: "Instagram", Icon: Instagram },
     ],
   },
 ];
@@ -102,7 +107,7 @@ function Navbar() {
     }
   }, [menuOpen]);
 
-  const year = new Date().getFullYear();
+  // Removed unused year to satisfy linter
 
   return (
     <>
@@ -141,14 +146,10 @@ function Navbar() {
           </nav>
         </div>
 
-        {/* Footer */}
-        <div className="pt-3 border-t border-white/10 w-full">
-          <p className="text-[11px] text-neutral-400/70">© Aaryan, {year}</p>
-        </div>
       </aside>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-4 py-2.5 z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
+      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-3 py-2 z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
         <div className="flex items-center gap-3">
           <BearIconSVG className="h-8 w-8" />
           <Link to="/" className="text-white text-lg font-semibold">
@@ -167,7 +168,7 @@ function Navbar() {
       {/* Mobile dropdown panel - slides from top */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
+          <Motion.div
             key="mobile-panel"
             initial={{ y: "-100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -191,11 +192,11 @@ function Navbar() {
                 </div>
               ))}
             </nav>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </>
   );
 }
 
-export default React.memo(Navbar);
+export default React.memo(Navbar); // Optimized to prevent unnecessary rerenders

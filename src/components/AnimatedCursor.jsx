@@ -166,7 +166,7 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
   };
 
   return (
-    <div ref={cursorRef} style={cursorStyle}>
+    <div ref={cursorRef} style={cursorStyle} aria-hidden>
       <CursorSVG color={CURSOR_COLOR} size={CURSOR_SIZE} />
       <div style={labelStyle}>{LABEL}</div>
     </div>

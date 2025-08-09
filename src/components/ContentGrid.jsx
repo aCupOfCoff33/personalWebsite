@@ -2,17 +2,24 @@ import React from 'react';
 import ContentCard from './ContentCard';
 
 // Grid layout component
-export default function ContentGrid({ 
+function ContentGrid({ 
   items = [], 
   columns = { base: 1, md: 2, lg: 3 },
   className = '',
   cardVariant = 'story'
 }) {
   // Generate responsive grid classes
-  const gridCols = `grid-cols-${columns.base} md:grid-cols-${columns.md} lg:grid-cols-${columns.lg}`;
+  // Tailwind needs explicit class names to avoid purging; map allowed values
+  const colClass = (n) => ({
+    1: 'grid-cols-1',
+    2: 'grid-cols-2',
+    3: 'grid-cols-3',
+    4: 'grid-cols-4',
+  }[n] || 'grid-cols-1');
+  const gridCols = `${colClass(columns.base)} md:${colClass(columns.md)} lg:${colClass(columns.lg)}`;
 
   return (
-    <div className={`grid ${gridCols} gap-8 ${className}`}>
+    <div className={`grid ${gridCols} gap-8 ${className}`} style={{ contain: 'content' }}>
       {items.map((item, index) => (
         <ContentCard
           key={item.id || index}
@@ -23,3 +30,5 @@ export default function ContentGrid({
     </div>
   );
 }
+// Optimized for performance by adding React.memo
+export default React.memo(ContentGrid);

@@ -1,4 +1,4 @@
-// src/components/BearIconSVG_New.jsx
+// Optimized: memoized interactive SVG to avoid unnecessary re-renders
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const MAX_HIGHLIGHT_MOVEMENT = 1.5; // Max pixels the highlight can move from center
@@ -174,4 +174,4 @@ const BearIconSVG_New = React.memo(({ className = '' }) => {
 
 BearIconSVG_New.displayName = 'BearIconSVG_New';
 
-export default BearIconSVG_New;
+export default BearIconSVG_New; // Optimized for performance by wrapping with React.memo

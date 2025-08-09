@@ -61,11 +61,10 @@ const selectedWorksData = [
 ];
 
 // Selected Works section using the reusable ContentSection
-export default function SelectedWorks() {
+function SelectedWorks() {
   const handleViewAllClick = () => {
-    // You can implement navigation to a full works page here
-    console.log('Navigate to all selected works page');
-    // For example: navigate('/works') or window.location.href = '/works'
+    // Placeholder for navigation to a full works page
+    // Intentionally no console log in production for performance cleanliness
   };
 
   return (
@@ -83,3 +82,6 @@ export default function SelectedWorks() {
     />
   );
 }
+
+// Optimized for performance by adding React.memo
+export default React.memo(SelectedWorks);
