@@ -41,6 +41,11 @@ const BearIconProjects = React.memo(({ className = '', showBase = true, idSuffix
 
   // Calculate laptop position based on bear state. Honor previousType so the laptop can animate out.
   const getLaptopTransform = () => {
+    // Outgoing: if we were projects and are transitioning down, slide it away (check this first)
+    if (bearState.previousType === 'projects' && bearState.itemPosition === 'transitioning-down') {
+      return 'translateY(60px)';
+    }
+
     // Incoming from home
     if (bearState.pendingType === 'projects') {
       switch (bearState.itemPosition) {
@@ -60,11 +65,6 @@ const BearIconProjects = React.memo(({ className = '', showBase = true, idSuffix
       return 'translateY(0px)';
     }
 
-    // Outgoing: if we were projects and are transitioning down, slide it away
-    if (bearState.previousType === 'projects' && bearState.itemPosition === 'transitioning-down') {
-      return 'translateY(60px)';
-    }
-
     return 'translateY(60px)';
   };
 
@@ -76,6 +76,18 @@ const BearIconProjects = React.memo(({ className = '', showBase = true, idSuffix
     }
     return 'translate(0 0)';
   };
+
+  // Decide whether to mount/render the laptop group. Keep it mounted during exit animations.
+  const shouldRenderLaptop = (() => {
+    const pos = bearState?.itemPosition;
+    // incoming: only render once it's transitioning-up or visible
+    if (bearState?.pendingType === 'projects') return pos !== 'hidden';
+    // current: render unless explicitly hidden
+    if (bearState?.currentType === 'projects') return true;
+    // outgoing: keep rendering during transitioning-down to animate out
+    if (bearState?.previousType === 'projects' && pos === 'transitioning-down') return true;
+    return false;
+  })();
 
   // --- Blinking ---
   const triggerBlink = useCallback(() => {
@@ -261,31 +273,33 @@ const BearIconProjects = React.memo(({ className = '', showBase = true, idSuffix
         </>
       )}
 
-      {/* macbook - animated positioning; always render so it can be overlaid */}
-      <g 
-        filter={`url(#lidShadow${idSuffix})`}
-        clipPath={`url(#bearCircleMask${idSuffix})`}
-        transform={getLaptopTransformAttr()}
-        style={{
-          transform: getLaptopTransform(),
-          transition: 'transform 420ms cubic-bezier(0.4, 0, 0.2, 1)',
-          transformOrigin: 'center bottom',
-          pointerEvents: 'none' // avoid intercepting clicks when overlaid
-        }}
-      >
-         <g aria-hidden="true">
-          <path id={`lidShape${idSuffix}`} d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill={`url(#lidLinear${idSuffix})`}/>
-           {/* Inner top shadow + center light overlays reuse same rounded shape */}
-          <path d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill={`url(#lidInnerTop${idSuffix})`}/>
-          <path d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill={`url(#lidCenterLight${idSuffix})`}/>
-           {/* Apple logo (provided path) centered, smaller scale */}
-          <g transform="translate(64 94) scale(0.75) translate(-12 -12)">
-            <path fill={`url(#appleGrad${idSuffix})`} d="M17.05 20.28c-.98.95-2.05.8-3.08.35c-1.09-.46-2.09-.48-3.24 0c-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8c1.18-.24 2.31-.93 3.57-.84c1.51.12 2.65.72 3.4 1.8c-3.12 1.87-2.38 5.98.48 7.13c-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25c.29 2.58-2.34 4.5-3.74 4.25"/>
+      {/* macbook - animated positioning; only mount when it should appear inside the white circle */}
+      {shouldRenderLaptop && (
+        <g
+          filter={`url(#lidShadow${idSuffix})`}
+          clipPath={`url(#bearCircleMask${idSuffix})`}
+          transform={getLaptopTransformAttr()}
+          style={{
+            transform: getLaptopTransform(),
+            transition: 'transform 420ms cubic-bezier(0.4, 0, 0.2, 1)',
+            transformOrigin: 'center bottom',
+            pointerEvents: 'none', // avoid intercepting clicks when overlaid
+          }}
+        >
+          <g aria-hidden="true">
+            <path id={`lidShape${idSuffix}`} d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill={`url(#lidLinear${idSuffix})`} />
+            {/* Inner top shadow + center light overlays reuse same rounded shape */}
+            <path d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill={`url(#lidInnerTop${idSuffix})`} />
+            <path d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill={`url(#lidCenterLight${idSuffix})`} />
+            {/* Apple logo (provided path) centered, smaller scale */}
+            <g transform="translate(64 94) scale(0.75) translate(-12 -12)">
+              <path fill={`url(#appleGrad${idSuffix})`} d="M17.05 20.28c-.98.95-2.05.8-3.08.35c-1.09-.46-2.09-.48-3.24 0c-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8c1.18-.24 2.31-.93 3.57-.84c1.51.12 2.65.72 3.4 1.8c-3.12 1.87-2.38 5.98.48 7.13c-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25c.29 2.58-2.34 4.5-3.74 4.25" />
+            </g>
           </g>
-         </g>
-       </g>
-     </svg>
-   );
+        </g>
+      )}
+    </svg>
+  );
 });
 
 BearIconProjects.displayName = 'BearIconProjects';

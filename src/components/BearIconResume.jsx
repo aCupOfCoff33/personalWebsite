@@ -9,6 +9,11 @@ const BearIconResume = React.memo(({ className = '', showBase = true, idSuffix =
   const svgRef = useRef(null);
 
   const getSuitTransform = () => {
+    // Outgoing: if we were resume and are transitioning down, slide it away (check this first)
+    if (bearState.previousType === 'resume' && bearState.itemPosition === 'transitioning-down') {
+      return 'translateY(60px)';
+    }
+
     // follow same logic as other bears but check for 'resume'
     if (bearState.pendingType === 'resume') {
       switch (bearState.itemPosition) {
@@ -27,10 +32,6 @@ const BearIconResume = React.memo(({ className = '', showBase = true, idSuffix =
       return 'translateY(0px)';
     }
 
-    if (bearState.previousType === 'resume' && bearState.itemPosition === 'transitioning-down') {
-      return 'translateY(60px)';
-    }
-
     return 'translateY(60px)';
   };
 
@@ -42,6 +43,15 @@ const BearIconResume = React.memo(({ className = '', showBase = true, idSuffix =
     }
     return 'translate(0 0)';
   };
+
+  // Decide whether to mount the suit group. Keep it mounted during exit animations.
+  const shouldRenderSuit = (() => {
+    const pos = bearState?.itemPosition;
+    if (bearState?.pendingType === 'resume') return pos !== 'hidden';
+    if (bearState?.currentType === 'resume') return true;
+    if (bearState?.previousType === 'resume' && pos === 'transitioning-down') return true;
+    return false;
+  })();
 
   const suitStyle = {
     transform: getSuitTransform(),
@@ -79,18 +89,20 @@ const BearIconResume = React.memo(({ className = '', showBase = true, idSuffix =
         </>
       )}
 
-      {/* Suit group: always rendered so it can animate independently */}
-      <g
-        aria-hidden="true"
-        clipPath={`url(#bearCircleMaskResume${idSuffix})`}
-        transform={getSuitTransformAttr()}
-        style={suitStyle}
-      >
-        {/* small rotated square (lapel button) */}
-        <rect x="33.6318" y="53" width="6.25718" height="6.25718" transform="rotate(45 33.6318 53)" fill="black" />
-        <path d="M39.3838 67.5732C37.6301 67.8523 35.8322 68 34 68C31.9544 68 29.951 67.8189 28.0049 67.4727L33.6445 61.834L39.3838 67.5732Z" fill="black" />
-        <path d="M8.5 49.5V45.5V45L33.7069 53H34.2931L59.5 45V49L58.9138 50C58.3276 51 56.569 52 53.6379 54.5C51.2931 56.5 42.8908 59.6667 38.9828 61L33.7069 54.5L29.0172 60.5L25.5 59.5C23.7414 59 17.8793 56.5 14.9483 55C12.6034 53.8 9 51.5 8.5 49.5Z" fill="white" stroke="#909090" strokeWidth="0.2" />
-      </g>
+      {/* Suit group: only mount when it should appear inside the white circle */}
+      {shouldRenderSuit && (
+        <g
+          aria-hidden="true"
+          clipPath={`url(#bearCircleMaskResume${idSuffix})`}
+          transform={getSuitTransformAttr()}
+          style={suitStyle}
+        >
+          {/* small rotated square (lapel button) */}
+          <rect x="33.6318" y="53" width="6.25718" height="6.25718" transform="rotate(45 33.6318 53)" fill="black" />
+          <path d="M39.3838 67.5732C37.6301 67.8523 35.8322 68 34 68C31.9544 68 29.951 67.8189 28.0049 67.4727L33.6445 61.834L39.3838 67.5732Z" fill="black" />
+          <path d="M8.5 49.5V45.5V45L33.7069 53H34.2931L59.5 45V49L58.9138 50C58.3276 51 56.569 52 53.6379 54.5C51.2931 56.5 42.8908 59.6667 38.9828 61L33.7069 54.5L29.0172 60.5L25.5 59.5C23.7414 59 17.8793 56.5 14.9483 55C12.6034 53.8 9 51.5 8.5 49.5Z" fill="white" stroke="#909090" strokeWidth="0.2" />
+        </g>
+      )}
     </svg>
   );
 });

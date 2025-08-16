@@ -37,6 +37,11 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
   const { tocItems, readingProgress } = useNotesTOC();
 
   const getBookTransform = () => {
+    // Outgoing: if we were stories and are transitioning down, slide it away (check this first)
+    if (bearState.previousType === 'stories' && bearState.itemPosition === 'transitioning-down') {
+      return 'translateY(60px)';
+    }
+
     if (bearState.pendingType === 'stories') {
       switch (bearState.itemPosition) {
         case 'hidden':
@@ -54,10 +59,6 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
       return 'translateY(0px)';
     }
 
-    if (bearState.previousType === 'stories' && bearState.itemPosition === 'transitioning-down') {
-      return 'translateY(60px)';
-    }
-
     return 'translateY(60px)';
   };
 
@@ -69,6 +70,16 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
     }
     return 'translate(0 0)';
   };
+
+  // Decide whether to mount/render the book group. Keep it mounted during exit animations.
+  const shouldRenderBook = (() => {
+    const pos = bearState?.itemPosition;
+    if (bearState?.pendingType === 'stories') return pos !== 'hidden';
+    if (bearState?.currentType === 'stories') return true;
+    // outgoing: keep rendering during transitioning-down to animate out
+    if (bearState?.previousType === 'stories' && pos === 'transitioning-down') return true;
+    return false;
+  })();
 
   const triggerBlink = useCallback(() => {
     if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
@@ -207,41 +218,43 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
         </>
       )}
 
-      {/* Book (always rendered so it can animate independently) */}
-      <g
-        aria-hidden="true"
-        clipPath={`url(#bearCircleMaskReading${idSuffix})`}
-        transform={getBookTransformAttr()}
-        style={{
-          transform: getBookTransform(),
-          transition: 'transform 420ms cubic-bezier(0.4, 0, 0.2, 1)',
-          transformOrigin: 'center bottom',
-          pointerEvents: 'none',
-        }}
-      >
-        <g ref={pageRef} style={{ transformOrigin: '32px 110px' }}>
-          <path d="M64 80 L32 68 L32 116 L64 122 Z" fill="#F6ECEB" />
-          <g stroke="#C4B5B3" strokeWidth="0.8">
-            <line x1="36" y1="82" x2="60" y2="78" />
-            <line x1="37" y1="88" x2="59" y2="84" />
-            <line x1="37" y1="94" x2="59" y2="90" />
-            <line x1="37" y1="100" x2="59" y2="96" />
-            <line x1="37" y1="106" x2="59" y2="102" />
-            <line x1="37" y1="112" x2="59" y2="108" />
+      {/* Book (only mount when it should appear inside the white circle) */}
+      {shouldRenderBook && (
+        <g
+          aria-hidden="true"
+          clipPath={`url(#bearCircleMaskReading${idSuffix})`}
+          transform={getBookTransformAttr()}
+          style={{
+            transform: getBookTransform(),
+            transition: 'transform 420ms cubic-bezier(0.4, 0, 0.2, 1)',
+            transformOrigin: 'center bottom',
+            pointerEvents: 'none',
+          }}
+        >
+          <g ref={pageRef} style={{ transformOrigin: '32px 110px' }}>
+            <path d="M64 80 L32 68 L32 116 L64 122 Z" fill="#F6ECEB" />
+            <g stroke="#C4B5B3" strokeWidth="0.8">
+              <line x1="36" y1="82" x2="60" y2="78" />
+              <line x1="37" y1="88" x2="59" y2="84" />
+              <line x1="37" y1="94" x2="59" y2="90" />
+              <line x1="37" y1="100" x2="59" y2="96" />
+              <line x1="37" y1="106" x2="59" y2="102" />
+              <line x1="37" y1="112" x2="59" y2="108" />
+            </g>
+          </g>
+
+          <path d="M64 78 L32 66 L32 118 L64 124 Z" fill={`url(#bookLeft${idSuffix})`} />
+          <path d="M64 78 L96 66 L96 118 L64 124 Z" fill={`url(#bookRight${idSuffix})`} />
+          <path d="M64 78 L64 124" stroke="#E6D3D1" strokeWidth="2" />
+          <g stroke="#EBD9D6" strokeWidth="0.8">
+            <line x1="68" y1="84" x2="92" y2="78" />
+            <line x1="69" y1="90" x2="91" y2="84" />
+            <line x1="69" y1="96" x2="91" y2="90" />
+            <line x1="69" y1="102" x2="91" y2="96" />
+            <line x1="69" y1="108" x2="91" y2="102" />
           </g>
         </g>
-
-        <path d="M64 78 L32 66 L32 118 L64 124 Z" fill={`url(#bookLeft${idSuffix})`} />
-        <path d="M64 78 L96 66 L96 118 L64 124 Z" fill={`url(#bookRight${idSuffix})`} />
-        <path d="M64 78 L64 124" stroke="#E6D3D1" strokeWidth="2" />
-        <g stroke="#EBD9D6" strokeWidth="0.8">
-          <line x1="68" y1="84" x2="92" y2="78" />
-          <line x1="69" y1="90" x2="91" y2="84" />
-          <line x1="69" y1="96" x2="91" y2="90" />
-          <line x1="69" y1="102" x2="91" y2="96" />
-          <line x1="69" y1="108" x2="91" y2="102" />
-        </g>
-      </g>
+      )}
     </svg>
   );
 });

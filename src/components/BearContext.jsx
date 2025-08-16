@@ -28,6 +28,7 @@ const BearProvider = ({ children }) => {
     if (t === 'default') {
       return {
         currentType: 'default',
+        previousType: null,
         pendingType: null,
         isTransitioning: false,
         itemPosition: 'visible',
@@ -36,6 +37,7 @@ const BearProvider = ({ children }) => {
 
     return {
       currentType: 'default', // remain default so we can animate the incoming item
+      previousType: null,
       pendingType: t,
       isTransitioning: true,
       itemPosition: 'hidden', // incoming starts hidden and will transition-up
@@ -57,6 +59,7 @@ const BearProvider = ({ children }) => {
         setBearState(cur => ({
           ...cur,
           currentType: cur.pendingType,
+          previousType: null,
           pendingType: null,
           itemPosition: 'visible',
           isTransitioning: false,
@@ -76,6 +79,7 @@ const BearProvider = ({ children }) => {
       // and set pendingType to the target so both can be rendered during animation.
       const startState = {
         ...prev,
+        previousType: prev.currentType, // Track the type we're transitioning away from
         pendingType: newType,
         isTransitioning: true,
       };
@@ -90,6 +94,7 @@ const BearProvider = ({ children }) => {
           setBearState((cur) => ({
             ...cur,
             currentType: 'default',
+            previousType: null, // Clear previousType
             pendingType: null,
             itemPosition: 'visible',
             isTransitioning: false,
@@ -112,6 +117,7 @@ const BearProvider = ({ children }) => {
           setBearState((cur) => ({
             ...cur,
             currentType: newType,
+            previousType: null, // Clear previousType
             pendingType: null,
             itemPosition: 'visible',
             isTransitioning: false,
@@ -133,6 +139,7 @@ const BearProvider = ({ children }) => {
         setBearState((cur) => ({
           ...cur,
           currentType: newType,
+          previousType: null, // Clear previousType
           pendingType: null,
           itemPosition: 'visible',
           isTransitioning: false,
