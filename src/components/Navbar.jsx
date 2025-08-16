@@ -20,6 +20,7 @@ import { useBearState } from './useBearState';
 import BearIconSVG from "./BearIcon";
 import BearIconReading from "./BearIconReading";
 import BearIconProjects from "./BearIconProjects";
+import BearIconResume from './BearIconResume';
 
 const sections = [
   {
@@ -28,7 +29,7 @@ const sections = [
       { kind: "internal", to: "/", label: "Home", Icon: HomeIcon },
       { kind: "internal", to: "/about", label: "About", Icon: UserRound },
       { kind: "internal", to: "/projects", label: "Projects", Icon: Briefcase },
-      { kind: "external", href: "https://drive.google.com/file/d/1-0-_00000000000000000000000000000000000000000/view?usp=sharing", label: "Resume", Icon: FileText },
+      { kind: "internal", to: "/resume", label: "Resume", Icon: FileText },
     ],
   },
   {
@@ -199,6 +200,11 @@ function Navbar() {
         {/* Book overlay (object-only) */}
         <div style={{ position: 'absolute', inset: 0, transition: 'opacity 420ms ease', opacity: overlayOpacity('stories'), pointerEvents: 'none' }}>
           <BearIconReading className={iconClass} showBase={false} idSuffix={'-read'} />
+        </div>
+
+        {/* Resume suit overlay */}
+        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 420ms ease', opacity: overlayOpacity('resume'), pointerEvents: 'none' }}>
+          <BearIconResume className={iconClass} showBase={false} idSuffix={'-resume'} />
         </div>
       </div>
     );

@@ -16,6 +16,7 @@ const BearProvider = ({ children }) => {
   const detectType = (path) => {
     if (path.startsWith('/projects')) return 'projects';
     if (path.startsWith('/notes')) return 'stories';
+    if (path.startsWith('/resume')) return 'resume';
     return 'default';
   };
 
