@@ -164,21 +164,19 @@ function Navbar() {
 
   // Removed unused year to satisfy linter
 
-  // Helper to render stacked bears; size is px for container (64 or 32)
+  // Helper to render a single base bear and overlay only the movable objects (book/laptop)
+  // so the base does not fade and only the item animates vertically.
   const renderStackedBears = (size) => {
-    const opacityFor = (type) => {
-      // Outgoing: if this type is currently active and we're sliding it down, keep it visible
+    const overlayOpacity = (type) => {
+      // If this type is currently visible or transitioning up, show it
       if (bearState.currentType === type) {
-        if (bearState.itemPosition === 'visible' || bearState.itemPosition === 'transitioning-down') return 1;
+        if (bearState.itemPosition === 'visible' || bearState.itemPosition === 'transitioning-up') return 1;
+        if (bearState.itemPosition === 'transitioning-down') return 1; // keep visible while sliding down
         return 0;
       }
 
-      // Incoming: when there's a pending type (the target) and it's in the 'transitioning-up' phase,
-      // render it so it can animate into view.
-      if (bearState.pendingType === type) {
-        if (bearState.itemPosition === 'transitioning-up') return 1;
-        return 0;
-      }
+      // Incoming: pendingType during transitioning-up should be visible
+      if (bearState.pendingType === type && bearState.itemPosition === 'transitioning-up') return 1;
 
       return 0;
     };
@@ -188,14 +186,19 @@ function Navbar() {
 
     return (
       <div style={{ width: sizePx, height: sizePx, position: 'relative' }}>
-        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 400ms ease', opacity: opacityFor('default') }}>
+        {/* Base bear always visible */}
+        <div style={{ position: 'absolute', inset: 0 }}>
           <BearIconSVG className={iconClass} />
         </div>
-        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 400ms ease', opacity: opacityFor('projects') }}>
-          <BearIconProjects className={iconClass} />
+
+        {/* Laptop overlay (object-only) */}
+        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 420ms ease', opacity: overlayOpacity('projects'), pointerEvents: 'none' }}>
+          <BearIconProjects className={iconClass} showBase={false} idSuffix={'-proj'} />
         </div>
-        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 400ms ease', opacity: opacityFor('stories') }}>
-          <BearIconReading className={iconClass} />
+
+        {/* Book overlay (object-only) */}
+        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 420ms ease', opacity: overlayOpacity('stories'), pointerEvents: 'none' }}>
+          <BearIconReading className={iconClass} showBase={false} idSuffix={'-read'} />
         </div>
       </div>
     );
