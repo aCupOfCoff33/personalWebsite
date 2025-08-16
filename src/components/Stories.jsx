@@ -11,6 +11,7 @@ const storiesData = [
     image: 'https://placehold.co/481x280/6366f1/ffffff?text=API+Design',
     accent: 'purple',
     category: 'Backend',
+    href: '/notes/building-scalable-apis', // Navigate to the story detail page
   },
   {
     id: 'react-performance-optimization',
@@ -69,7 +70,7 @@ function Stories() {
       layout="carousel"
       showGradientBar={true}
       showControls={true}
-      cardVariant="glass" // Use glass variant for horizontal carousel
+      cardVariant="panel" // Flat-modern panel style
     />
   );
 }

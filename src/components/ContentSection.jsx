@@ -25,8 +25,8 @@ function ContentSection({
   const carouselId = useId(); // Generate unique ID for this carousel instance
   // Removed dev logs to reduce noise/re-renders
 
-  // Auto-determine card variant based on layout
-  const finalCardVariant = cardVariant || (layout === 'carousel' ? 'glass' : 'story');
+  // Auto-determine card variant based on layout (prefer flatter "panel" style for carousel)
+  const finalCardVariant = cardVariant || (layout === 'carousel' ? 'panel' : 'panel');
 
   return (
     <section 

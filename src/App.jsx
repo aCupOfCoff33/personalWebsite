@@ -2,17 +2,18 @@ import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/Navbar";
 import HeroBackground from "./components/HeroBackground";
+import { NotesProvider } from "./components/notes/NotesContext";
 
 // Optimized for performance by lazy-loading route components
 // This reduces initial bundle size without changing functionality
 const Home = lazy(() => import("./components/Home"));
 const AboutMe = lazy(() => import("./components/AboutMe"));
-const Work = lazy(() => import("./components/Work"));
 const Projects = lazy(() => import("./components/Projects"));
+const NotePage = lazy(() => import("./components/notes/NotePage"));
 
 function App() {
   return (
-    <>
+  <NotesProvider>
       {/* Global background - prevents remounting between pages */}
       <HeroBackground />
       <NavBar />
@@ -24,9 +25,10 @@ function App() {
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/work" element={<Work />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/about" element={<AboutMe />} />
+            {/* Notes feature: only detail route is exposed */}
+            <Route path="/notes/:slug" element={<NotePage />} />
           </Routes>
         </Suspense>
 
@@ -35,7 +37,7 @@ function App() {
           Your Footer Content Here
         </footer>
       </main>
-    </>
+    </NotesProvider>
   );
 }
 

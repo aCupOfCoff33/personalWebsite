@@ -1,7 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import Hero from './HeyThere';
 // Optimized: lazy-load heavy sections below the fold
-const Experiences = lazy(() => import('./ThingsBuilt'));
 const Stories = lazy(() => import('./Stories'));
 const Experience = lazy(() => import('./Experience'));
 
@@ -15,13 +14,7 @@ export default function Home() {
           {/* remove previous black fade to keep continuous background */}
           {/* spacer removed intentionally */}
         </section>
-        {/* Experiences Section */}
-        <Suspense fallback={null}>
-          <div className="w-full flex justify-center items-center" data-bg-scene="projects">
-            <Experiences />
-          </div>
-        </Suspense>
-        {/* Stories Section */}
+        {/* Stories Section (replaces previous "Things I've Built in My Cave") */}
         <Suspense fallback={null}>
           <div className="w-full flex justify-center items-center" data-bg-scene="stories">
             <Stories />
