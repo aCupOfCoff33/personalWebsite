@@ -17,6 +17,7 @@ import XIcon from "./icons/XIcon";
 import TOC from "./notes/TOC";
 import { useNotesTOC } from "./notes/NotesContext";
 import BearIconSVG from "./BearIcon";
+import BearIconReading from "./BearIconReading";
 
 const sections = [
   {
@@ -169,7 +170,11 @@ function Navbar() {
         {/* Brand */}
         <div className="w-full pb-5 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <BearIconSVG className="h-16 w-16" />
+            {isNotesRoute && tocItems?.length > 0 ? (
+              <BearIconReading className="h-16 w-16" />
+            ) : (
+              <BearIconSVG className="h-16 w-16" />
+            )}
             <Link to="/" className="text-white text-2xl font-semibold leading-none">
               aaryan
             </Link>
@@ -273,7 +278,11 @@ function Navbar() {
       {/* Mobile top bar with morphing contact area */}
       <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-3 py-2 z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
         <div className="flex items-center gap-3">
-          <BearIconSVG className="h-8 w-8" />
+          {isNotesRoute && tocItems?.length > 0 ? (
+            <BearIconReading className="h-8 w-8" />
+          ) : (
+            <BearIconSVG className="h-8 w-8" />
+          )}
           <Link to="/" className="text-white text-lg font-semibold">aaryan</Link>
         </div>
 
