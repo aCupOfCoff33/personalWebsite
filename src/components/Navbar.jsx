@@ -17,10 +17,7 @@ import XIcon from "./icons/XIcon";
 import TOC from "./notes/TOC";
 import { useNotesTOC } from "./notes/NotesContext";
 import { useBearState } from './useBearState';
-import BearIconSVG from "./BearIcon";
-import BearIconReading from "./BearIconReading";
-import BearIconProjects from "./BearIconProjects";
-import BearIconResume from './BearIconResume';
+import UnifiedBearIcon from './UnifiedBearIcon';
 
 const sections = [
   {
@@ -148,7 +145,7 @@ function Navbar() {
   const location = useLocation();
   const isNotesRoute = location.pathname.startsWith('/notes');
   // use bear state at top level so hooks are not called conditionally or inside callbacks
-  const { bearState } = useBearState();
+  useBearState();
    // Collapse only based on contactCollapsed so it can revert when scrolling back up
    const collapsed = isNotesRoute && contactCollapsed;
 
@@ -165,50 +162,12 @@ function Navbar() {
 
   // Removed unused year to satisfy linter
 
-  // Helper to render a single base bear and overlay only the movable objects (book/laptop)
-  // so the base does not fade and only the item animates vertically.
-  const renderStackedBears = (size) => {
-    const overlayOpacity = (type) => {
-      // If this type is currently visible or transitioning up, show it
-      if (bearState.currentType === type) {
-        if (bearState.itemPosition === 'visible' || bearState.itemPosition === 'transitioning-up') return 1;
-        if (bearState.itemPosition === 'transitioning-down') return 1; // keep visible while sliding down
-        return 0;
-      }
-
-      // Incoming: pendingType during transitioning-up should be visible
-      if (bearState.pendingType === type && bearState.itemPosition === 'transitioning-up') return 1;
-
-      return 0;
-    };
-
-    const sizePx = size;
-    const iconClass = size > 40 ? 'h-16 w-16' : 'h-8 w-8';
-
-    return (
-      <div style={{ width: sizePx, height: sizePx, position: 'relative' }}>
-        {/* Base bear always visible */}
-        <div style={{ position: 'absolute', inset: 0 }}>
-          <BearIconSVG className={iconClass} />
-        </div>
-
-        {/* Laptop overlay (object-only) */}
-        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 420ms ease', opacity: overlayOpacity('projects'), pointerEvents: 'none' }}>
-          <BearIconProjects className={iconClass} showBase={false} idSuffix={'-proj'} />
-        </div>
-
-        {/* Book overlay (object-only) */}
-        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 420ms ease', opacity: overlayOpacity('stories'), pointerEvents: 'none' }}>
-          <BearIconReading className={iconClass} showBase={false} idSuffix={'-read'} />
-        </div>
-
-        {/* Resume suit overlay */}
-        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 420ms ease', opacity: overlayOpacity('resume'), pointerEvents: 'none' }}>
-          <BearIconResume className={iconClass} showBase={false} idSuffix={'-resume'} />
-        </div>
-      </div>
-    );
-  };
+  // Render the unified icon; size via tailwind classes
+  const renderUnifiedBear = (size) => (
+    <div style={{ width: size, height: size }}>
+      <UnifiedBearIcon className={size > 40 ? 'h-16 w-16' : 'h-8 w-8'} />
+    </div>
+  );
 
   return (
     <>
@@ -220,8 +179,8 @@ function Navbar() {
         {/* Brand */}
         <div className="w-full pb-5 border-b border-white/10">
           <div className="flex items-center gap-3" style={{ position: 'relative' }}>
-          {/* stacked bears so exit animations can run while new bear mounts */}
-          {renderStackedBears(64)}
+          {/* unified bear icon */}
+          {renderUnifiedBear(64)}
           <Link to="/" className="text-white text-2xl font-semibold leading-none">
             aaryan
           </Link>
@@ -325,7 +284,7 @@ function Navbar() {
       {/* Mobile top bar with morphing contact area */}
       <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-3 py-2 z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
         <div className="flex items-center gap-3" style={{ position: 'relative' }}>
-          {renderStackedBears(32)}
+          {renderUnifiedBear(32)}
            <Link to="/" className="text-white text-lg font-semibold">aaryan</Link>
          </div>
 
