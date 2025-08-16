@@ -20,32 +20,13 @@ const Book = React.memo(function Book({ position = 'hidden', idSuffix = '' }) {
     return () => clearTimeout(t);
   }, []);
 
-  const getTransformY = () => {
-    switch (position) {
-      case 'visible':
-      case 'transitioning-up':
-        return 0;
-      case 'transitioning-down':
-      case 'hidden':
-      default:
-        return 60;
-    }
-  };
-
-  const cssTransform = `translateY(${getTransformY()}px)`;
-  const svgTransform = `translate(0 ${getTransformY()})`;
+  const opacity = position === 'hidden' ? 0 : 1;
 
   return (
     <g
       aria-hidden="true"
       clipPath={`url(#bearCircleMaskReading${idSuffix})`}
-      transform={svgTransform}
-      style={{
-        transform: cssTransform,
-        transition: 'transform 420ms cubic-bezier(0.4, 0, 0.2, 1)',
-        transformOrigin: 'center bottom',
-        pointerEvents: 'none',
-      }}
+      style={{ pointerEvents: 'none', opacity }}
     >
       <defs>
         <linearGradient id={`bookLeft${idSuffix}`} x1="39" y1="74" x2="64" y2="116" gradientUnits="userSpaceOnUse">

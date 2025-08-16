@@ -28,23 +28,23 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) 
       }
     };
 
-    const pushIf = (type, pos, key) => {
+    const pushIf = (type, pos) => {
       const Comp = typeToComp(type);
       if (!Comp) return;
-      items.push({ key, Comp, pos, type });
+      items.push({ key: type, Comp, pos, type });
     };
 
     // Outgoing item during slide-down
     if (previousType && itemPosition === 'transitioning-down') {
-      pushIf(previousType, 'transitioning-down', `out-${previousType}`);
+      pushIf(previousType, 'transitioning-down');
     }
 
     // Incoming or steady-state
     if (pendingType) {
-      if (itemPosition === 'transitioning-up') pushIf(pendingType, 'transitioning-up', `in-${pendingType}`);
-      if (itemPosition === 'visible') pushIf(pendingType, 'visible', `cur-${pendingType}`);
+  if (itemPosition === 'transitioning-up') pushIf(pendingType, 'transitioning-up');
+  if (itemPosition === 'visible') pushIf(pendingType, 'visible');
     } else if (currentType && currentType !== 'default') {
-      pushIf(currentType, itemPosition || 'visible', `cur-${currentType}`);
+  pushIf(currentType, itemPosition || 'visible');
     }
 
     return items;
@@ -55,10 +55,16 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) 
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" className={className} role="img" aria-hidden="true">
       <BaseBear />
-      <AnimatePresence initial={false} mode="sync">
-    {items.map((item) => (
-          <Motion.g key={item.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
-      <item.Comp position={item.pos} idSuffix={`-${uid}-${item.type}`} />
+      <AnimatePresence initial={false} mode="wait">
+        {items.map((item) => (
+          <Motion.g
+            key={item.key}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <item.Comp position={item.pos} idSuffix={`-${uid}-${item.type}`} />
           </Motion.g>
         ))}
       </AnimatePresence>

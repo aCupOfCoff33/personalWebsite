@@ -1,33 +1,14 @@
 import React from 'react';
 
-// Suit accessory extracted from BearIconResume; controls its own vertical transform
+// Suit accessory extracted from BearIconResume; now fades in/out
 const Suit = React.memo(function Suit({ position = 'hidden', idSuffix = '' }) {
-  const getTransformY = () => {
-    switch (position) {
-      case 'visible':
-      case 'transitioning-up':
-        return 0;
-      case 'transitioning-down':
-      case 'hidden':
-      default:
-        return 60;
-    }
-  };
-
-  const cssTransform = `translateY(${getTransformY()}px)`;
-  const svgTransform = `translate(0 ${getTransformY()})`;
+  const opacity = position === 'hidden' ? 0 : 1;
 
   return (
     <g
       aria-hidden="true"
       clipPath={`url(#bearCircleMaskResume${idSuffix})`}
-      transform={svgTransform}
-      style={{
-        transform: cssTransform,
-        transition: 'transform 420ms cubic-bezier(0.4, 0, 0.2, 1)',
-        transformOrigin: 'center bottom',
-        pointerEvents: 'none',
-      }}
+  style={{ pointerEvents: 'none', opacity }}
     >
       <defs>
         <clipPath id={`bearCircleMaskResume${idSuffix}`}>

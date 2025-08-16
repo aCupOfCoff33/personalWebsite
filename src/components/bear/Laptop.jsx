@@ -3,32 +3,14 @@ import React from 'react';
 // Laptop accessory extracted from BearIconProjects; controls its own vertical transform
 const Laptop = React.memo(function Laptop({ position = 'hidden', idSuffix = '' }) {
   // Map position to translateY
-  const getTransformY = () => {
-    switch (position) {
-      case 'visible':
-      case 'transitioning-up':
-        return 0;
-      case 'transitioning-down':
-      case 'hidden':
-      default:
-        return 60;
-    }
-  };
-
-  const cssTransform = `translateY(${getTransformY()}px)`;
-  const svgTransform = `translate(0 ${getTransformY()})`;
+  // Fade only; compute opacity from position if desired (or let parent animate opacity)
+  const opacity = position === 'hidden' ? 0 : 1;
 
   return (
     <g
       filter={`url(#lidShadow${idSuffix})`}
       clipPath={`url(#bearCircleMask${idSuffix})`}
-      transform={svgTransform}
-      style={{
-        transform: cssTransform,
-        transition: 'transform 420ms cubic-bezier(0.4, 0, 0.2, 1)',
-        transformOrigin: 'center bottom',
-        pointerEvents: 'none',
-      }}
+      style={{ pointerEvents: 'none', opacity }}
     >
       <defs>
         <linearGradient id={`lidLinear${idSuffix}`} x1="0" y1="72" x2="0" y2="116" gradientUnits="userSpaceOnUse">
