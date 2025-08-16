@@ -80,7 +80,10 @@ const NoteSection = React.memo(function NoteSection({ section }) {
     case 'heading': {
       const Tag = section.level === 1 ? 'h2' : section.level === 3 ? 'h4' : 'h3';
       return (
-        <Tag id={section.id} className="scroll-mt-32 text-3xl md:text-4xl font-semibold text-white">
+        <Tag
+          id={section.id}
+          className="scroll-mt-32 text-3xl md:text-4xl font-normal font-adamant italic text-white"
+        >
           {section.text}
         </Tag>
       );

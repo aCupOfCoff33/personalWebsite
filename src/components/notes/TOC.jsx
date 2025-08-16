@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
+// Alias to capitalized variable so linters recognize JSX usage
+const M = motion;
 
 function TOCItem({ id, text, level, onClick }) {
   return (
@@ -19,7 +21,7 @@ function TOCItem({ id, text, level, onClick }) {
           'block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded transition-colors',
           level > 1
             ? 'pl-3 text-sm text-neutral-300 hover:text-white'
-            : 'pl-0 font-adamant italic text-base text-white',
+            : 'pl-0 text-base text-white font-normal',
         ].join(' ')}
         aria-label={`Jump to ${text}`}
       >
@@ -39,7 +41,7 @@ TOCItem.propTypes = {
 const TOC = React.memo(function TOC({ items, className = '', visible = true }) {
   if (!items?.length) return null;
   return (
-    <motion.nav
+    <M.nav
       initial={false}
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
       transition={{ duration: 0.25 }}
@@ -53,7 +55,7 @@ const TOC = React.memo(function TOC({ items, className = '', visible = true }) {
           <TOCItem key={item.id} {...item} />
         ))}
       </ul>
-    </motion.nav>
+    </M.nav>
   );
 });
 
