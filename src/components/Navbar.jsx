@@ -16,8 +16,10 @@ import {
 import XIcon from "./icons/XIcon";
 import TOC from "./notes/TOC";
 import { useNotesTOC } from "./notes/NotesContext";
+import { useBearState } from './useBearState';
 import BearIconSVG from "./BearIcon";
 import BearIconReading from "./BearIconReading";
+import BearIconProjects from "./BearIconProjects";
 
 const sections = [
   {
@@ -144,8 +146,10 @@ function Navbar() {
   const { tocItems, tocVisible, contactCollapsed, readingProgress } = useNotesTOC();
   const location = useLocation();
   const isNotesRoute = location.pathname.startsWith('/notes');
-  // Collapse only based on contactCollapsed so it can revert when scrolling back up
-  const collapsed = isNotesRoute && contactCollapsed;
+  // use bear state at top level so hooks are not called conditionally or inside callbacks
+  const { bearState } = useBearState();
+   // Collapse only based on contactCollapsed so it can revert when scrolling back up
+   const collapsed = isNotesRoute && contactCollapsed;
 
   // Lock body scroll when mobile menu is open
   React.useEffect(() => {
@@ -160,6 +164,43 @@ function Navbar() {
 
   // Removed unused year to satisfy linter
 
+  // Helper to render stacked bears; size is px for container (64 or 32)
+  const renderStackedBears = (size) => {
+    const opacityFor = (type) => {
+      // Outgoing: if this type is currently active and we're sliding it down, keep it visible
+      if (bearState.currentType === type) {
+        if (bearState.itemPosition === 'visible' || bearState.itemPosition === 'transitioning-down') return 1;
+        return 0;
+      }
+
+      // Incoming: when there's a pending type (the target) and it's in the 'transitioning-up' phase,
+      // render it so it can animate into view.
+      if (bearState.pendingType === type) {
+        if (bearState.itemPosition === 'transitioning-up') return 1;
+        return 0;
+      }
+
+      return 0;
+    };
+
+    const sizePx = size;
+    const iconClass = size > 40 ? 'h-16 w-16' : 'h-8 w-8';
+
+    return (
+      <div style={{ width: sizePx, height: sizePx, position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 400ms ease', opacity: opacityFor('default') }}>
+          <BearIconSVG className={iconClass} />
+        </div>
+        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 400ms ease', opacity: opacityFor('projects') }}>
+          <BearIconProjects className={iconClass} />
+        </div>
+        <div style={{ position: 'absolute', inset: 0, transition: 'opacity 400ms ease', opacity: opacityFor('stories') }}>
+          <BearIconReading className={iconClass} />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       {/* Desktop vertical sidebar */}
@@ -169,16 +210,13 @@ function Navbar() {
       >
         {/* Brand */}
         <div className="w-full pb-5 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            {isNotesRoute && tocItems?.length > 0 ? (
-              <BearIconReading className="h-16 w-16" />
-            ) : (
-              <BearIconSVG className="h-16 w-16" />
-            )}
-            <Link to="/" className="text-white text-2xl font-semibold leading-none">
-              aaryan
-            </Link>
-          </div>
+          <div className="flex items-center gap-3" style={{ position: 'relative' }}>
+          {/* stacked bears so exit animations can run while new bear mounts */}
+          {renderStackedBears(64)}
+          <Link to="/" className="text-white text-2xl font-semibold leading-none">
+            aaryan
+          </Link>
+        </div>
         </div>
 
         {/* Sections */}
@@ -277,14 +315,10 @@ function Navbar() {
 
       {/* Mobile top bar with morphing contact area */}
       <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-3 py-2 z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
-        <div className="flex items-center gap-3">
-          {isNotesRoute && tocItems?.length > 0 ? (
-            <BearIconReading className="h-8 w-8" />
-          ) : (
-            <BearIconSVG className="h-8 w-8" />
-          )}
-          <Link to="/" className="text-white text-lg font-semibold">aaryan</Link>
-        </div>
+        <div className="flex items-center gap-3" style={{ position: 'relative' }}>
+          {renderStackedBears(32)}
+           <Link to="/" className="text-white text-lg font-semibold">aaryan</Link>
+         </div>
 
         {/* Smoothly collapse into icons-only when reading (unified with desktop collapse state) */}
         <Motion.div

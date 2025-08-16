@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/Navbar";
 import HeroBackground from "./components/HeroBackground";
 import { NotesProvider } from "./components/notes/NotesContext";
+import BearProvider from "./components/BearContext";
 
 // Optimized for performance by lazy-loading route components
 // This reduces initial bundle size without changing functionality
@@ -13,7 +14,8 @@ const NotePage = lazy(() => import("./components/notes/NotePage"));
 
 function App() {
   return (
-  <NotesProvider>
+    <BearProvider>
+      <NotesProvider>
       {/* Global background - prevents remounting between pages */}
       <HeroBackground />
       <NavBar />
@@ -38,6 +40,7 @@ function App() {
         </footer>
       </main>
     </NotesProvider>
+    </BearProvider>
   );
 }
 

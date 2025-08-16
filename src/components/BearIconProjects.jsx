@@ -1,52 +1,48 @@
-// Reading bear component that syncs page flips with note sections
-// - Animated book positioning based on route transitions
+// Bear with MacBook (trapezoid lid in front, Figma gradients, Apple logo)
+// - Laptop fully in front
+// - Trapezoid shape (top wider than bottom)
+// - No white outline, no center pill, no bottom gray bar
+// - Subtle drop shadow toward the middle using feDropShadow + inner vignette
+// - Animated laptop positioning based on route transitions
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useNotesTOC } from './notes/NotesContext';
 import { useBearState } from './useBearState';
 
-const MAX_HIGHLIGHT_MOVEMENT = 1.5; // highlight wobble (inside the iris)
+const MAX_HIGHLIGHT_MOVEMENT = 1.5; // highlight wobble inside pupils
 const BLINK_DURATION_MS = 120;
 
-// reading motion tuning - slowed down as requested
-const EYE_SCAN_AMPLITUDE_PX = 2.0;   // horizontal sweep (reduced from 2.6)
-const EYE_SCAN_DOWN_BIAS_PX = 1.4;   // eyes look slightly down toward the book
-const EYE_SCAN_PERIOD_MS = 3200;     // time to scan left -> right (increased from 1800)
-const SACCADE_THRESHOLD = 0.85;      // when to snap back left (reduced from 0.9)
+// subtle, slow reading scan
+const EYE_SCAN_AMPLITUDE_PX = 2.0;
+const EYE_SCAN_DOWN_BIAS_PX = 1.2;
+const EYE_SCAN_PERIOD_MS = 3200; // slow sweep
+const SACCADE_THRESHOLD = 0.85;  // snap back near end
 
-const PAGE_FLIP_DURATION_MS = 320;
-const PAGE_FLIP_DEG = -12;
-
-const BearIconReading = React.memo(({ className = '' }) => {
+const BearIconProjects = React.memo(({ className = '' }) => {
   const [isBlinking, setIsBlinking] = useState(false);
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const svgRef = useRef(null);
   const { bearState } = useBearState();
 
-  // Eye highlight refs (tiny white dots)
-  const leftHighlightRef = useRef(null);
-  const rightHighlightRef = useRef(null);
-
-  // Whole iris+pupil groups — we animate these for the reading motion
+  // Eyes
   const leftIrisGroupRef = useRef(null);
   const rightIrisGroupRef = useRef(null);
 
-  // Page flip refs - separate from covers
-  const pageRef = useRef(null);
-
-  // timers/raf
+  // timers
   const blinkTimeoutRef = useRef(null);
   const periodicBlinkTimeoutRef = useRef(null);
   const scanStartRef = useRef(null);
-  const pageFlipResetTimeoutRef = useRef(null);
 
-  // Get TOC context to track section changes
-  const { tocItems, readingProgress } = useNotesTOC();
+  // Eye-look state and timers (autonomous random looks, both eyes look together)
+  const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
+  const lookTimeoutRef = useRef(null);
+  const settleTimeoutRef = useRef(null);
 
-  // Calculate book position based on bear state. Respect pendingType for incoming animations
-  // and previousType for outgoing animations.
-  const getBookTransform = () => {
-    // Incoming: pendingType is the target that's mounting and should animate up
-    if (bearState.pendingType === 'stories') {
+  const MAX_LOOK_PX = 3; // maximum pupil offset in px
+  const LOOK_MIN_MS = 1200;
+  const LOOK_MAX_MS = 4500;
+
+  // Calculate laptop position based on bear state. Honor previousType so the laptop can animate out.
+  const getLaptopTransform = () => {
+    // Incoming from home
+    if (bearState.pendingType === 'projects') {
       switch (bearState.itemPosition) {
         case 'hidden':
           return 'translateY(60px)';
@@ -58,24 +54,22 @@ const BearIconReading = React.memo(({ className = '' }) => {
       }
     }
 
-    // Active/current stories page
-    if (bearState.currentType === 'stories') {
+    // Active/current projects page
+    if (bearState.currentType === 'projects') {
       if (bearState.itemPosition === 'hidden') return 'translateY(60px)';
       return 'translateY(0px)';
     }
 
-    // Outgoing: if we were stories and are transitioning down, slide it away
-    if (bearState.previousType === 'stories' && bearState.itemPosition === 'transitioning-down') {
+    // Outgoing: if we were projects and are transitioning down, slide it away
+    if (bearState.previousType === 'projects' && bearState.itemPosition === 'transitioning-down') {
       return 'translateY(60px)';
     }
 
     return 'translateY(60px)';
   };
 
-  // Attribute-friendly transform (SVG transform) to ensure initial paint uses the offscreen position
-  const getBookTransformAttr = () => {
-    const tx = getBookTransform();
-    // convert 'translateY(60px)' -> 'translate(0,60)'
+  const getLaptopTransformAttr = () => {
+    const tx = getLaptopTransform();
     if (tx.startsWith('translateY')) {
       const num = tx.replace(/translateY\(|px\)/g, '');
       return `translate(0 ${num})`;
@@ -95,7 +89,7 @@ const BearIconReading = React.memo(({ className = '' }) => {
 
   const schedulePeriodicBlink = useCallback(() => {
     if (periodicBlinkTimeoutRef.current) clearTimeout(periodicBlinkTimeoutRef.current);
-    const delay = Math.random() * 5000 + 2000; // slower blinks when reading
+    const delay = Math.random() * 5000 + 2000; // calmer blink cadence while "reading"
     periodicBlinkTimeoutRef.current = setTimeout(() => {
       triggerBlink();
       schedulePeriodicBlink();
@@ -110,9 +104,6 @@ const BearIconReading = React.memo(({ className = '' }) => {
     };
   }, [schedulePeriodicBlink]);
 
-  // --- Eye tracking removed for reading focus ---
-
-  // --- Reading scan motion for pupils (sawtooth: sweep L->R, snap left) ---
   useEffect(() => {
     const left = leftIrisGroupRef.current;
     const right = rightIrisGroupRef.current;
@@ -125,65 +116,50 @@ const BearIconReading = React.memo(({ className = '' }) => {
       const p = (elapsed % EYE_SCAN_PERIOD_MS) / EYE_SCAN_PERIOD_MS; // 0..1
       const isSaccade = p > SACCADE_THRESHOLD;
       const progress = isSaccade ? 0 : p / SACCADE_THRESHOLD; // normalize 0..1 before saccade
-
-      // map to -amp .. +amp then snap back
       const x = -EYE_SCAN_AMPLITUDE_PX + (2 * EYE_SCAN_AMPLITUDE_PX * progress);
       const y = EYE_SCAN_DOWN_BIAS_PX;
-
       const tStr = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`;
       left.style.transform = tStr;
       right.style.transform = tStr;
-
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  // --- Track section changes for page flips ---
-  useEffect(() => {
-    if (!tocItems?.length) return;
-    
-    // Calculate which section we're currently in based on reading progress
-    const newSectionIndex = Math.floor(readingProgress * tocItems.length);
-    const clampedIndex = Math.max(0, Math.min(newSectionIndex, tocItems.length - 1));
-    
-    if (clampedIndex !== currentSectionIndex) {
-      setCurrentSectionIndex(clampedIndex);
-      
-      // Trigger page flip animation (flip from left to right)
-      const page = pageRef.current;
-      if (page) {
-        page.style.transition = `transform ${PAGE_FLIP_DURATION_MS}ms ease-in-out`;
-        page.style.transformOrigin = '32px 110px'; // left spine edge
-        page.style.transform = `rotateY(${PAGE_FLIP_DEG}deg)`;
+  // Autonomous random eye-look behavior
+  const scheduleRandomLook = useCallback(() => {
+    if (lookTimeoutRef.current) clearTimeout(lookTimeoutRef.current);
+    const delay = Math.random() * (LOOK_MAX_MS - LOOK_MIN_MS) + LOOK_MIN_MS;
+    lookTimeoutRef.current = setTimeout(() => {
+      const randomOffset = () => {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * MAX_LOOK_PX;
+        // Slightly squash Y so eyes mostly move horizontally
+        return { x: Math.round(Math.cos(angle) * radius), y: Math.round(Math.sin(angle) * radius * 0.6) };
+      };
+      const off = randomOffset();
+      setEyeOffset(off);
 
-        if (pageFlipResetTimeoutRef.current) {
-          clearTimeout(pageFlipResetTimeoutRef.current);
-        }
-        
-        pageFlipResetTimeoutRef.current = setTimeout(() => {
-          if (page) {
-            page.style.transform = 'rotateY(0deg)';
-          }
-        }, PAGE_FLIP_DURATION_MS);
-      }
-    }
-  }, [tocItems, readingProgress, currentSectionIndex]);
-
-  // Cleanup page flip timeouts
-  useEffect(() => {
-    return () => {
-      if (pageFlipResetTimeoutRef.current) {
-        clearTimeout(pageFlipResetTimeoutRef.current);
-      }
-    };
+      // Small settle back to center after a short glance, then schedule next look
+      const settleDelay = Math.random() * 500 + 200;
+      if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current);
+      settleTimeoutRef.current = setTimeout(() => {
+        setEyeOffset({ x: 0, y: 0 });
+        scheduleRandomLook();
+      }, settleDelay);
+    }, delay);
   }, []);
 
-  const handleClick = () => {
-    // click to blink; feels natural while "reading"
-    triggerBlink();
-  };
+  useEffect(() => {
+    scheduleRandomLook();
+    return () => {
+      if (lookTimeoutRef.current) clearTimeout(lookTimeoutRef.current);
+      if (settleTimeoutRef.current) clearTimeout(settleTimeoutRef.current);
+    };
+  }, [scheduleRandomLook]);
+
+  const handleClick = () => triggerBlink();
 
   const eyeBlinkStyle = {
     transform: isBlinking ? 'scaleY(0.1)' : 'scaleY(1)',
@@ -199,27 +175,39 @@ const BearIconReading = React.memo(({ className = '' }) => {
       fill="none"
       className={className}
       role="img"
-      aria-label="Bear reading a book"
+      aria-label="Bear with a MacBook"
       onClick={handleClick}
       style={{ cursor: 'pointer' }}
     >
       <defs>
-        {/* Reddish book gradients */}
-        <linearGradient id="bookLeft" x1="39" y1="74" x2="64" y2="116" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#C73B33" />
-          <stop offset="1" stopColor="#9E2B26" />
+        <linearGradient id="lidLinear" x1="0" y1="72" x2="0" y2="116" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#BEBFC3"/>
+          <stop offset="100%" stopColor="#5A5B5D"/>
         </linearGradient>
-        <linearGradient id="bookRight" x1="88" y1="74" x2="64" y2="116" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#D85C55" />
-          <stop offset="1" stopColor="#A1332D" />
+        <linearGradient id="lidInnerTop" x1="0" y1="72" x2="0" y2="116" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="rgba(0,0,0,0.25)"/>
+          <stop offset="35%" stopColor="rgba(0,0,0,0)"/>
         </linearGradient>
-        {/* Clipping mask to contain book within bear circle */}
-        <clipPath id="bearCircleMaskReading">
+        <radialGradient id="lidCenterLight" cx="50%" cy="45%" r="70%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.16)"/>
+          <stop offset="70%" stopColor="rgba(255,255,255,0)"/>
+        </radialGradient>
+        {/* Apple logo */}
+        <linearGradient id="appleGrad" x1="0" y1="-12" x2="0" y2="12" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#D8D9DD"/>
+          <stop offset="100%" stopColor="#BDBEC2"/>
+        </linearGradient>
+        {/* Drop shadow under lid */}
+        <filter id="lidShadow" x="-20%" y="-20%" width="140%" height="160%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.2" floodColor="#000000" floodOpacity="0.28"/>
+        </filter>
+        {/* Clipping mask to contain laptop within bear circle */}
+        <clipPath id="bearCircleMask">
           <circle cx="63.8175" cy="63.8175" r="63.8175"/>
         </clipPath>
       </defs>
 
-      {/* Bear base */}
+      {/* Bear */}
       <circle cx="63.8175" cy="63.8175" r="63.8175" fill="#E7E9E8"/>
       <ellipse cx="94.5444" cy="35.1165" rx="8.10381" ry="7.42849" fill="#8D4C16"/>
       <ellipse cx="33.0905" cy="35.7918" rx="8.10381" ry="7.42849" fill="#8D4C16"/>
@@ -232,67 +220,64 @@ const BearIconReading = React.memo(({ className = '' }) => {
       <path fillRule="evenodd" clipRule="evenodd" d="M82.563 32.4375C83.5109 27.0524 88.2122 22.9609 93.8691 22.9609C100.21 22.9609 105.349 28.1009 105.349 34.4413C105.349 39.3937 102.214 43.6137 97.8192 45.2241C96.7101 43.8004 95.5293 42.4458 94.2829 41.1671C94.4802 41.1853 94.68 41.1947 94.8821 41.1947C98.4253 41.1947 101.298 38.3223 101.298 34.7791C101.298 31.236 98.4253 28.3636 94.8821 28.3636C91.3389 28.3636 88.4666 31.236 88.4666 34.7791C88.4666 35.2759 88.523 35.7595 88.6299 36.2239C86.707 34.7996 84.6796 33.5319 82.563 32.4375Z" fill="#9E5719"/>
       <path fillRule="evenodd" clipRule="evenodd" d="M28.0651 45.7447C23.8816 44.0305 20.9348 39.9179 20.9348 35.1171C20.9348 28.7767 26.0748 23.6367 32.4152 23.6367C37.8562 23.6367 42.4132 27.4218 43.5966 32.5025C42.2969 33.1798 41.0312 33.9224 39.8029 34.7267C39.4414 31.5262 36.7252 29.0391 33.4282 29.0391C29.885 29.0391 27.0127 31.9115 27.0127 35.4546C27.0127 38.3567 28.9396 40.8088 31.5838 41.6011C30.3414 42.9082 29.1664 44.2917 28.0651 45.7447Z" fill="#9E5719"/>
 
-      {/* --- Eyes rendered first (behind book) --- */}
-      {/* Left Eye (iris group moves; highlight static for reading) */}
+      {/* blinking eyes */}
       <g style={eyeBlinkStyle}>
         <g ref={leftIrisGroupRef} style={{ transition: 'transform 100ms linear' }}>
           <ellipse cx="43.8956" cy="64.1551" rx="6.07785" ry="7.42849" fill="#271711"/>
-          <circle ref={leftHighlightRef} cx="44.25" cy="62.25" r="2.25" fill="#D9D9D9"/>
+          {/* Pupil/highlight group — translated to simulate looking around */}
+          <g
+            style={{
+              transform: `translate(${eyeOffset.x}px, ${eyeOffset.y}px)`,
+              transition: 'transform 280ms cubic-bezier(.2,.9,.3,1)',
+              transformBox: 'fill-box',
+              transformOrigin: 'center',
+            }}
+          >
+            <circle cx="44.25" cy="62.25" r="2.25" fill="#D9D9D9"/>
+          </g>
         </g>
       </g>
-
-      {/* Right Eye */}
       <g style={eyeBlinkStyle}>
         <g ref={rightIrisGroupRef} style={{ transition: 'transform 100ms linear' }}>
           <ellipse cx="83.064" cy="64.1551" rx="6.07785" ry="7.42849" fill="#271711"/>
-          <circle ref={rightHighlightRef} cx="83.25" cy="62.25" r="2.25" fill="#D9D9D9"/>
+          <g
+            style={{
+              transform: `translate(${eyeOffset.x}px, ${eyeOffset.y}px)`,
+              transition: 'transform 280ms cubic-bezier(.2,.9,.3,1)',
+              transformBox: 'fill-box',
+              transformOrigin: 'center',
+            }}
+          >
+            <circle cx="83.25" cy="62.25" r="2.25" fill="#D9D9D9"/>
+          </g>
         </g>
       </g>
 
-      {/* --- BIGGER BOOK (rendered on top of eyes) - animated positioning --- */}
+      {/* macbook - animated positioning */}
       <g 
-        aria-hidden="true"
-        clipPath="url(#bearCircleMaskReading)"
-        transform={getBookTransformAttr()}
+        filter="url(#lidShadow)"
+        clipPath="url(#bearCircleMask)"
+        transform={getLaptopTransformAttr()}
         style={{
-          transform: getBookTransform(),
+          transform: getLaptopTransform(),
           transition: 'transform 420ms cubic-bezier(0.4, 0, 0.2, 1)',
           transformOrigin: 'center bottom'
         }}
       >
-        {/* Pages that flip (lower z-index, behind covers) */}
-        <g ref={pageRef} style={{ transformOrigin: '32px 110px' }}>
-          <path d="M64 80 L32 68 L32 116 L64 122 Z" fill="#F6ECEB" />
-          {/* Page text lines */}
-          <g stroke="#C4B5B3" strokeWidth="0.8">
-            <line x1="36" y1="82" x2="60" y2="78" />
-            <line x1="37" y1="88" x2="59" y2="84" />
-            <line x1="37" y1="94" x2="59" y2="90" />
-            <line x1="37" y1="100" x2="59" y2="96" />
-            <line x1="37" y1="106" x2="59" y2="102" />
-            <line x1="37" y1="112" x2="59" y2="108" />
+        <g aria-hidden="true">
+          <path id="lidShape" d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill="url(#lidLinear)"/>
+          {/* Inner top shadow + center light overlays reuse same rounded shape */}
+          <path d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill="url(#lidInnerTop)"/>
+          <path d="M24 72 L104 72 Q106 72 105.73 73.98 L100.27 114.02 Q100 116 98 116 L30 116 Q28 116 27.73 114.02 L22.27 73.98 Q22 72 24 72 Z" fill="url(#lidCenterLight)"/>
+          {/* Apple logo (provided path) centered, smaller scale */}
+          <g transform="translate(64 94) scale(0.75) translate(-12 -12)">
+            <path fill="url(#appleGrad)" d="M17.05 20.28c-.98.95-2.05.8-3.08.35c-1.09-.46-2.09-.48-3.24 0c-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8c1.18-.24 2.31-.93 3.57-.84c1.51.12 2.65.72 3.4 1.8c-3.12 1.87-2.38 5.98.48 7.13c-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25c.29 2.58-2.34 4.5-3.74 4.25"/>
           </g>
-        </g>
-        
-        {/* Static book covers (higher z-index, on top) */}
-        <path d="M64 78 L32 66 L32 118 L64 124 Z" fill="url(#bookLeft)" />
-        <path d="M64 78 L96 66 L96 118 L64 124 Z" fill="url(#bookRight)" />
-        
-        {/* spine + fold (on top) */}
-        <path d="M64 78 L64 124" stroke="#E6D3D1" strokeWidth="2"/>
-        
-        {/* Right page static text lines */}
-        <g stroke="#EBD9D6" strokeWidth="0.8">
-          <line x1="68" y1="84" x2="92" y2="78" />
-          <line x1="69" y1="90" x2="91" y2="84" />
-          <line x1="69" y1="96" x2="91" y2="90" />
-          <line x1="69" y1="102" x2="91" y2="96" />
-          <line x1="69" y1="108" x2="91" y2="102" />
         </g>
       </g>
     </svg>
   );
 });
 
-BearIconReading.displayName = 'BearIconReading';
-export default BearIconReading;
+BearIconProjects.displayName = 'BearIconProjects';
+export default BearIconProjects;
