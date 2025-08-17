@@ -1,9 +1,11 @@
 import React from "react";
 import ContentSection from './ContentSection';
 import storiesData from '../constants/storiesData';
+import { useNavigate } from 'react-router-dom';
 
 // Stories section using the reusable ContentSection with horizontal carousel layout
 function Stories() {
+  const navigate = useNavigate();
   return (
     <ContentSection
       title="Notes from Hibernation"
@@ -13,6 +15,10 @@ function Stories() {
       showGradientBar={true}
       showControls={true}
       cardVariant="panel" // Flat-modern panel style
+      showViewAll={true}
+      maxItems={7}
+      onViewAllClick={() => navigate('/notes')}
+      viewAllLabel={'Venture Deeper Into\nThe Woods'}
     />
   );
 }

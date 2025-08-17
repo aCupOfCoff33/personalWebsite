@@ -80,16 +80,8 @@ const CardButton = React.memo(function CardButton({ label, icon: IconComponent, 
 });
 
 function InternalLink({ to, label, Icon: IconComponent, onClick }) {
-  const location = useLocation();
-  const isHome = location.pathname === "/";
-  const isDead = isHome && to === "/about"; // Make About a dead link on the home screen
-
+  // Always behave as a normal internal link; remove special-case "dead" behavior on home
   const handleClick = (e) => {
-    if (isDead) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
     if (onClick) onClick(e);
   };
 
@@ -97,20 +89,14 @@ function InternalLink({ to, label, Icon: IconComponent, onClick }) {
     <NavLink
       to={to}
       onClick={handleClick}
-      className={[
-        "block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-xl",
-        isDead ? "cursor-default" : "",
-      ].join(" ")}
+      className={"block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-xl"}
       aria-label={label}
-      aria-disabled={isDead || undefined}
-      tabIndex={isDead ? -1 : 0}
     >
       {({ isActive }) => (
         <CardButton
           label={label}
           icon={IconComponent}
-          active={!isDead && isActive}
-          className={isDead ? "opacity-60" : ""}
+          active={isActive}
         />
       )}
     </NavLink>

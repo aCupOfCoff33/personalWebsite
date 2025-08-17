@@ -19,6 +19,7 @@ function ContentSection({
   showViewAll = false,
   maxItems = 6,
   onViewAllClick = () => {},
+  viewAllLabel = 'Venture Deeper into the Woods',
   ...props
 }) {
   const revealRef = useReveal();
@@ -96,6 +97,7 @@ function ContentSection({
               showViewAll={showViewAll}
               maxItems={maxItems}
               onViewAllClick={onViewAllClick}
+              viewAllLabel={viewAllLabel}
             />
           </div>
         ) : (
