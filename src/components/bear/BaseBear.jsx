@@ -1,5 +1,5 @@
 import React from 'react';
-import BearEars from '../BearEars';
+import BearEars from '../common/BearEars';
 
 // BaseBear renders only the static visual paths for the bear (no <svg>, no state/logic)
 const BaseBear = React.memo(() => (
