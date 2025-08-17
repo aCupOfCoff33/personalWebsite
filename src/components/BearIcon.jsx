@@ -13,20 +13,24 @@ const BearIconSVG_New = React.memo(({ className = '' }) => {
   const blinkTimeoutRef = useRef(null);
   const periodicBlinkTimeoutRef = useRef(null);
   const rafRef = useRef(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => { isMountedRef.current = true; return () => { isMountedRef.current = false; }; }, []);
 
   // --- Blinking Logic (Optimized to avoid double setState) ---
   const triggerBlink = useCallback(() => {
     if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
     setIsBlinking(true);
     blinkTimeoutRef.current = setTimeout(() => {
-      setIsBlinking(false);
+      if (isMountedRef.current) setIsBlinking(false);
       blinkTimeoutRef.current = null;
     }, BLINK_DURATION_MS);
   }, []);
 
   const schedulePeriodicBlink = useCallback(() => {
     if (periodicBlinkTimeoutRef.current) clearTimeout(periodicBlinkTimeoutRef.current);
-    const delay = Math.random() * 4000+1000;
+    // Ensure correct operator precedence: (Math.random() * 4000) + 1000
+    const delay = Math.random() * 4000 + 1000;
     periodicBlinkTimeoutRef.current = setTimeout(() => {
       triggerBlink();
       schedulePeriodicBlink();
@@ -38,6 +42,8 @@ const BearIconSVG_New = React.memo(({ className = '' }) => {
     return () => {
       if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
       if (periodicBlinkTimeoutRef.current) clearTimeout(periodicBlinkTimeoutRef.current);
+      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+      if (isMountedRef.current) setIsBlinking(false);
     };
   }, [schedulePeriodicBlink]);
 
@@ -97,8 +103,8 @@ const BearIconSVG_New = React.memo(({ className = '' }) => {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
-      leftHighlightRef.current.style.transform = `translate(0px, 0px)`;
-      rightHighlightRef.current.style.transform = `translate(0px, 0px)`;
+      if (leftHighlightRef.current) leftHighlightRef.current.style.transform = `translate(0px, 0px)`;
+      if (rightHighlightRef.current) rightHighlightRef.current.style.transform = `translate(0px, 0px)`;
     };
 
     window.addEventListener('mousemove', handleMouseMove);

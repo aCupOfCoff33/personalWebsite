@@ -16,6 +16,13 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
   const lookTimeoutRef = useRef(null);
   const settleTimeoutRef = useRef(null);
   const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
+  // Track mounted state to avoid stale timeouts causing UI to remain in blink state
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const cfg = useMemo(() => {
     if (mode === 'projects' || mode === 'stories') {
@@ -43,7 +50,8 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
     if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
     setIsBlinking(true);
     blinkTimeoutRef.current = setTimeout(() => {
-      setIsBlinking(false);
+      // Only update state if component is still mounted
+      if (isMountedRef.current) setIsBlinking(false);
       blinkTimeoutRef.current = null;
     }, cfg.BLINK_MS);
   }, [cfg.BLINK_MS]);
@@ -60,8 +68,17 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
   useEffect(() => {
     schedulePeriodicBlink();
     return () => {
-      if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
-      if (periodicBlinkTimeoutRef.current) clearTimeout(periodicBlinkTimeoutRef.current);
+      // Clear timers/rafs and make sure blink state is reset when effect re-runs
+      if (blinkTimeoutRef.current) {
+        clearTimeout(blinkTimeoutRef.current);
+        blinkTimeoutRef.current = null;
+      }
+      if (periodicBlinkTimeoutRef.current) {
+        clearTimeout(periodicBlinkTimeoutRef.current);
+        periodicBlinkTimeoutRef.current = null;
+      }
+      // Reset visible blink state when effect cleans up (e.g. mode change)
+      if (isMountedRef.current) setIsBlinking(false);
     };
   }, [schedulePeriodicBlink]);
 

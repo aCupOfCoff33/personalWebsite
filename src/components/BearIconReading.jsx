@@ -33,6 +33,9 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
   const periodicBlinkTimeoutRef = useRef(null);
   const scanStartRef = useRef(null);
   const pageFlipResetTimeoutRef = useRef(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => { isMountedRef.current = true; return () => { isMountedRef.current = false; }; }, []);
 
   const { tocItems, readingProgress } = useNotesTOC();
 
@@ -85,7 +88,7 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
     if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
     setIsBlinking(true);
     blinkTimeoutRef.current = setTimeout(() => {
-      setIsBlinking(false);
+      if (isMountedRef.current) setIsBlinking(false);
       blinkTimeoutRef.current = null;
     }, BLINK_DURATION_MS);
   }, []);
@@ -104,6 +107,7 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
     return () => {
       if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
       if (periodicBlinkTimeoutRef.current) clearTimeout(periodicBlinkTimeoutRef.current);
+      if (isMountedRef.current) setIsBlinking(false);
     };
   }, [schedulePeriodicBlink]);
 
