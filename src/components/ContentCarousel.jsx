@@ -1,33 +1,25 @@
 import React, { useMemo } from 'react';
 import ContentCard from './ContentCard';
 
-// View All Projects Button Component - Pill Style
+// View All Projects Button Component - matches navbar card style
 function ViewAllButton({ onClick, className = '' }) {
   return (
     <div className=" snap-start shrink-0 w-[90vw] sm:w-[48vw] md:w-[32vw] lg:w-[28vw] xl:w-[24vw] flex items-center justify-center min-h-[320px]">
       <button
         onClick={onClick}
         className={`
-          group inline-flex items-center gap-3 px-6 py-3
-          rounded-full border border-white/30
-          backdrop-blur-xl bg-white/10
-          hover:bg-white/20 hover:border-white/50
-          transition-all duration-300 ease-out
+          w-full rounded-xl border border-white/10 bg-neutral-900/40 text-neutral-300
+          hover:bg-white/5 hover:text-white transition-colors duration-200 px-4 py-3 flex items-center justify-center gap-3
           ${className}
         `}
       >
-        {/* Text */}
-        <span className="z-10 text-white font-medium group-hover:text-blue-300 transition-colors duration-300">
-          Venture Deeper into the Woods
-        </span>
-        
-        {/* Arrow Icon */}
+        <span className="font-adamant text-md">View all projects</span>
         <svg 
           width="16" 
           height="16" 
           viewBox="0 0 24 24" 
           fill="none"
-          className="text-white/70 group-hover:text-white transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300 ease-out"
+          className="text-white/70 transform transition-transform duration-200"
         >
           <path 
             d="M7 17L17 7M17 7H7M17 7V17" 
