@@ -6,6 +6,7 @@ import BaseBear from './bear/BaseBear';
 import Laptop from './bear/Laptop';
 import Book from './bear/Book';
 import Suit from './bear/Suit';
+import BearEyes from './bear/BearEyes';
 
 const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) {
   const { bearState } = useBearState();
@@ -52,9 +53,18 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) 
 
   const items = computeItems();
 
+  const eyeMode = (() => {
+    const t = (bearState?.pendingType || bearState?.currentType || 'default');
+    if (t === 'projects') return 'projects';
+    if (t === 'stories') return 'stories';
+    if (t === 'resume') return 'resume';
+    return 'default';
+  })();
+
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" className={className} role="img" aria-hidden="true">
-      <BaseBear />
+  <BaseBear />
+  <BearEyes mode={eyeMode} />
       <AnimatePresence initial={false} mode="wait">
         {items.map((item) => (
           <Motion.g
