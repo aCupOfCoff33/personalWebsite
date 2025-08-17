@@ -48,7 +48,7 @@ const SectionLabel = ({ children }) => (
   </div>
 );
 
-const CardButton = React.memo(function CardButton({ label, icon: IconComponent, className = "", children, active = false, iconLayoutId, morphKey }) {
+const CardButton = React.memo(function CardButton({ label, icon: IconComponent, className = "", children, active = false, iconLayoutId }) {
   return (
     <div
       className={[
@@ -60,17 +60,12 @@ const CardButton = React.memo(function CardButton({ label, icon: IconComponent, 
       ].join(" ")}
     >
       <div className="flex items-center gap-2.5 px-3 py-1.5">
-        <div className="shrink-0 opacity-90">
+        <div className="shrink-0 opacity-90 flex items-center justify-center">{/* ensure icon stays centered */}
           {IconComponent ? (
             iconLayoutId ? (
-              <Motion.div layout layoutId={iconLayoutId} transition={{ layout: { type: 'spring', stiffness: 140, damping: 26, bounce: 0.2 } }}>
-                <Motion.div
-                  key={morphKey}
-                  animate={{ y: [0, -24, 0] }}
-                  transition={{ duration: 0.9, ease: 'easeInOut' }}
-                >
-                  <IconComponent className="h-4 w-4" />
-                </Motion.div>
+              // Use a single layout node and center the icon using flexbox — no hard-coded y offsets
+              <Motion.div layout layoutId={iconLayoutId} transition={{ layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }} className="flex items-center justify-center">
+                <IconComponent className="h-4 w-4" />
               </Motion.div>
             ) : (
               <IconComponent className="h-4 w-4" />
@@ -122,7 +117,7 @@ function InternalLink({ to, label, Icon: IconComponent, onClick }) {
   );
 }
 
-function ExternalLink({ href, label, Icon: IconComponent, layoutId, iconLayoutId, morphKey }) {
+function ExternalLink({ href, label, Icon: IconComponent, layoutId, iconLayoutId }) {
   const Anchor = layoutId ? Motion.a : 'a';
   return (
     <Anchor
@@ -134,14 +129,14 @@ function ExternalLink({ href, label, Icon: IconComponent, layoutId, iconLayoutId
       className="text-neutral-300 hover:text-white"
       transition={layoutId ? { layout: { type: 'spring', stiffness: 500, damping: 38, bounce: 0.2 } } : undefined}
     >
-      <CardButton label={label} icon={IconComponent} iconLayoutId={iconLayoutId} morphKey={morphKey} />
+      <CardButton label={label} icon={IconComponent} iconLayoutId={iconLayoutId} />
     </Anchor>
   );
 }
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const { tocItems, tocVisible, contactCollapsed, readingProgress } = useNotesTOC();
+  const { tocItems, tocVisible, contactCollapsed } = useNotesTOC();
   const location = useLocation();
   const isNotesRoute = location.pathname.startsWith('/notes');
   // use bear state at top level so hooks are not called conditionally or inside callbacks
@@ -204,7 +199,7 @@ function Navbar() {
                             initial={{ opacity: 0, y: -6 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 1.2, layout: { type: 'spring', stiffness: 90, damping: 20, bounce: 0.2 } }}
+                            transition={{ duration: 0.35, layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }}
                             className="grid grid-cols-5 gap-2 w-full"
                           >
                             {section.items.map((item) => (
@@ -218,12 +213,11 @@ function Navbar() {
                                 target={item.href?.startsWith('http') ? '_blank' : undefined}
                                 rel={item.href?.startsWith('http') ? 'noopener' : undefined}
                                 className="flex h-8 w-full items-center justify-center rounded-xl border border-white/10 bg-neutral-900/40 hover:bg-white/5 text-neutral-300 hover:text-white transition-colors min-w-0"
-                                transition={{ layout: { type: 'spring', stiffness: 90, damping: 20, bounce: 0.2 } }}
+                                transition={{ layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }}
                               >
-                                <Motion.div layout layoutId={`contact-icon-${item.label}`} transition={{ layout: { type: 'spring', stiffness: 90, damping: 20, bounce: 0.2 } }}>
-                                  <Motion.div style={{ y: -18 * (1 - readingProgress) }}>
-                                    <item.Icon className="h-4 w-4" />
-                                  </Motion.div>
+                                {/* Make the layout node fill the anchor and center its child so the icon is always smack in the middle */}
+                                <Motion.div layout layoutId={`contact-icon-${item.label}`} transition={{ layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }} className="flex items-center justify-center h-full w-full">
+                                  <item.Icon className="h-4 w-4" />
                                 </Motion.div>
                               </Motion.a>
                             ))}
@@ -235,11 +229,11 @@ function Navbar() {
                             initial={{ opacity: 0, y: -6 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 1.2, layout: { type: 'spring', stiffness: 90, damping: 20, bounce: 0.2 } }}
+                            transition={{ duration: 0.35, layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }}
                           >
                             <div className="grid grid-cols-1 gap-2.5">
                             {section.items.map((item) => (
-                                <ExternalLink key={item.label} {...item} layoutId={`contact-${item.label}`} iconLayoutId={`contact-icon-${item.label}`} morphKey={collapsed ? 'c' : 'v'} />
+                                <ExternalLink key={item.label} {...item} layoutId={`contact-${item.label}`} iconLayoutId={`contact-icon-${item.label}`} />
                               ))}
                             </div>
                           </Motion.div>
