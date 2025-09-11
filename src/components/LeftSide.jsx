@@ -24,7 +24,7 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
         software engineer/consultant
       </h2>
       <p className="text-lg text-white mt-6">
-        software engineering with ivey aeo @uwestern
+        software engineering & ivey hba
       </p>
       <div className="mt-8 flex space-x-4">
         <button
