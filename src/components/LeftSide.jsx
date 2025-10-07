@@ -56,7 +56,7 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
       <div className="mt-8">
         <div>
           <h2 className="text-lg font-semibold text-gray-400">
-            currently working at
+            currently working @
           </h2>
           <p className="text-md text-white mt-1">
             data engineering and strategy @ american global
@@ -68,7 +68,7 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
           </h2>
           <p className="text-md text-white mt-1">
             vp of dev/ops @ western developers society <br />
-            consultant analyst @ivey fintech
+            consultant analyst @ ivey fintech
           </p>
         </div>
 
