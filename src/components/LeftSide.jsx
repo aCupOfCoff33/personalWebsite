@@ -64,7 +64,7 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
         </div>
         <div>
           <h2 className="mt-6 text-lg font-semibold text-gray-400">
-            currently spending time at school working as
+            currently involved on campus as
           </h2>
           <p className="text-md text-white mt-1">
             vp of dev/ops @ western developers society <br />
