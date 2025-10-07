@@ -21,7 +21,7 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
     <div className="flex flex-col items-center justify-center h-auto lg:h-screen px-8 text-center bg-black sticky top-0">
       <h1 className="text-5xl font-bold text-white">aaryan joharapurkar</h1>
       <h2 className="text-2xl font-semibold text-white mt-4">
-        software engineer/consultant
+        software engineer
       </h2>
       <p className="text-lg text-white mt-6">
         software engineering & ivey hba
@@ -56,15 +56,15 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
       <div className="mt-8">
         <div>
           <h2 className="text-lg font-semibold text-gray-400">
-            currently incoming at
+            currently working at
           </h2>
           <p className="text-md text-white mt-1">
-            data analytics and strategy @ american global
+            data engineering and strategy @ american global
           </p>
         </div>
         <div>
           <h2 className="mt-6 text-lg font-semibold text-gray-400">
-            currently working as
+            currently spending time at school working as
           </h2>
           <p className="text-md text-white mt-1">
             vp of dev/ops @ western developers society <br />
