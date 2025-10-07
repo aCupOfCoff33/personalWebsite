@@ -6,7 +6,7 @@ const SelectedWorks = () => {
   const experiences = [
     {
       date: "may 2025 - august 2025",
-      title: "data analytics and strategy",
+      title: "data engineering & strategy",
       company: "american global",
       description:
         "becoming one of the first interns on the data analytics team and super excited to make a huge impact within the construction insurance sector!!",
