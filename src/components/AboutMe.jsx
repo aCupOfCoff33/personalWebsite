@@ -12,9 +12,11 @@ const AboutMe = () => {
       <p>
         i’m passionate about taking complex, unstructured datasets and uncovering
         meaningful relationships within them. turning that complexity into
-        intuitive, story-driven insights that people can act on is really cool! whether it’s in
-        private equity, fintech, or any data-heavy space, i love building systems
-        that make information feel obvious, visual, and actionable. ⚡
+        intuitive, story-driven insights that people can act on is really cool! 
+      </p>
+      <p>
+        whether it’s in private equity, fintech, or any data-heavy space, i love 
+        building systems that make information feel obvious, visual, and actionable. ⚡
       </p>
       <p>
         this space is where i share projects that bring those ideas to life. ✨
