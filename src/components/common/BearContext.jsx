@@ -17,6 +17,7 @@ const BearProvider = ({ children }) => {
     if (path.startsWith('/projects')) return 'projects';
     if (path.startsWith('/notes')) return 'stories';
     if (path.startsWith('/resume')) return 'resume';
+    if (path.startsWith('/about')) return 'about';
     return 'default';
   };
 

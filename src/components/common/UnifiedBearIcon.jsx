@@ -6,6 +6,7 @@ import BaseBear from '../bear/BaseBear';
 import Laptop from '../bear/Laptop';
 import Book from '../bear/Book';
 import Suit from '../bear/Suit';
+import QuarterZip from '../bear/QuarterZip';
 import BearEyes from '../bear/BearEyes';
 
 const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) {
@@ -24,6 +25,8 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) 
           return Book;
         case 'resume':
           return Suit;
+        case 'about':
+          return QuarterZip;
         default:
           return null;
       }
@@ -58,6 +61,7 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) 
     if (t === 'projects') return 'projects';
     if (t === 'stories') return 'stories';
     if (t === 'resume') return 'resume';
+    if (t === 'about') return 'about';
     return 'default';
   })();
 

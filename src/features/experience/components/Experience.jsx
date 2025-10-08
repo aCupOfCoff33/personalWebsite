@@ -113,7 +113,7 @@ const Experience = React.memo(() => {
           {activeExperiences.map((exp) => (
             <div
               key={exp.id}
-              className="w-full py-5 md:py-6 px-4 sm:px-5 relative inline-flex items-center gap-4
+              className="w-full py-5 md:py-6 px-4 sm:px-5 relative inline-flex items-center gap-4 rounded-xl overflow-hidden
                          after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-0 after:h-px
                          after:bg-gradient-to-r after:from-white/10 after:to-transparent
                          first:before:content-[''] first:before:absolute first:before:left-0 first:before:right-0 first:before:top-0 first:before:h-px
