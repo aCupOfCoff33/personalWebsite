@@ -146,7 +146,7 @@ function Navbar() {
   // Render the unified icon; size via tailwind classes
   const renderUnifiedBear = (size) => (
     <div style={{ width: size, height: size }}>
-      <UnifiedBearIcon className={size > 40 ? 'h-16 w-16' : 'h-8 w-8'} />
+      <UnifiedBearIcon className={size > 70 ? 'h-20 w-20' : size > 40 ? 'h-16 w-16' : 'h-8 w-8'} />
     </div>
   );
 
@@ -161,8 +161,8 @@ function Navbar() {
         <div className="w-full pb-5 border-b border-white/10">
           <div className="flex items-center gap-3" style={{ position: 'relative' }}>
           {/* unified bear icon */}
-          {renderUnifiedBear(64)}
-          <Link to="/" className="text-white text-2xl font-semibold leading-none">
+          {renderUnifiedBear(80)}
+          <Link to="/" className="text-white text-3xl font-semibold leading-none">
             aaryan
           </Link>
         </div>

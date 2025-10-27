@@ -1,60 +1,82 @@
 import React from "react";
-import AaryanImage from "/aaryan.png";    // Ensure these paths are correct
-import Background from "/background.png";  // Ensure these paths are correct
+import { Sparkles } from "lucide-react";
+import ImageGallery from "../../../components/common/ImageGallery";
 
 const AboutMe = () => (
   <>
     {/* ---- Foreground content ---- */}
-    <section className="relative z-10 w-full px-6 py-48 text-white font-adamant">
-      <div className="mx-auto flex max-w-screen-xl flex-col gap-16 lg:flex-row lg:items-start">
-        {/* Image container */}
-        {/* Consider adding max-w-full for better responsiveness on smaller screens */}
-        <div className="relative w-full max-w-[600px] h-[486px] flex-shrink-0"> {/* Added max-w-full and flex-shrink-0 */}
-          {/* Background image (shadow layer) */}
-          <img
-            src={Background}
-            alt="accent"
-            className="absolute top-24 left-0 w-full h-96 -z-10"
-            loading="lazy" decoding="async" /* Reduce initial cost */
-          />
+    <section className="relative z-10 w-full px-4 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-24 text-white font-adamant">
+      <div className="mx-auto max-w-screen-2xl">
+        {/* Mobile: Text first, then image below */}
+        {/* Desktop: Image left, text right side by side */}
+        <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-6 lg:gap-10">
+          
+          {/* Text Content - appears first on mobile, second on desktop */}
+          <div className="w-full lg:hidden px-4 sm:px-6 py-8 order-1">
+            <div className="border-2 border-dashed border-[#954dfc] rounded-lg p-6 sm:p-7 flex flex-col">
+              {/* Header with icon */}
+              <div className="flex items-center gap-2.5 mb-5">
+                <Sparkles className="w-6 h-6 text-[white]" />
+                <h3 className="text-[white] text-xs tracking-[0.2em] uppercase font-adamant font-normal">
+                  My Background
+                </h3>
+              </div>
+              
+              <div className="w-full inline-flex flex-col justify-center items-start gap-4 sm:gap-5">
+                <p className="self-stretch justify-start text-neutral-300 text-base sm:text-lg font-normal font-adamant leading-relaxed">
+                  Technically a <span className="text-white font-semibold">Business + SWE Student at Ivey Business School</span> but most of what I care about happens outside the classroom. I'm in third year, graduating in 2027 and based near Toronto.
+                  <br/><br/>
+                  I like spending time in <span className="text-white font-semibold">Figma</span> & finding cool relationships in diverse <span className="text-white font-semibold">datasets</span> and presenting time, especially in a financial context.
+                  <br/><br/>
+                  Outside of that, I swim (un)competitively, follow <span className="text-white font-semibold">Mercedes in F1</span>, and listen to random songs on <span className="text-white font-semibold">Spotify</span>.
+                  <br/><br/>
+                  No big story behind the bear. He's just cool. And he's staying.
+                </p>
+              </div>
+            </div>
+          </div>
 
-          {/* Foreground portrait */}
-          <img
-            src={AaryanImage}
-            alt="Aaryan"
-            className="relative z-10 w-full h-full  shadow-xl"
-            loading="lazy" decoding="async" /* Reduce initial cost */
-          />
-        </div>
+          {/* Image Container - appears second on mobile, first on desktop */}
+          <div className="w-full lg:w-auto px-0 sm:px-4 lg:px-10 pt-0 lg:pt-24 pb-0 lg:pb-12 inline-flex flex-col justify-center items-center lg:items-start order-2 lg:order-1">
+            <img 
+              className="w-full max-w-md lg:max-w-[514px] lg:w-[514px] h-auto lg:h-[685px] rounded-[20px] object-cover shadow-xl" 
+              src="/aaryan-about.JPG" 
+              alt="Aaryan"
+              loading="lazy"
+            />
+          </div>
 
-        {/* Text aligned vertically with the top of the background image */}
-        {/* Removed justify-center and min-h-[384px] */}
-        {/* Added lg:mt-24 to match the background image's top-24 */}
-        <div className="w-full max-w-xl flex flex-col lg:mt-24">
-          <h2 className="mb-6 text-3xl italic lg:text-4xl">About Me</h2>
+          {/* Text Content - Desktop only */}
+          <div className="hidden lg:flex px-7 pt-24 pb-12 justify-start items-start order-2">
+            <div className="w-[514px] border-2 border-dashed border-[#954dfc] rounded-lg flex flex-col p-8">
+              {/* Header with icon */}
+              <div className="flex items-center gap-3 mb-8">
+                <Sparkles className="w-7 h-7 text-[#954dfc]" />
+                <h3 className="text-[#954dfc] text-sm tracking-[0.2em] uppercase font-adamant font-normal">
+                  MY BACKGROUND
+                </h3>
+              </div>
+              
+              <div className="w-full flex flex-col justify-center items-start gap-5">
+                <p className="w-full text-neutral-300 text-xl font-normal font-adamant leading-relaxed">
+                  Technically a <span className="text-white font-semibold">Business + SWE Student at Ivey Business School</span> but most of what I care about happens outside the classroom. I'm in third year, graduating in 2027 and based near Toronto.
+                  <br/><br/>
+                  I like spending time in <span className="text-white font-semibold">Figma</span> & finding cool relationships in diverse <span className="text-white font-semibold">datasets</span> and presenting time, especially in a financial context.
+                  <br/><br/>
+                  Outside of that, I swim (un)competitively, follow <span className="text-white font-semibold">Mercedes in F1</span>, and listen to random songs on <span className="text-white font-semibold">Spotify</span>.
+                  <br/><br/>
+                  No big story behind the bear. He's just cool. And he's staying.
+                </p>
+              </div>
+            </div>
+          </div>
 
-          <p className="text-lg leading-relaxed lg:text-xl">
-            Technically a Western U student studying SWE + Ivey Business but most of what I care about happens outside the syllabus.
-            <br/><br/>
-
-            I'm in third year, graduating in 2028 and based near Toronto. I make UI that doesn't fight the user and data that actually answers something.
-
-
-
-            <br/><br/>
-
-            Outside of
-            that, I swim uncompetitive-ly, follow Mercedes in F1 out of loyalty
-            more than logic, and build playlists on Spotify like it's an unpaid
-            second job.
-
-            <br/><br/>
-            No big story behind the bear. He's just cool. And
-            stayed.
-          </p>
         </div>
       </div>
     </section>
+
+    {/* Image Gallery Section */}
+    <ImageGallery />
   </>
 );
 

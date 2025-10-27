@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
@@ -8,10 +8,13 @@ function ContentCard({
   subtitle,
   dates,
   logo,
+  image,
   gradient = 'from-cyan-400 to-blue-500', // supply just the colour stops or a full bg-*
   href,
   className = '',
 }) {
+  // Track if the provided image failed to load so we can fall back to the gradient
+  const [imageFailed, setImageFailed] = useState(false);
   const gradientClass = gradient && gradient.includes('bg-')
     ? gradient
     : `bg-gradient-to-r ${gradient}`;
@@ -40,7 +43,21 @@ function ContentCard({
         >
           {/* hero panel */}
           <div className="relative flex-1 min-h-[288px] rounded-xl overflow-hidden" style={{ willChange: 'transform' }}>
-            <div className={clsx('absolute inset-0', gradientClass)} />
+            {/* If an image is provided, render it as the hero background; otherwise fall back to the gradient */}
+            {/* Prefer the provided image, but if it fails to load (404 or other), fall back to the gradient */}
+            {image && !imageFailed ? (
+              <img
+                src={image}
+                alt={title || ''}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+                onError={() => setImageFailed(true)}
+                onLoad={() => setImageFailed(false)}
+              />
+            ) : (
+              <div className={clsx('absolute inset-0', gradientClass)} />
+            )}
             <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
           </div>
 
@@ -62,7 +79,19 @@ function ContentCard({
         <div className="relative flex h-full w-full flex-col overflow-hidden rounded p-4 space-y-4">
           {/* hero panel */}
           <div className="relative flex-1 min-h-[288px] rounded-xl overflow-hidden" style={{ willChange: 'transform' }}>
-            <div className={clsx('absolute inset-0', gradientClass)} />
+            {image && !imageFailed ? (
+              <img
+                src={image}
+                alt={title || ''}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+                onError={() => setImageFailed(true)}
+                onLoad={() => setImageFailed(false)}
+              />
+            ) : (
+              <div className={clsx('absolute inset-0', gradientClass)} />
+            )}
             <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
           </div>
 
@@ -97,3 +126,6 @@ ContentCard.propTypes = {
   href: PropTypes.string,
   className: PropTypes.string,
 };
+
+// Add optional image prop for hero backgrounds
+ContentCard.propTypes.image = PropTypes.string;

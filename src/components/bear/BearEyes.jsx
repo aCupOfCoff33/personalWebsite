@@ -200,18 +200,18 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
       {/* Left eye */}
       <g style={eyeBlinkStyle}>
         <g ref={leftIrisGroupRef} style={{ transition: 'transform 100ms linear' }}>
-          <ellipse cx="43.8956" cy="64.1551" rx="6.07785" ry="7.42849" fill="#271711"/>
+          <ellipse cx="23.3865" cy="34.1803" rx="3.2381" ry="3.95767" fill="#271711"/>
           <g style={eyeOffsetStyle}>
-            <circle ref={leftHighlightRef} cx="44.25" cy="62.25" r="2.25" fill="#D9D9D9" style={mode === 'default' ? trackingTransitionStyle : undefined}/>
+            <circle ref={leftHighlightRef} cx="23.5757" cy="33.1655" r="1.19873" fill="#D9D9D9" style={mode === 'default' ? trackingTransitionStyle : undefined}/>
           </g>
         </g>
       </g>
       {/* Right eye */}
       <g style={eyeBlinkStyle}>
         <g ref={rightIrisGroupRef} style={{ transition: 'transform 100ms linear' }}>
-          <ellipse cx="83.064" cy="64.1551" rx="6.07785" ry="7.42849" fill="#271711"/>
+          <ellipse cx="44.2381" cy="33.9577" rx="3.2381" ry="3.95767" fill="#271711"/>
           <g style={eyeOffsetStyle}>
-            <circle ref={rightHighlightRef} cx="83.25" cy="62.25" r="2.25" fill="#D9D9D9" style={mode === 'default' ? trackingTransitionStyle : undefined}/>
+            <circle ref={rightHighlightRef} cx="44.354" cy="33.1655" r="1.19873" fill="#D9D9D9" style={mode === 'default' ? trackingTransitionStyle : undefined}/>
           </g>
         </g>
       </g>

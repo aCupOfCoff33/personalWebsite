@@ -1,6 +1,7 @@
 import React from 'react';
 
 // QuarterZip accessory for the about page; follows the same pattern as other bear accessories
+// Updated for new 68x68 viewBox coordinate system (no scaling needed)
 const QuarterZip = React.memo(function QuarterZip({ position = 'hidden', idSuffix = '' }) {
   const opacity = position === 'hidden' ? 0 : 1;
 
@@ -12,14 +13,12 @@ const QuarterZip = React.memo(function QuarterZip({ position = 'hidden', idSuffi
     >
       <defs>
         <clipPath id={`bearCircleMaskQuarterZip${idSuffix}`}>
-          <circle cx="63.8175" cy="63.8175" r="63.8175" />
+          <circle cx="34" cy="34" r="34" />
         </clipPath>
       </defs>
 
-      {/* Scale original 56x23 quarter zip to 128x128 space and position at bottom of bear */}
-      {/* Original bear SVG is 68x68, scaling factor is 128/68 = 1.882 */}
-      {/* Position the quarter zip at the bottom of the bear body */}
-      <g transform={`scale(${128 / 68}) translate(6, 45)`}>
+      {/* Original quarter zip is already in 68x68 space - positioned at bottom */}
+      <g transform="translate(6, 45)">
         <path d="M0 7.49994C7.07763 6.23694 16.575 7.33636 24.9775 11.1474C40.5565 7.19207 50.0004 6.72524 55.2852 8.43842C49.089 16.7769 39.1653 22.1806 27.9785 22.1806C16.3776 22.1806 6.13577 16.369 0 7.49994Z" fill="#284A38"/>
         <path d="M18.5 9.5L19.5 7.5H35.5L36 9L30.5 12L27.5 17L24.5 12L18.5 9.5Z" fill="black" stroke="black" strokeLinejoin="round"/>
         <path d="M16.1017 6.40544C25.2539 8.23587 27.5 16.4239 27.5 21C27.0423 13.6776 23.8811 13.2703 17.4746 11.8975C10.3885 11.585 8.32238 10.5239 4.20391 8.23587C0.0854447 5.94783 2.83109 -0.916279 3.7463 0.914151C4.66152 2.74458 5.57673 1.82937 16.1017 6.40544Z" fill="#284A38" stroke="#203F2F" strokeLinejoin="round"/>

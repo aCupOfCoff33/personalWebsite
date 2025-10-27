@@ -171,7 +171,7 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
     <svg
       ref={svgRef}
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 128 128"
+      viewBox="0 0 68 68"
       fill="none"
       className={className}
       role="img"
@@ -180,27 +180,27 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
       style={{ cursor: 'pointer' }}
     >
       <defs>
-        <linearGradient id={`bookLeft${idSuffix}`} x1="39" y1="74" x2="64" y2="116" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`bookLeft${idSuffix}`} x1="20.7" y1="39.3" x2="34" y2="61.6" gradientUnits="userSpaceOnUse">
           <stop stopColor="#C73B33" />
           <stop offset="1" stopColor="#9E2B26" />
         </linearGradient>
-        <linearGradient id={`bookRight${idSuffix}`} x1="88" y1="74" x2="64" y2="116" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`bookRight${idSuffix}`} x1="46.7" y1="39.3" x2="34" y2="61.6" gradientUnits="userSpaceOnUse">
           <stop stopColor="#D85C55" />
           <stop offset="1" stopColor="#A1332D" />
         </linearGradient>
         <clipPath id={`bearCircleMaskReading${idSuffix}`}>
-          <circle cx="63.8175" cy="63.8175" r="63.8175" />
+          <circle cx="34" cy="34" r="34" />
         </clipPath>
       </defs>
 
       {showBase && (
         <>
-          <circle cx="63.8175" cy="63.8175" r="63.8175" fill="#E7E9E8" />
+          <circle cx="34" cy="34" r="34" fill="#E7E9E8" />
           <BearEars />
-          <path fillRule="evenodd" clipRule="evenodd" d="M103.954 99.9468C107.008 93.2376 108.726 85.6695 108.726 77.6615C108.726 50.0619 88.3175 27.688 63.1422 27.688C37.9669 27.688 17.5583 50.0619 17.5583 77.6615C17.5583 85.6695 19.2764 93.2376 22.3306 99.9468H103.954ZM63.2227 127.635H63.0616C63.0885 127.635 63.1153 127.635 63.1422 127.635C63.169 127.635 63.1958 127.635 63.2227 127.635Z" fill="#A96229" />
-          <path fillRule="evenodd" clipRule="evenodd" d="M79.1457 99.9468C80.3559 96.6003 81.0381 92.8139 81.0381 88.8039C81.0381 75.1906 73.177 64.1548 63.4798 64.1548C53.7827 64.1548 45.9216 75.1906 45.9216 88.8039C45.9216 92.8139 46.6037 96.6003 47.8139 99.9468H79.1457Z" fill="#C6843F" />
-          <path d="M57.0643 85.765C56.9517 85.765 56.389 85.4274 55.0383 84.0767C53.6877 82.7261 54.7007 82.1633 55.376 82.0508C55.4885 82.501 56.389 83.6715 59.0902 84.752C62.4668 86.1027 63.4798 82.7261 63.4798 84.0767C63.4798 85.4274 63.4798 85.765 62.1292 86.4403C61.0487 86.9806 59.4279 86.6654 58.7526 86.4403L57.0643 85.765Z" fill="#241E16" stroke="#281E11" />
-          <path d="M69.5672 85.765C69.6798 85.765 70.2426 85.4274 71.5932 84.0767C72.9438 82.7261 71.9309 82.1633 71.2555 82.0508C71.143 82.501 70.2426 83.6715 67.5413 84.752C64.1647 86.1027 63.1517 82.7261 63.1517 84.0767C63.1517 85.4274 63.1517 85.765 64.5024 86.4403C65.5829 86.9806 67.2036 86.6654 67.8789 86.4403L69.5672 85.765Z" fill="#241E16" stroke="#281E11" />
+          <path d="M33.6406 14.75C47.1716 14.75 58.1406 24.6557 58.1406 36.875C58.1406 49.0943 47.1716 59 33.6406 59C20.1096 59 9.14062 49.0943 9.14062 36.875C9.14062 24.6557 20.1096 14.75 33.6406 14.75Z" fill="#B56A2B"/>
+          <path d="M34 34C40.9229 34 42.9999 40.7853 43 44.5322C43 51.6425 38.9076 53 34.0645 53C29.2215 52.9999 25 50.9637 25 44.5322C25.0001 40.7853 27.0771 34 34 34Z" fill="#CD853F"/>
+          <path d="M30.4018 45.6937C30.3419 45.6937 30.042 45.5138 29.3225 44.7942C28.6029 44.0746 29.1426 43.7748 29.5024 43.7148C29.5623 43.9547 30.042 44.5783 31.4812 45.154C33.2801 45.8736 33.8198 44.0746 33.8198 44.7942C33.8198 45.5138 33.8198 45.6937 33.1002 46.0535C32.5246 46.3413 31.6611 46.1734 31.3013 46.0535L30.4018 45.6937Z" fill="#241E16" stroke="#281E11" />
+          <path d="M37.063 45.6937C37.123 45.6937 37.4228 45.5138 38.1424 44.7942C38.862 44.0746 38.3223 43.7748 37.9625 43.7148C37.9025 43.9547 37.4228 44.5783 35.9836 45.154C34.1847 45.8736 33.645 44.0746 33.645 44.7942C33.645 45.5138 33.645 45.6937 34.3646 46.0535C34.9403 46.3413 35.8038 46.1734 36.1635 46.0535L37.063 45.6937Z" fill="#241E16" stroke="#281E11" />
         </>
       )}
 
@@ -209,14 +209,14 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
         <>
           <g style={eyeBlinkStyle}>
             <g ref={leftIrisGroupRef} style={{ transition: 'transform 100ms linear' }}>
-              <ellipse cx="43.8956" cy="64.1551" rx="6.07785" ry="7.42849" fill="#271711" />
-              <circle ref={leftHighlightRef} cx="44.25" cy="62.25" r="2.25" fill="#D9D9D9" />
+              <ellipse cx="23.3865" cy="34.1803" rx="3.2381" ry="3.95767" fill="#271711" />
+              <circle ref={leftHighlightRef} cx="23.5757" cy="33.1655" r="1.19873" fill="#D9D9D9" />
             </g>
           </g>
           <g style={eyeBlinkStyle}>
             <g ref={rightIrisGroupRef} style={{ transition: 'transform 100ms linear' }}>
-              <ellipse cx="83.064" cy="64.1551" rx="6.07785" ry="7.42849" fill="#271711" />
-              <circle ref={rightHighlightRef} cx="83.25" cy="62.25" r="2.25" fill="#D9D9D9" />
+              <ellipse cx="44.2381" cy="33.9577" rx="3.2381" ry="3.95767" fill="#271711" />
+              <circle ref={rightHighlightRef} cx="44.354" cy="33.1655" r="1.19873" fill="#D9D9D9" />
             </g>
           </g>
         </>
@@ -235,27 +235,27 @@ const BearIconReading = React.memo(({ className = '', showBase = true, idSuffix 
             pointerEvents: 'none',
           }}
         >
-          <g ref={pageRef} style={{ transformOrigin: '32px 110px' }}>
-            <path d="M64 80 L32 68 L32 116 L64 122 Z" fill="#F6ECEB" />
-            <g stroke="#C4B5B3" strokeWidth="0.8">
-              <line x1="36" y1="82" x2="60" y2="78" />
-              <line x1="37" y1="88" x2="59" y2="84" />
-              <line x1="37" y1="94" x2="59" y2="90" />
-              <line x1="37" y1="100" x2="59" y2="96" />
-              <line x1="37" y1="106" x2="59" y2="102" />
-              <line x1="37" y1="112" x2="59" y2="108" />
+          <g ref={pageRef} style={{ transformOrigin: '17px 58.5px' }}>
+            <path d="M34 42.5 L17 36.1 L17 61.6 L34 64.8 Z" fill="#F6ECEB" />
+            <g stroke="#C4B5B3" strokeWidth="0.42">
+              <line x1="19.1" y1="43.5" x2="31.9" y2="41.4" />
+              <line x1="19.6" y1="46.7" x2="31.3" y2="44.6" />
+              <line x1="19.6" y1="49.9" x2="31.3" y2="47.8" />
+              <line x1="19.6" y1="53.1" x2="31.3" y2="51" />
+              <line x1="19.6" y1="56.3" x2="31.3" y2="54.2" />
+              <line x1="19.6" y1="59.5" x2="31.3" y2="57.4" />
             </g>
           </g>
 
-          <path d="M64 78 L32 66 L32 118 L64 124 Z" fill={`url(#bookLeft${idSuffix})`} />
-          <path d="M64 78 L96 66 L96 118 L64 124 Z" fill={`url(#bookRight${idSuffix})`} />
-          <path d="M64 78 L64 124" stroke="#E6D3D1" strokeWidth="2" />
-          <g stroke="#EBD9D6" strokeWidth="0.8">
-            <line x1="68" y1="84" x2="92" y2="78" />
-            <line x1="69" y1="90" x2="91" y2="84" />
-            <line x1="69" y1="96" x2="91" y2="90" />
-            <line x1="69" y1="102" x2="91" y2="96" />
-            <line x1="69" y1="108" x2="91" y2="102" />
+          <path d="M34 41.4 L17 35 L17 62.7 L34 65.9 Z" fill={`url(#bookLeft${idSuffix})`} />
+          <path d="M34 41.4 L51 35 L51 62.7 L34 65.9 Z" fill={`url(#bookRight${idSuffix})`} />
+          <path d="M34 41.4 L34 65.9" stroke="#E6D3D1" strokeWidth="1.06" />
+          <g stroke="#EBD9D6" strokeWidth="0.42">
+            <line x1="36.1" y1="44.6" x2="48.9" y2="41.4" />
+            <line x1="36.6" y1="47.8" x2="48.3" y2="44.6" />
+            <line x1="36.6" y1="51" x2="48.3" y2="47.8" />
+            <line x1="36.6" y1="54.2" x2="48.3" y2="51" />
+            <line x1="36.6" y1="57.4" x2="48.3" y2="54.2" />
           </g>
         </g>
       )}

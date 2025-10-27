@@ -66,7 +66,7 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) 
   })();
 
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" className={className} role="img" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 68" fill="none" className={className} role="img" aria-hidden="true">
   <BaseBear />
   <BearEyes mode={eyeMode} />
       <AnimatePresence initial={false} mode="wait">
