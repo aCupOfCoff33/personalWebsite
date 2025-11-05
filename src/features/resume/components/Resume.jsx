@@ -22,20 +22,85 @@ const DownloadIcon = () => (
 
 export default function Resume() {
   const { personalInfo, workExperience } = resumeData;
+  
+  // Timeline configuration
+  const currentYear = new Date().getFullYear();
+  const startTimelineYear = 2021;
+  const endTimelineYear = currentYear + 1;
+  const years = Array.from(
+    { length: endTimelineYear - startTimelineYear + 1 }, 
+    (_, i) => endTimelineYear - i
+  );
+  const ROW_HEIGHT = 80; // pixels per year
+
+  // Format dates for display
+  const formatJobDates = (start, end) => {
+    const startDate = new Date(`${start}-01T12:00:00Z`);
+    const startMonth = startDate.toLocaleString('default', { month: 'short' }).toUpperCase();
+    const startYear = startDate.getFullYear().toString().slice(-2);
+
+    if (end === 'present') {
+      return `${startMonth} ${startYear} - PRESENT`;
+    }
+
+    const endDate = new Date(`${end}-01T12:00:00Z`);
+    const endMonth = endDate.toLocaleString('default', { month: 'short' }).toUpperCase();
+    const endYear = endDate.getFullYear().toString().slice(-2);
+
+    return `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
+  };
+
+  // Calculate layout for each job - SINGLE COLUMN, NO OVERLAPS
+  const jobsWithLayout = workExperience
+    .map(job => {
+      if (!job.startDate) return null;
+
+      const start = new Date(`${job.startDate}-01T12:00:00Z`);
+      const end = job.endDate === 'present' ? new Date() : new Date(`${job.endDate}-01T12:00:00Z`);
+
+      // Calculate position based on year (from the TOP of timeline which is endTimelineYear)
+      const startFraction = start.getFullYear() + start.getMonth() / 12;
+      const endFraction = end.getFullYear() + end.getMonth() / 12;
+
+      // Calculate top position: distance from the start of timeline (which is endTimelineYear at top)
+      // If job starts in 2025 and timeline starts at 2026, it's 1 year down = 80px
+      const topOffset = (endTimelineYear - startFraction) * ROW_HEIGHT;
+      const bottomOffset = (endTimelineYear - endFraction) * ROW_HEIGHT;
+      const height = topOffset - bottomOffset;
+
+      // Minimum height for readability
+      const minHeight = 50;
+
+      return {
+        ...job,
+        layout: {
+          top: bottomOffset, // Position from top where job ENDS (more recent)
+          height: Math.max(height, minHeight),
+        },
+        displayDate: formatJobDates(job.startDate, job.endDate),
+        isCompact: Math.max(height, minHeight) < 120,
+      };
+    })
+    .filter(Boolean);
+
+  // Split into Work Experience and Club Experience
+  const workExperienceIds = ['american-global-2025', 'esdc-2024', 'minimart-2023'];
+  
+  const workJobs = jobsWithLayout.filter(job => workExperienceIds.includes(job.id));
+  const clubJobs = jobsWithLayout.filter(job => !workExperienceIds.includes(job.id));
 
   return (
-    <section className="w-full bg-transparent py-12 lg:py-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+    <section className="w-full bg-transparent py-24">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Section */}
-        <div className="mb-12 lg:mb-16 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
-          {/* Title */}
+        <div className="mb-16 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
           <div className="inline-flex flex-col items-start gap-1">
-            <h1 className="text-white text-4xl lg:text-5xl font-normal font-adamant">Work</h1>
-            <h2 className="text-white text-3xl lg:text-4xl font-normal font-adamant">Experience</h2>
+            <h1 className="text-white text-4xl lg:text-5xl font-normal font-adamant tracking-wide">
+              CAREER JOURNEY
+            </h1>
           </div>
 
-          {/* Download Resume (responsive) */}
           <a
             href={personalInfo.resumeUrl}
             download
@@ -54,86 +119,192 @@ export default function Resume() {
           </a>
         </div>
 
-        {/* Work Experience Section */}
-        <div className="space-y-16">
-          {workExperience.map((job, index) => (
-            <div 
-              key={job.id}
-              className="relative"
-            >
-              {/* Company Header - Full Width Row */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-8">
-                {/* Logo */}
-                <div className="size-14 p-[5px] bg-white rounded-[10px] flex justify-center items-center 
-                              shadow-lg flex-shrink-0">
-                  <img 
-                    className="w-12 h-12 rounded-md object-contain" 
-                    src={job.logo} 
-                    alt={`${job.company} logo`}
-                    loading="lazy"
-                  />
-                </div>
-
-                {/* Company Info */}
-                <div className="flex-1 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-white text-2xl font-normal font-adamant">
-                      {job.company}
-                    </h3>
-                    <p className="text-white/70 text-xl font-normal font-adamant">
-                      {job.position}
-                    </p>
-                  </div>
-                  
-                  <div className="text-white/60 text-base sm:text-lg font-normal font-adamant 
-                                sm:text-right whitespace-nowrap">
-                    {job.dateRange}
+        {/* Timeline Container */}
+        <div className="relative">
+          {/* Years and Horizontal Lines */}
+          <div className="space-y-20">
+            {years.map((year) => (
+              <div key={year} className="relative flex items-center gap-8">
+                <div className="flex-shrink-0 w-12">
+                  <div className="text-white/70 text-xl font-normal font-adamant">
+                    {year}
                   </div>
                 </div>
+                <div className="flex-1 h-px bg-white/10" />
               </div>
+            ))}
+          </div>
 
-              {/* Highlights in 2-Column Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {job.highlights.map((highlight, highlightIndex) => {
-                  // Extract bolded heading from the highlight (format: "Heading - Description")
-                  const parts = highlight.split(' - ');
-                  const heading = parts.length > 1 ? parts[0] : '';
-                  const description = parts.length > 1 ? parts.slice(1).join(' - ') : highlight;
-                  
-                  return (
+          {/* Two Column Layout */}
+          <div className="absolute top-0 left-16 right-0 h-full pointer-events-none">
+            <div className="relative h-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              {/* LEFT COLUMN - Work Experience */}
+              <div className="relative">
+                <div className="mb-8 pointer-events-auto">
+                  <h2 className="text-white text-xl font-semibold font-adamant">Work Experience</h2>
+                </div>
+                <div className="relative h-full">
+                  {workJobs.map(({ id, company, position, logo, layout, displayDate, isCompact }) => (
                     <div
-                      key={highlightIndex}
-                      className="relative p-px"
+                      key={id}
+                      className="absolute w-full pointer-events-auto"
+                      style={{
+                        top: `${layout.top}px`,
+                        minHeight: `${layout.height}px`,
+                      }}
                     >
-                      {/* Card content - glassmorphic, no hover highlight */}
-                      <div className="relative bg-white/5 rounded-xl px-6 py-6
-                                    ring-1 ring-white/10 transition-all duration-300 h-full">
-                        {heading ? (
-                          <>
-                            <p className="text-white text-lg lg:text-xl font-semibold font-adamant mb-3 leading-relaxed">
-                              {heading}
+                      {isCompact ? (
+                        // COMPACT CARD STYLE
+                        <div className="bg-white/5 rounded-xl px-4 py-1.5 ring-1 ring-white/10 
+                                        hover:bg-white/10 hover:ring-white/20 transition-all duration-300 shadow-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="size-6 p-0.5 bg-white rounded flex justify-center items-center 
+                                          shadow-md flex-shrink-0">
+                              <img 
+                                className="w-full h-full rounded object-contain" 
+                                src={logo} 
+                                alt={`${company} logo`}
+                                loading="lazy"
+                              />
+                            </div>
+
+                            <div className="flex-1 min-w-0 flex items-center gap-2">
+                              <h3 className="text-white text-sm font-semibold font-adamant truncate">
+                                {position}
+                              </h3>
+                              <span className="text-white/40 text-sm">•</span>
+                              <p className="text-white/70 text-sm font-normal font-adamant truncate">
+                                {company}
+                              </p>
+                            </div>
+
+                            <div className="text-white/50 text-[10px] font-normal font-adamant uppercase tracking-wider flex-shrink-0">
+                              {displayDate}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        // EXPANDED CARD STYLE
+                        <div className="bg-white/5 rounded-xl px-6 py-5 ring-1 ring-white/10 
+                                        hover:bg-white/10 hover:ring-white/20 transition-all duration-300 shadow-lg">
+                          <div className="flex items-start gap-4 mb-3">
+                            <div className="size-12 p-1.5 bg-white rounded-lg flex justify-center items-center 
+                                          shadow-md flex-shrink-0">
+                              <img 
+                                className="w-full h-full rounded object-contain" 
+                                src={logo} 
+                                alt={`${company} logo`}
+                                loading="lazy"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <h3 className="text-white text-base font-semibold font-adamant">
+                              {position}
+                            </h3>
+                            <p className="text-white/70 text-sm font-normal font-adamant">
+                              {company}
                             </p>
-                            <p className="text-white/80 text-base lg:text-lg font-normal font-adamant leading-relaxed">
-                              {description}
-                            </p>
-                          </>
-                        ) : (
-                          <p className="text-white/80 text-base lg:text-lg font-normal font-adamant leading-relaxed">
-                            {highlight}
-                          </p>
-                        )}
-                      </div>
+                            
+                            <div className="pt-2">
+                              <p className="text-white/50 text-[10px] font-normal font-adamant uppercase tracking-wider">
+                                {displayDate}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
 
-              {/* Divider line between jobs (except last) */}
-              {index < workExperience.length - 1 && (
-                <div className="mt-16 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              )}
+              {/* RIGHT COLUMN - Club Experience */}
+              <div className="relative">
+                <div className="mb-8 pointer-events-auto">
+                  <h2 className="text-white text-xl font-semibold font-adamant">Club Experience</h2>
+                </div>
+                <div className="relative h-full">
+                  {clubJobs.map(({ id, company, position, logo, layout, displayDate, isCompact }) => (
+                    <div
+                      key={id}
+                      className="absolute w-full pointer-events-auto"
+                      style={{
+                        top: `${layout.top}px`,
+                        minHeight: `${layout.height}px`,
+                      }}
+                    >
+                      {isCompact ? (
+                        // COMPACT CARD STYLE
+                        <div className="bg-white/5 rounded-xl px-4 py-1.5 ring-1 ring-white/10 
+                                        hover:bg-white/10 hover:ring-white/20 transition-all duration-300 shadow-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="size-6 p-0.5 bg-white rounded flex justify-center items-center 
+                                          shadow-md flex-shrink-0">
+                              <img 
+                                className="w-full h-full rounded object-contain" 
+                                src={logo} 
+                                alt={`${company} logo`}
+                                loading="lazy"
+                              />
+                            </div>
+
+                            <div className="flex-1 min-w-0 flex items-center gap-2">
+                              <h3 className="text-white text-sm font-semibold font-adamant truncate">
+                                {position}
+                              </h3>
+                              <span className="text-white/40 text-sm">•</span>
+                              <p className="text-white/70 text-sm font-normal font-adamant truncate">
+                                {company}
+                              </p>
+                            </div>
+
+                            <div className="text-white/50 text-[10px] font-normal font-adamant uppercase tracking-wider flex-shrink-0">
+                              {displayDate}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        // EXPANDED CARD STYLE
+                        <div className="bg-white/5 rounded-xl px-6 py-5 ring-1 ring-white/10 
+                                        hover:bg-white/10 hover:ring-white/20 transition-all duration-300 shadow-lg">
+                          <div className="flex items-start gap-4 mb-3">
+                            <div className="size-12 p-1.5 bg-white rounded-lg flex justify-center items-center 
+                                          shadow-md flex-shrink-0">
+                              <img 
+                                className="w-full h-full rounded object-contain" 
+                                src={logo} 
+                                alt={`${company} logo`}
+                                loading="lazy"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <h3 className="text-white text-base font-semibold font-adamant">
+                              {position}
+                            </h3>
+                            <p className="text-white/70 text-sm font-normal font-adamant">
+                              {company}
+                            </p>
+                            
+                            <div className="pt-2">
+                              <p className="text-white/50 text-[10px] font-normal font-adamant uppercase tracking-wider">
+                                {displayDate}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
-          ))}
+          </div>
         </div>
 
       </div>

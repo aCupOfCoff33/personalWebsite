@@ -262,16 +262,16 @@ function Navbar() {
       </aside>
 
       {/* Mobile top bar with morphing contact area */}
-      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-3 py-2 z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
-        <div className="flex items-center gap-3" style={{ position: 'relative' }}>
-          {renderUnifiedBear(32)}
-           <Link to="/" className="text-white text-lg font-semibold">aaryan</Link>
-         </div>
+      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-5 py-5 min-h-[7.5rem] z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
+        <div className="flex items-center gap-5" style={{ position: 'relative' }}>
+          {renderUnifiedBear(72)}
+          <Link to="/" className="text-white text-3xl font-semibold">aaryan</Link>
+        </div>
 
         {/* Smoothly collapse into icons-only when reading (unified with desktop collapse state) */}
         <Motion.div
           initial={false}
-          animate={collapsed ? { width: 120, opacity: 1 } : { width: 0, opacity: 0 }}
+          animate={collapsed ? { width: 148, opacity: 1 } : { width: 0, opacity: 0 }}
           transition={{ type: "tween", duration: 0.25 }}
           className="overflow-hidden flex items-center justify-end gap-3 mr-1"
         >
@@ -282,12 +282,15 @@ function Navbar() {
 
         <button
           aria-label={menuOpen ? "Close menu" : "Open menu"}
-          className="rounded-full p-2.5 bg-neutral-900/70 text-white hover:bg-neutral-800 transition"
+          className="rounded-full p-4 bg-neutral-900/70 text-white hover:bg-neutral-800 transition"
           onClick={() => setMenuOpen((v) => !v)}
         >
-          {menuOpen ? <CloseIcon className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {menuOpen ? <CloseIcon className="h-8 w-8" /> : <Menu className="h-8 w-8" />}
         </button>
       </div>
+
+      {/* Spacer keeps mobile content from sliding under the fixed navbar */}
+      <div className="md:hidden h-[2.5rem]" aria-hidden="true" />
 
       {/* Mobile dropdown panel - slides from top */}
       <AnimatePresence>
@@ -298,7 +301,7 @@ function Navbar() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "-100%", opacity: 0 }}
             transition={{ type: "tween", duration: 0.26 }}
-            className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#0C100D]/95 backdrop-blur border-b border-white/10 rounded-b-2xl pt-20 pb-6 px-4"
+            className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#0C100D]/95 backdrop-blur border-b border-white/10 rounded-b-2xl pt-32 pb-6 px-5"
           >
             <nav className="flex flex-col gap-5">
               {sections.map((section) => (

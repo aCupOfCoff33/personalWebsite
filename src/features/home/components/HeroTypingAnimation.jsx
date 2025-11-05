@@ -7,11 +7,74 @@ import { motion, useMotionValue, animate } from "framer-motion";
 
 /* ── constants ─────────────────────────────────────────────── */
 const HEADLINE = "Hey there! I'm Aaryan!";
+const HERO_INTRO_SESSION_KEY = 'heroIntroSeen';
+
+// Track whether the hero intro has already played in this SPA session
+let heroIntroHasPlayed = false;
+let sessionStorageStatus = null;
+
+const isSessionStorageReady = () => {
+  if (sessionStorageStatus !== null) return sessionStorageStatus;
+  if (typeof window === 'undefined' || !window.sessionStorage) return false;
+  try {
+    const testKey = '__hero_intro_test__';
+    window.sessionStorage.setItem(testKey, '1');
+    window.sessionStorage.removeItem(testKey);
+    sessionStorageStatus = true;
+  } catch (error) {
+    sessionStorageStatus = false;
+  }
+  return sessionStorageStatus;
+};
+
+const detectNavigationType = () => {
+  if (typeof window === 'undefined' || typeof performance === 'undefined') return 'navigate';
+  if (typeof performance.getEntriesByType === 'function') {
+    const [navEntry] = performance.getEntriesByType('navigation');
+    if (navEntry && navEntry.type) return navEntry.type;
+  }
+  if (performance.navigation && typeof performance.navigation.type === 'number') {
+    const { TYPE_RELOAD, TYPE_BACK_FORWARD, TYPE_NAVIGATE } = performance.navigation;
+    switch (performance.navigation.type) {
+      case TYPE_RELOAD: return 'reload';
+      case TYPE_BACK_FORWARD: return 'back_forward';
+      case TYPE_NAVIGATE: return 'navigate';
+      default: return 'navigate';
+    }
+  }
+  return 'navigate';
+};
+
+const getHeroIntroSeen = () => {
+  if (isSessionStorageReady()) {
+    const seen = window.sessionStorage.getItem(HERO_INTRO_SESSION_KEY) === 'true';
+    if (seen) heroIntroHasPlayed = true;
+    return seen;
+  }
+  return heroIntroHasPlayed;
+};
+
+const markHeroIntroSeen = () => {
+  heroIntroHasPlayed = true;
+  if (isSessionStorageReady()) {
+    window.sessionStorage.setItem(HERO_INTRO_SESSION_KEY, 'true');
+  }
+};
+
+// Allow a hard refresh on the home route to replay the intro sequence
+if (detectNavigationType() === 'reload' && isSessionStorageReady()) {
+  window.sessionStorage.removeItem(HERO_INTRO_SESSION_KEY);
+  heroIntroHasPlayed = false;
+}
 
 // Optimized for performance by wrapping with React.memo
 const HeroTypingAnimation = React.memo(() => {
   const bodyRef = useRef(null);
   const headlineRef = useRef(null);
+  const shouldRunIntro = React.useRef(!getHeroIntroSeen()).current;
+  const markIntroSeen = React.useCallback(() => {
+    markHeroIntroSeen();
+  }, []);
   
   // Initialize state first
   const initialState = {
@@ -50,6 +113,7 @@ const HeroTypingAnimation = React.memo(() => {
   }
   
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isMobile, setIsMobile] = React.useState(false);
 
   /* motion values for drag / snap */
   const frameRef = useRef(null);
@@ -69,6 +133,20 @@ const HeroTypingAnimation = React.memo(() => {
   
   const x = useMotionValue(getInitialX());
   const y = useMotionValue(0);
+
+  useEffect(() => {
+    const updateIsMobile = () => {
+      if (typeof window !== "undefined") {
+        setIsMobile(window.innerWidth < 768);
+      }
+    };
+
+    updateIsMobile();
+    window.addEventListener("resize", updateIsMobile);
+    return () => {
+      window.removeEventListener("resize", updateIsMobile);
+    };
+  }, []);
 
   // Dynamic safe margins that respect the new layout:
   // - desktop: reserve space for the fixed left sidebar (16rem) + padding
@@ -157,6 +235,8 @@ const HeroTypingAnimation = React.memo(() => {
 
   /* ── orchestrate the sequence ───────────────────────────── */
   useEffect(() => {
+    if (!shouldRunIntro) return;
+    markIntroSeen();
     (async () => {
       await new Promise((r) => setTimeout(r, 100));
       dispatch({ type: 'SET_SHOW_FRAME', value: true });
@@ -164,17 +244,37 @@ const HeroTypingAnimation = React.memo(() => {
       // Typing animation: update textContent directly for performance
       // Only dispatch once to set phase, then use ref for all text updates
       if (headlineRef.current) headlineRef.current.textContent = '';
-        for (let i = 0; i <= HEADLINE.length; i++) {
+      for (let i = 0; i <= HEADLINE.length; i++) {
         if (headlineRef.current) headlineRef.current.textContent = HEADLINE.slice(0, i);
-          // REMOVED: dispatch call that was causing 23 re-renders per typing sequence
-          await new Promise((r) => setTimeout(r, 65));
+        // REMOVED: dispatch call that was causing 23 re-renders per typing sequence
+        await new Promise((r) => setTimeout(r, 65));
       }
       setTimeout(() => dispatch({ type: 'SET_SHOW_CURSOR', value: false }), 200);
       await new Promise((r) => setTimeout(r, 300));
       dispatch({ type: 'SET_SHOW_BODY', value: true });
       dispatch({ type: 'SET_FRAME_FROZEN', value: true });
     })();
-  }, [x]);
+  }, [shouldRunIntro, x, markIntroSeen]);
+
+  // Skip intro: immediately show final state when returning to Home without a hard refresh
+  useEffect(() => {
+    if (shouldRunIntro) return;
+    dispatch({ type: 'SET_SHOW_FRAME', value: true });
+    dispatch({ type: 'SET_PHASE', value: 'frameMoved' });
+    dispatch({ type: 'SET_SHOW_BODY', value: true });
+    dispatch({ type: 'SET_FRAME_FROZEN', value: false });
+    dispatch({ type: 'SET_CURSOR_TRIGGERED', value: true });
+    dispatch({ type: 'SET_DRAG_OK', value: true });
+    dispatch({ type: 'SET_FRAME_ALIGNED', value: true });
+    dispatch({ type: 'SET_SHOW_CURSOR', value: false });
+    dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
+    dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: true });
+    markIntroSeen();
+    const rafId = requestAnimationFrame(() => {
+      if (headlineRef.current) headlineRef.current.textContent = HEADLINE;
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [shouldRunIntro, markIntroSeen]);
 
   // AnimatedCursor orchestration
   const handleCursorReadyToDrag = React.useCallback(async () => {
@@ -201,7 +301,8 @@ const HeroTypingAnimation = React.memo(() => {
   const handleCursorDragComplete = React.useCallback(() => {
     dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
     dispatch({ type: 'SET_DRAG_OK', value: true });
-  }, []);
+    markIntroSeen();
+  }, [markIntroSeen]);
 
   // Show cursor only after typing and frame is ready
   // Only trigger cursor animation once
@@ -209,19 +310,43 @@ const HeroTypingAnimation = React.memo(() => {
   useEffect(() => {
     if (state.showFrame && state.showBody && state.frameFrozen && !state.showAnimatedCursor && !cursorTriggered) {
       dispatch({ type: 'SET_CURSOR_TRIGGERED', value: true });
-      setTimeout(() => dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true }), 100);
+      if (isMobile) {
+        (async () => {
+          await handleCursorReadyToDrag();
+          dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
+          dispatch({ type: 'SET_DRAG_OK', value: true });
+          markIntroSeen();
+        })();
+      } else {
+        setTimeout(() => dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true }), 100);
+      }
     }
-  }, [state.showFrame, state.showBody, state.showAnimatedCursor, cursorTriggered, state.frameFrozen]);
+  }, [state.showFrame, state.showBody, state.showAnimatedCursor, cursorTriggered, state.frameFrozen, isMobile, handleCursorReadyToDrag, markIntroSeen]);
 
   /* snap the frame back after dragging */
   // Snap the frame back after dragging, with Paddington cursor sequence
   const [pendingSnapBack, setPendingSnapBack] = React.useState(false);
   const snapBack = React.useCallback(() => {
     setPendingSnapBack(true);
-    // Reset cursor exit state when showing cursor again
-    dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: false });
-    dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true });
-  }, []);
+    if (!isMobile) {
+      dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: false });
+      dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true });
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (pendingSnapBack && isMobile) {
+      (async () => {
+        dispatch({ type: 'SET_FRAME_THICK', value: true });
+        await Promise.all([
+          animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
+          animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
+        ]);
+        dispatch({ type: 'SET_FRAME_THICK', value: false });
+        setPendingSnapBack(false);
+      })();
+    }
+  }, [pendingSnapBack, isMobile, x, y, state.centreX]);
 
   // When the cursor reaches the box (after user drag), snap the box back in sync
   const handleCursorReadyToDragSnap = React.useCallback(async () => {
@@ -248,7 +373,7 @@ const HeroTypingAnimation = React.memo(() => {
   return (
     <section className="relative w-full max-w-screen-xl mx-auto px-3 pt-16 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
       {/* Animated cursor overlay */}
-      {state.showAnimatedCursor && (
+      {state.showAnimatedCursor && !isMobile && (
         <AnimatedCursor
           targetRef={frameRef}
           onDragComplete={handleCursorDragComplete}

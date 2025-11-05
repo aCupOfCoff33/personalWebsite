@@ -39,7 +39,7 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
         RANDOM_LOOK_MAX_MS: 4500,
       };
     }
-    if (mode === 'resume') {
+    if (mode === 'resume' || mode === 'about') {
       return { BLINK_MS: 120, BLINK_MIN_DELAY: 1800, BLINK_JITTER: 4000, HIGHLIGHT_MOVE: 1.5 };
     }
     // default
@@ -82,9 +82,8 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
     };
   }, [schedulePeriodicBlink]);
 
-  // Default mode: cursor-tracked highlight wobble
   useEffect(() => {
-    if (!(mode === 'default' || mode === 'resume')) return undefined;
+    if (!(mode === 'default' || mode === 'resume' || mode === 'about')) return undefined;
     const leftEl = leftHighlightRef.current;
     const rightEl = rightHighlightRef.current;
     if (!leftEl || !rightEl) return undefined;
@@ -102,8 +101,11 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
         const dist = Math.hypot(dx, dy) || 1;
         const nx = dx / dist;
         const ny = dy / dist;
-        const tx = nx * (cfg.HIGHLIGHT_MOVE || 1.5);
-        const ty = ny * (cfg.HIGHLIGHT_MOVE || 1.5);
+        // Limit movement to stay within iris boundaries
+        // Iris radius is ~3.2px, highlight radius is ~1.2px, so max safe translation is ~2px
+        const maxMove = 1.0;
+        const tx = nx * maxMove;
+        const ty = ny * maxMove;
         el.style.transform = `translate(${tx}px, ${ty}px)`;
       };
       move(leftEl);
@@ -126,7 +128,7 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseleave', onLeave);
     };
-  }, [mode, cfg.HIGHLIGHT_MOVE]);
+  }, [mode]);
 
   // Projects/Stories: scanning + random looks
   useEffect(() => {
