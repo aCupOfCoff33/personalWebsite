@@ -115,7 +115,6 @@ const HeroTypingAnimation = React.memo(() => {
   }
   
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [isMobile, setIsMobile] = React.useState(false);
 
   /* motion values for drag / snap */
   const frameRef = useRef(null);
@@ -135,20 +134,6 @@ const HeroTypingAnimation = React.memo(() => {
   
   const x = useMotionValue(getInitialX());
   const y = useMotionValue(0);
-
-  useEffect(() => {
-    const updateIsMobile = () => {
-      if (typeof window !== "undefined") {
-        setIsMobile(window.innerWidth < 768);
-      }
-    };
-
-    updateIsMobile();
-    window.addEventListener("resize", updateIsMobile);
-    return () => {
-      window.removeEventListener("resize", updateIsMobile);
-    };
-  }, []);
 
   // Dynamic safe margins that respect the new layout:
   // - desktop: reserve space for the fixed left sidebar (16rem) + padding
@@ -319,18 +304,10 @@ const HeroTypingAnimation = React.memo(() => {
   useEffect(() => {
     if (state.showFrame && state.showBody && state.frameFrozen && !state.showAnimatedCursor && !cursorTriggered) {
       dispatch({ type: 'SET_CURSOR_TRIGGERED', value: true });
-      if (isMobile) {
-        (async () => {
-          await handleCursorReadyToDrag();
-          dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
-          dispatch({ type: 'SET_DRAG_OK', value: true });
-          markIntroSeen();
-        })();
-      } else {
-        setTimeout(() => dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true }), 100);
-      }
+      // Show paddington cursor on both mobile and desktop
+      setTimeout(() => dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true }), 100);
     }
-  }, [state.showFrame, state.showBody, state.showAnimatedCursor, cursorTriggered, state.frameFrozen, isMobile, handleCursorReadyToDrag, markIntroSeen]);
+  }, [state.showFrame, state.showBody, state.showAnimatedCursor, cursorTriggered, state.frameFrozen]);
 
   /* snap the frame back after dragging */
   // Snap the frame back after dragging, with Paddington cursor sequence
@@ -343,36 +320,14 @@ const HeroTypingAnimation = React.memo(() => {
     dispatch({ type: 'SET_DRAG_OK', value: false });
     dispatch({ type: 'SET_IS_ANIMATING_BACK', value: true });
     setPendingSnapBack(true);
-    if (!isMobile) {
-      dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: false });
-      setCursorKey(k => k + 1); // Force new cursor instance
-      dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true });
-    }
-  }, [isMobile]);
+    // Show paddington cursor on both mobile and desktop for snap-back
+    dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: false });
+    setCursorKey(k => k + 1); // Force new cursor instance
+    dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true });
+  }, []);
 
-  useEffect(() => {
-    if (pendingSnapBack && isMobile) {
-      let cancelled = false;
-      (async () => {
-        dispatch({ type: 'SET_FRAME_THICK', value: true });
-        try {
-          await Promise.all([
-            animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
-            animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
-          ]);
-        } catch (e) {
-          // Animation was interrupted
-        }
-        if (!cancelled) {
-          dispatch({ type: 'SET_FRAME_THICK', value: false });
-          dispatch({ type: 'SET_IS_ANIMATING_BACK', value: false });
-          dispatch({ type: 'SET_DRAG_OK', value: true }); // Re-enable after animation completes
-          setPendingSnapBack(false);
-        }
-      })();
-      return () => { cancelled = true; };
-    }
-  }, [pendingSnapBack, isMobile, x, y, state.centreX]);
+  // Mobile-only snap-back effect is no longer needed since we now show cursor on mobile too
+  // The handleCursorReadyToDragSnap will handle the animation for both platforms
 
   // When the cursor reaches the box (after user drag), snap the box back in sync
   const handleCursorReadyToDragSnap = React.useCallback(async () => {
@@ -405,8 +360,8 @@ const HeroTypingAnimation = React.memo(() => {
   /* ── render ─────────────────────────────────────────────── */
   return (
     <section className="relative w-full max-w-screen-xl mx-auto px-3 pt-16 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
-      {/* Animated cursor overlay */}
-      {state.showAnimatedCursor && !isMobile && (
+      {/* Animated cursor overlay - shown on both mobile and desktop */}
+      {state.showAnimatedCursor && (
         <AnimatedCursor
           key={cursorKey}
           targetRef={frameRef}
