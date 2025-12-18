@@ -1,10 +1,10 @@
 export const resumeData = {
   personalInfo: {
     name: "Aaryan Joharapurkar",
-    email: "ajoharap@uwo.ca",
-    phone: "+1 (226) 504-0323",
+    email: "aaryanj@outlook.com",
+    phone: "+1 (647) 916-1230",
     location: "London, ON",
-    linkedin: "https://www.linkedin.com/in/aaryan-joharapurkar/",
+    linkedin: "https://www.linkedin.com/in/aaryanj/",
     github: "https://github.com/aCupOfCoff33",
     resumeUrl: "/Aaryan Joharapurkar SWE Resume Neo.pdf"
   },
@@ -13,9 +13,11 @@ export const resumeData = {
     {
       id: 'american-global-2025',
       company: 'American Global',
-      position: 'Data Analytics & Strategy Intern',
+      position: 'Data Engineering & Strategy Intern',
       location: 'Oakville, ON',
-      dateRange: 'May 2025 - Present',
+      category: 'work',
+      startDate: '2025-05',
+      endDate: 'present',
       logo: 'https://media.licdn.com/dms/image/v2/C4E0BAQFxOWSzcQlx7w/company-logo_200_200/company-logo_200_200/0/1672776000338/american_global_llc_logo?e=2147483647&v=beta&t=6eASPMK3qET6z-fVO8yv4YWrhgf7l7wjaAwu_iF8q2s',
       highlights: [
         'ETL Schema Migration - Unified 30+ Excel sheets into a structured Sanity database.',
@@ -26,9 +28,11 @@ export const resumeData = {
     {
       id: 'esdc-2024',
       company: 'Employment and Social Development Canada',
-      position: 'Financial Services Officer',
+      position: 'Financial Services',
       location: 'North York, ON',
-      dateRange: 'May 2024 - Aug 2024',
+      category: 'work',
+      startDate: '2024-05',
+      endDate: '2024-08',
       logo: 'https://avatars.githubusercontent.com/u/20973642?s=280&v=4',
       highlights: [
         'SAP + Power BI Automation - Created ETL workflows resolving $150K+ in suspended transactions.',
@@ -39,9 +43,11 @@ export const resumeData = {
     {
       id: 'western-dev-society-2024',
       company: 'Western Developers Society',
-      position: 'Vice President of Developer Operations',
+      position: 'Vice President of Development',
       location: 'London, ON',
-      dateRange: 'Sept 2023 - Present',
+      category: 'club',
+      startDate: '2023-09',
+      endDate: 'present',
       logo: 'https://media.licdn.com/dms/image/v2/D4E0BAQEuc4ov6cWAtw/company-logo_200_200/company-logo_200_200/0/1736450937302/western_dev_society_logo?e=2147483647&v=beta&t=oYKXg7b_w-tYzt847EjXLG_VgKi9qecWt6vndmafe_g',
       highlights: [
         'Agile Leadership - Oversaw 120+ developers across multiple cross-functional projects.',
@@ -54,7 +60,9 @@ export const resumeData = {
       company: 'Ivey FinTech',
       position: 'Consultant Analyst',
       location: 'London, ON',
-      dateRange: 'Sept 2024 - Apr 2025',
+      category: 'club',
+      startDate: '2024-09',
+      endDate: '2025-04',
       logo: 'https://miro.medium.com/v2/resize:fit:512/1*429tXOeB5sYvQ37L-zasBQ.jpeg',
       highlights: [
         'AI Strategy Consulting - Identified automation opportunities for a national fintech client.',
@@ -67,7 +75,9 @@ export const resumeData = {
       company: 'Minimart',
       position: 'Business Analyst',
       location: 'London, ON',
-      dateRange: 'Sept 2022 - Mar 2023',
+      category: 'work',
+      startDate: '2022-09',
+      endDate: '2023-03',
       logo: 'https://banner2.cleanpng.com/20180630/xcw/aax01zjeu.webp',
       highlights: [
         'Financial Modeling - Built cash flow and ROI models to assess expansion feasibility.',

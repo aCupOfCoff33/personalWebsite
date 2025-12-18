@@ -1,6 +1,7 @@
 import React from "react";
 import { Sparkles } from "lucide-react";
-import ImageGallery from "../../../components/common/ImageGallery";
+import PhotoMosaic from "./PhotoMosaic";
+import aboutImages from "../data/aboutImagesData";
 
 const AboutMe = () => (
   <>
@@ -75,8 +76,8 @@ const AboutMe = () => (
       </div>
     </section>
 
-    {/* Image Gallery Section */}
-    <ImageGallery />
+    {/* Photo Gallery Mosaic */}
+    <PhotoMosaic images={aboutImages} />
   </>
 );
 

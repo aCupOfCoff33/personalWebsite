@@ -73,6 +73,14 @@ export const storiesData = [
   readTime: '14 min read',
     accent: 'blue',
     category: 'Testing',
+  },
+  {
+    id: 'BCG X Ivey Case Competition',
+    title: 'BCG X Ivey Case Competition',
+  dates: '2025',
+  readTime: '5 min read',
+    accent: 'green',
+    category: 'Testing',
   }
 ];
 

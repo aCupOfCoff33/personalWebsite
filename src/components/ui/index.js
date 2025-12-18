@@ -16,7 +16,3 @@ export { default as ErrorBoundary } from '../common/ErrorBoundary';
 // Bear-related components (could be moved to a separate module)
 export { default as UnifiedBearIcon } from '../common/UnifiedBearIcon';
 export { default as BearDebug } from '../common/BearDebug';
-
-// Future UI components would be added here
-// export { default as Input } from './Input';
-// export { default as Modal } from './Modal';
