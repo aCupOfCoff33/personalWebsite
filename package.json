@@ -16,6 +16,7 @@
     "cleanup:components": "cd src/components && rm -f *.jsx *.js && echo 'Cleanup complete! Remaining:' && ls -la"
   },
   "dependencies": {
+    "@react-three/fiber": "^9.4.2",
     "axios": "^1.8.4",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
@@ -29,7 +30,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.3",
-    "react-syntax-highlighter": "^16.1.0"
+    "react-syntax-highlighter": "^16.1.0",
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
