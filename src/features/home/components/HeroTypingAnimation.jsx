@@ -91,6 +91,7 @@ const HeroTypingAnimation = React.memo(() => {
     showAnimatedCursor: false,
     cursorShouldExit: false,
     cursorTriggered: false,
+    isAnimatingBack: false, // NEW: tracks when snap-back animation is in progress
   };
   
   function reducer(state, action) {
@@ -108,6 +109,7 @@ const HeroTypingAnimation = React.memo(() => {
       case 'SET_SHOW_ANIMATED_CURSOR': return { ...state, showAnimatedCursor: action.value };
       case 'SET_CURSOR_SHOULD_EXIT': return { ...state, cursorShouldExit: action.value };
       case 'SET_CURSOR_TRIGGERED': return { ...state, cursorTriggered: action.value };
+      case 'SET_IS_ANIMATING_BACK': return { ...state, isAnimatingBack: action.value };
       default: return state;
     }
   }
@@ -164,56 +166,62 @@ const HeroTypingAnimation = React.memo(() => {
     };
   }, []);
 
-  const clampIntoViewport = React.useCallback(() => {
-    if (!frameRef.current) return;
+  // Calculate viewport bounds for clamping - returns {minX, maxX, minY, maxY} as delta limits
+  const getViewportBounds = React.useCallback(() => {
+    if (!frameRef.current) return { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity };
     const rect = frameRef.current.getBoundingClientRect();
     const SAFE_MARGIN = getSafeMargin();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    let dx = 0;
-    let dy = 0;
+    // Current position in motion values
+    const currentX = x.get();
+    const currentY = y.get();
 
-    if (rect.left < SAFE_MARGIN.left) {
-      dx += SAFE_MARGIN.left - rect.left;
-    }
-    if (rect.right > viewportWidth - SAFE_MARGIN.right) {
-      dx += (viewportWidth - SAFE_MARGIN.right) - rect.right;
-    }
-    if (rect.top < SAFE_MARGIN.top) {
-      dy += SAFE_MARGIN.top - rect.top;
-    }
-    if (rect.bottom > viewportHeight - SAFE_MARGIN.bottom) {
-      dy += (viewportHeight - SAFE_MARGIN.bottom) - rect.bottom;
-    }
+    // Calculate the absolute position limits, then convert to motion value limits
+    // rect.left = some_origin + currentX, so some_origin = rect.left - currentX
+    const originX = rect.left - currentX;
+    const originY = rect.top - currentY;
 
-    if (dx !== 0) x.set(x.get() + dx);
-    if (dy !== 0) y.set(y.get() + dy);
+    const minX = SAFE_MARGIN.left - originX;
+    const maxX = (viewportWidth - SAFE_MARGIN.right) - rect.width - originX;
+    const minY = SAFE_MARGIN.top - originY;
+    const maxY = (viewportHeight - SAFE_MARGIN.bottom) - rect.height - originY;
+
+    return { minX, maxX, minY, maxY };
   }, [getSafeMargin, x, y]);
 
-  const handleDrag = React.useCallback((event, info) => {
+  const clampIntoViewport = React.useCallback(() => {
+    const bounds = getViewportBounds();
+    const currentX = x.get();
+    const currentY = y.get();
+    
+    const clampedX = Math.max(bounds.minX, Math.min(bounds.maxX, currentX));
+    const clampedY = Math.max(bounds.minY, Math.min(bounds.maxY, currentY));
+
+    if (clampedX !== currentX) x.set(clampedX);
+    if (clampedY !== currentY) y.set(clampedY);
+  }, [getViewportBounds, x, y]);
+
+  // Proactive drag handler that prevents going out of bounds entirely
+  const handleDrag = React.useCallback(() => {
     if (!frameRef.current) return;
-    const frame = frameRef.current.getBoundingClientRect();
-    const SAFE_MARGIN = getSafeMargin();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // Compute allowed delta window relative to current on-screen rect
-    const minDeltaX = SAFE_MARGIN.left - frame.left;
-    const maxDeltaX = (viewportWidth - SAFE_MARGIN.right) - frame.right;
-    const minDeltaY = SAFE_MARGIN.top - frame.top;
-    const maxDeltaY = (viewportHeight - SAFE_MARGIN.bottom) - frame.bottom;
-
-    // Clamp the incoming delta so we never exceed viewport bounds
-    const nextDeltaX = Math.max(minDeltaX, Math.min(maxDeltaX, info.delta.x));
-    const nextDeltaY = Math.max(minDeltaY, Math.min(maxDeltaY, info.delta.y));
-
-    // Framer already applied info.delta.* to x/y; only apply the correction diff
-    const correctionX = nextDeltaX - info.delta.x;
-    const correctionY = nextDeltaY - info.delta.y;
-    if (correctionX !== 0) x.set(x.get() + correctionX);
-    if (correctionY !== 0) y.set(y.get() + correctionY);
-  }, [x, y, getSafeMargin]);
+    
+    // Get bounds based on current frame position
+    const bounds = getViewportBounds();
+    
+    // Get the current motion values (already updated by framer)
+    const currentX = x.get();
+    const currentY = y.get();
+    
+    // Clamp to bounds - this creates a "hard stop" effect
+    const clampedX = Math.max(bounds.minX, Math.min(bounds.maxX, currentX));
+    const clampedY = Math.max(bounds.minY, Math.min(bounds.maxY, currentY));
+    
+    // Apply correction if needed
+    if (clampedX !== currentX) x.set(clampedX);
+    if (clampedY !== currentY) y.set(clampedY);
+  }, [x, y, getViewportBounds]);
   
   // Update x position when screen size changes
   useEffect(() => {
@@ -300,6 +308,7 @@ const HeroTypingAnimation = React.memo(() => {
   // Called by cursor after exit, hides cursor and enables drag
   const handleCursorDragComplete = React.useCallback(() => {
     dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
+    dispatch({ type: 'SET_IS_ANIMATING_BACK', value: false });
     dispatch({ type: 'SET_DRAG_OK', value: true });
     markIntroSeen();
   }, [markIntroSeen]);
@@ -326,25 +335,42 @@ const HeroTypingAnimation = React.memo(() => {
   /* snap the frame back after dragging */
   // Snap the frame back after dragging, with Paddington cursor sequence
   const [pendingSnapBack, setPendingSnapBack] = React.useState(false);
+  // Counter to force fresh cursor instance on each show (fixes stale state issues)
+  const [cursorKey, setCursorKey] = React.useState(0);
+  
   const snapBack = React.useCallback(() => {
+    // Immediately disable dragging to prevent race conditions
+    dispatch({ type: 'SET_DRAG_OK', value: false });
+    dispatch({ type: 'SET_IS_ANIMATING_BACK', value: true });
     setPendingSnapBack(true);
     if (!isMobile) {
       dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: false });
+      setCursorKey(k => k + 1); // Force new cursor instance
       dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true });
     }
   }, [isMobile]);
 
   useEffect(() => {
     if (pendingSnapBack && isMobile) {
+      let cancelled = false;
       (async () => {
         dispatch({ type: 'SET_FRAME_THICK', value: true });
-        await Promise.all([
-          animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
-          animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
-        ]);
-        dispatch({ type: 'SET_FRAME_THICK', value: false });
-        setPendingSnapBack(false);
+        try {
+          await Promise.all([
+            animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
+            animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
+          ]);
+        } catch (e) {
+          // Animation was interrupted
+        }
+        if (!cancelled) {
+          dispatch({ type: 'SET_FRAME_THICK', value: false });
+          dispatch({ type: 'SET_IS_ANIMATING_BACK', value: false });
+          dispatch({ type: 'SET_DRAG_OK', value: true }); // Re-enable after animation completes
+          setPendingSnapBack(false);
+        }
       })();
+      return () => { cancelled = true; };
     }
   }, [pendingSnapBack, isMobile, x, y, state.centreX]);
 
@@ -353,13 +379,20 @@ const HeroTypingAnimation = React.memo(() => {
     if (pendingSnapBack) {
       // Thicken border while the frame animates back
       dispatch({ type: 'SET_FRAME_THICK', value: true });
-      // Animate both x and y simultaneously for diagonal movement
-      await Promise.all([
-        animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
-        animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
-      ]);
+      // Store animation controls for potential cancellation
+      try {
+        // Animate both x and y simultaneously for diagonal movement
+        await Promise.all([
+          animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
+          animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
+        ]);
+      } catch (e) {
+        // Animation was cancelled, don't proceed with state changes
+        return;
+      }
       // Return border to thin after reaching target
       dispatch({ type: 'SET_FRAME_THICK', value: false });
+      dispatch({ type: 'SET_IS_ANIMATING_BACK', value: false });
       setPendingSnapBack(false);
       // Signal cursor to exit after the snap animation completes
       dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: true });
@@ -375,6 +408,7 @@ const HeroTypingAnimation = React.memo(() => {
       {/* Animated cursor overlay */}
       {state.showAnimatedCursor && !isMobile && (
         <AnimatedCursor
+          key={cursorKey}
           targetRef={frameRef}
           onDragComplete={handleCursorDragComplete}
           onCursorReadyToDrag={handleCursorReadyToDragSnap}
@@ -384,22 +418,31 @@ const HeroTypingAnimation = React.memo(() => {
       {/* ── headline & draggable blue frame ── */}
       <motion.div
         ref={frameRef}
-        drag={state.dragOK}
+        drag={state.dragOK && !state.isAnimatingBack}
         dragMomentum={false}
         dragElastic={0}
+        onDragStart={(event, info) => {
+          // Double-check: abort if animation is running (defensive)
+          if (state.isAnimatingBack || pendingSnapBack) {
+            return false;
+          }
+        }}
         onDrag={handleDrag}
         onDragEnd={() => { 
-          clampIntoViewport(); 
-          // Ensure thin border right after user drops
-          dispatch({ type: 'SET_FRAME_THICK', value: false });
-          snapBack(); 
+          // Only trigger snap-back if not already animating
+          if (!state.isAnimatingBack && !pendingSnapBack) {
+            clampIntoViewport(); 
+            // Ensure thin border right after user drops
+            dispatch({ type: 'SET_FRAME_THICK', value: false });
+            snapBack(); 
+          }
         }}
         onMouseEnter={() => dispatch({ type: 'SET_POINTER_HOVER', value: true })}
         onMouseLeave={() => dispatch({ type: 'SET_POINTER_HOVER', value: false })}
         dragConstraints={false}
         style={{ x: state.frameFrozen && !state.frameAligned ? getInitialX() : x, y }}
         className={`relative inline-block px-4 py-6 md:px-10 ${
-          state.dragOK ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+          state.dragOK && !state.isAnimatingBack ? "cursor-grab active:cursor-grabbing" : "cursor-default"
         } max-w-full`}
       >
         {state.showFrame && (

@@ -32,7 +32,6 @@ const sections = [
   {
     title: "Contact",
     items: [
-      // Fill these with your real links any time
       { kind: "external", href: "mailto:aaryanj@outlook.com", label: "Email", Icon: Mail },
       { kind: "external", href: "https://www.linkedin.com/in/aaryanj/", label: "LinkedIn", Icon: Linkedin },
       { kind: "external", href: "https://github.com/aCupOfCoff33", label: "GitHub", Icon: Github },
@@ -185,7 +184,7 @@ function Navbar() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
                             transition={{ duration: 0.35, layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }}
-                            className="grid grid-cols-5 gap-2 w-full"
+                            className="grid grid-cols-4 gap-2 w-full"
                           >
                             {section.items.map((item) => (
                               <Motion.a
@@ -270,13 +269,14 @@ function Navbar() {
         {/* Smoothly collapse into icons-only when reading (unified with desktop collapse state) */}
         <Motion.div
           initial={false}
-          animate={collapsed ? { width: 148, opacity: 1 } : { width: 0, opacity: 0 }}
+          animate={collapsed ? { width: 200, opacity: 1 } : { width: 0, opacity: 0 }}
           transition={{ type: "tween", duration: 0.25 }}
           className="overflow-hidden flex items-center justify-end gap-3 mr-1"
         >
           <a href="mailto:aaryanj@outlook.com" className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110" aria-label="Email"><Mail className="h-5 w-5" /></a>
           <a href="https://www.linkedin.com/in/aaryanj/" target="_blank" rel="noopener" className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110" aria-label="LinkedIn"><Linkedin className="h-5 w-5" /></a>
           <a href="https://github.com/aCupOfCoff33" target="_blank" rel="noopener" className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110" aria-label="GitHub"><Github className="h-5 w-5" /></a>
+          <a href="https://x.com/aaryanj05" target="_blank" rel="noopener" className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110" aria-label="X"><XIcon className="h-5 w-5" /></a>
         </Motion.div>
 
         <button
