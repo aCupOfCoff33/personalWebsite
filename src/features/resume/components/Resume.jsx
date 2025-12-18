@@ -20,74 +20,228 @@ const DownloadIcon = () => (
   </svg>
 );
 
+const TimelineColumn = ({ jobs }) => (
+  <div className="relative h-full">
+    {jobs.map(({ id, company, position, logo, layout, displayDate, isCompact }) => (
+      <React.Fragment key={id}>
+        <div
+          className="absolute left-6 right-6 pointer-events-none"
+          style={{
+            top: `${layout.barTop}px`,
+            height: `${layout.barHeight}px`,
+          }}
+        >
+          <div className="w-full h-full rounded-full bg-white/8 ring-1 ring-white/10" />
+        </div>
+
+        <div
+          className="absolute inset-x-0 pointer-events-auto transition-transform duration-200 hover:scale-[1.02]"
+          style={{
+            top: `${layout.cardTop}px`,
+            height: `${layout.cardHeight}px`,
+          }}
+        >
+          {isCompact ? (
+            <div className="h-full flex items-center bg-white/5 rounded-xl px-4 py-2 ring-1 ring-white/10 hover:bg-white/10 hover:ring-white/15 transition-all duration-300 shadow-lg">
+              <div className="flex items-center gap-3 w-full">
+                <div className="size-8 p-1 bg-white rounded-md flex justify-center items-center shadow-md flex-shrink-0">
+                  <img
+                    src={logo}
+                    alt={`${company} logo`}
+                    className="w-full h-full object-contain rounded-sm"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex-1 min-w-0 flex items-baseline gap-2">
+                  <h3 className="text-white text-sm font-semibold font-adamant truncate">
+                    {position}
+                  </h3>
+                  <span className="text-white/40 text-sm">•</span>
+                  <p className="text-white/70 text-sm font-normal font-adamant truncate">
+                    {company}
+                  </p>
+                </div>
+                <div className="text-white/50 text-xs font-mono uppercase tracking-wider flex-shrink-0">
+                  {displayDate}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex flex-col justify-between bg-white/5 rounded-xl px-5 py-4 ring-1 ring-white/10 hover:bg-white/10 hover:ring-white/15 transition-all duration-300 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="size-12 p-1.5 bg-white rounded-lg flex justify-center items-center shadow-md">
+                  <img
+                    src={logo}
+                    alt={`${company} logo`}
+                    className="w-full h-full object-contain rounded"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-white text-base font-semibold font-adamant truncate">
+                    {position}
+                  </h3>
+                  <p className="text-white/70 text-sm font-normal font-adamant truncate">
+                    {company}
+                  </p>
+                </div>
+              </div>
+              <p className="text-white/50 text-xs font-mono uppercase tracking-wider">
+                {displayDate}
+              </p>
+            </div>
+          )}
+        </div>
+      </React.Fragment>
+    ))}
+  </div>
+);
+
 export default function Resume() {
   const { personalInfo, workExperience } = resumeData;
-  
-  // Timeline configuration
-  const currentYear = new Date().getFullYear();
-  const startTimelineYear = 2021;
-  const endTimelineYear = currentYear + 1;
-  const years = Array.from(
-    { length: endTimelineYear - startTimelineYear + 1 }, 
-    (_, i) => endTimelineYear - i
-  );
-  const ROW_HEIGHT = 80; // pixels per year
 
-  // Format dates for display
-  const formatJobDates = (start, end) => {
-    const startDate = new Date(`${start}-01T12:00:00Z`);
-    const startMonth = startDate.toLocaleString('default', { month: 'short' }).toUpperCase();
-    const startYear = startDate.getFullYear().toString().slice(-2);
+  // --- CONFIGURATION ---
+  const ROW_HEIGHT = 100; // Vertical spacing between timeline markers
+  const TIMELINE_PADDING = 56;
+  const CARD_GAP = 32;
+  const COMPACT_CARD_HEIGHT = 72;
+  const EXPANDED_CARD_HEIGHT = 184;
+  const BAR_MIN_HEIGHT = 10;
+  const timelineStartYear = 2021;
+  const now = new Date();
+  const currentUtcYear = now.getUTCFullYear();
+  const currentUtcMonth = now.getUTCMonth();
+  const timelineStartDate = new Date(Date.UTC(timelineStartYear, 0, 1));
+  const timelineEndDate = new Date(Date.UTC(currentUtcYear, currentUtcMonth + 1, 0, 23, 59, 59, 999));
+  const totalTimelineDuration = Math.max(1, timelineEndDate.getTime() - timelineStartDate.getTime());
+  const years = [
+    'PRESENT',
+    ...Array.from(
+      { length: currentUtcYear - timelineStartYear + 1 },
+      (_, i) => currentUtcYear - i
+    ),
+  ];
+  const baseTimelineHeight = Math.max(ROW_HEIGHT, (years.length - 1) * ROW_HEIGHT);
+  const timelineHeight = baseTimelineHeight + TIMELINE_PADDING * 2;
+  const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30.4375;
 
-    if (end === 'present') {
-      return `${startMonth} ${startYear} - PRESENT`;
+  // --- HELPERS ---
+  const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' });
+
+  const parseMonthToDate = (value, { endOfMonth = false } = {}) => {
+    if (!value) return null;
+    const [year, month] = value.split('-').map(Number);
+    if (!year || !month) return null;
+    if (endOfMonth) {
+      return new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
     }
-
-    const endDate = new Date(`${end}-01T12:00:00Z`);
-    const endMonth = endDate.toLocaleString('default', { month: 'short' }).toUpperCase();
-    const endYear = endDate.getFullYear().toString().slice(-2);
-
-    return `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
+    return new Date(Date.UTC(year, month - 1, 1));
   };
 
-  // Calculate layout for each job - SINGLE COLUMN, NO OVERLAPS
+  const clampDateToTimeline = (date) => {
+    if (!date) return null;
+    const time = date.getTime();
+    if (time <= timelineStartDate.getTime()) return new Date(timelineStartDate);
+    if (time >= timelineEndDate.getTime()) return new Date(timelineEndDate);
+    return date;
+  };
+
+  const getOffsetFromTop = (date) => {
+    const clamped = clampDateToTimeline(date);
+    if (!clamped) return 0;
+    const ratio = (timelineEndDate.getTime() - clamped.getTime()) / totalTimelineDuration;
+    return TIMELINE_PADDING + ratio * baseTimelineHeight;
+  };
+
+  const formatJobDates = (start, end) => {
+    const startDate = parseMonthToDate(start);
+    if (!startDate) return '';
+
+    const startMonthLabel = monthFormatter.format(startDate).toUpperCase();
+    const startYearLabel = startDate.getUTCFullYear().toString().slice(-2);
+
+    if (end === 'present') {
+      const endMonthLabel = monthFormatter.format(timelineEndDate).toUpperCase();
+      const endYearLabel = timelineEndDate.getUTCFullYear().toString().slice(-2);
+      return `${startMonthLabel} ${startYearLabel} - ${endMonthLabel} ${endYearLabel} (PRESENT)`;
+    }
+
+    const endDate = parseMonthToDate(end);
+    if (!endDate) {
+      return `${startMonthLabel} ${startYearLabel}`;
+    }
+
+    const endMonthLabel = monthFormatter.format(endDate).toUpperCase();
+    const endYearLabel = endDate.getUTCFullYear().toString().slice(-2);
+
+    return `${startMonthLabel} ${startYearLabel} - ${endMonthLabel} ${endYearLabel}`;
+  };
+
+  // --- LAYOUT CALCULATION (USING PRECISE DATE POSITIONS) ---
   const jobsWithLayout = workExperience
     .map(job => {
       if (!job.startDate) return null;
 
-      const start = new Date(`${job.startDate}-01T12:00:00Z`);
-      const end = job.endDate === 'present' ? new Date() : new Date(`${job.endDate}-01T12:00:00Z`);
+      const startDate = parseMonthToDate(job.startDate);
+      if (!startDate) return null;
 
-      // Calculate position based on year (from the TOP of timeline which is endTimelineYear)
-      const startFraction = start.getFullYear() + start.getMonth() / 12;
-      const endFraction = end.getFullYear() + end.getMonth() / 12;
+      const rawEndDate = job.endDate === 'present'
+        ? timelineEndDate
+        : parseMonthToDate(job.endDate, { endOfMonth: true });
+      if (!rawEndDate) return null;
 
-      // Calculate top position: distance from the start of timeline (which is endTimelineYear at top)
-      // If job starts in 2025 and timeline starts at 2026, it's 1 year down = 80px
-      const topOffset = (endTimelineYear - startFraction) * ROW_HEIGHT;
-      const bottomOffset = (endTimelineYear - endFraction) * ROW_HEIGHT;
-      const height = topOffset - bottomOffset;
+      const clampedStart = clampDateToTimeline(startDate);
+      const clampedEnd = clampDateToTimeline(rawEndDate);
 
-      // Minimum height for readability
-      const minHeight = 50;
+      const barTop = getOffsetFromTop(clampedEnd);
+      const barBottom = getOffsetFromTop(clampedStart);
+      const barHeight = Math.max(barBottom - barTop, BAR_MIN_HEIGHT);
+      const durationInMonths = Math.max((clampedEnd.getTime() - clampedStart.getTime()) / MS_PER_MONTH, 0);
+      const isCompact = durationInMonths < 2;
+
+      return {
+        ...job,
+        layout: { barTop, barBottom, barHeight },
+        displayDate: formatJobDates(job.startDate, job.endDate),
+        isCompact,
+      };
+    })
+  .filter(Boolean) // Remove invalid jobs
+  .sort((a, b) => a.layout.barTop - b.layout.barTop); // Sort by most recent end date
+
+  const stackColumnCards = (jobs) => {
+    let lastBottom = -Infinity;
+
+    return jobs.map(job => {
+      const cardHeight = job.isCompact ? COMPACT_CARD_HEIGHT : EXPANDED_CARD_HEIGHT;
+      let cardTop = Math.max(job.layout.barTop - cardHeight / 2, 0);
+
+      if (lastBottom !== -Infinity) {
+        cardTop = Math.max(cardTop, lastBottom + CARD_GAP);
+      }
+
+      if (cardTop + cardHeight > timelineHeight) {
+        cardTop = Math.max(timelineHeight - cardHeight, 0);
+      }
+
+      cardTop = Math.max(cardTop, 0);
+
+      lastBottom = cardTop + cardHeight;
 
       return {
         ...job,
         layout: {
-          top: bottomOffset, // Position from top where job ENDS (more recent)
-          height: Math.max(height, minHeight),
+          ...job.layout,
+          cardTop,
+          cardHeight,
         },
-        displayDate: formatJobDates(job.startDate, job.endDate),
-        isCompact: Math.max(height, minHeight) < 120,
       };
-    })
-    .filter(Boolean);
+    });
+  };
 
-  // Split into Work Experience and Club Experience
-  const workExperienceIds = ['american-global-2025', 'esdc-2024', 'minimart-2023'];
-  
-  const workJobs = jobsWithLayout.filter(job => workExperienceIds.includes(job.id));
-  const clubJobs = jobsWithLayout.filter(job => !workExperienceIds.includes(job.id));
+  // Split into categories using the new data field
+  const workJobs = stackColumnCards(jobsWithLayout.filter(job => job.category === 'work'));
+  const clubJobs = stackColumnCards(jobsWithLayout.filter(job => job.category === 'club'));
 
   return (
     <section className="w-full bg-transparent py-24">
@@ -122,187 +276,34 @@ export default function Resume() {
         {/* Timeline Container */}
         <div className="relative">
           {/* Years and Horizontal Lines */}
-          <div className="space-y-20">
-            {years.map((year) => (
-              <div key={year} className="relative flex items-center gap-8">
-                <div className="flex-shrink-0 w-12">
-                  <div className="text-white/70 text-xl font-normal font-adamant">
-                    {year}
+          <div className="relative" style={{ height: timelineHeight }}>
+            <div
+              className="absolute inset-x-0"
+              style={{ top: TIMELINE_PADDING, bottom: TIMELINE_PADDING }}
+            >
+              <div className="flex flex-col justify-between h-full">
+                {years.map((year) => (
+                  <div key={year} className="relative flex items-center gap-8">
+                    <div className="flex-shrink-0 w-16">
+                      <div className="text-white/70 text-xl font-normal font-adamant">
+                        {year}
+                      </div>
+                    </div>
+                    <div className="flex-1 h-px bg-white/10" />
                   </div>
-                </div>
-                <div className="flex-1 h-px bg-white/10" />
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
           {/* Two Column Layout */}
-          <div className="absolute top-0 left-16 right-0 h-full pointer-events-none">
+          <div
+            className="absolute top-0 left-16 right-0 pointer-events-none"
+            style={{ height: timelineHeight }}
+          >
             <div className="relative h-full grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* LEFT COLUMN - Work Experience */}
-              <div className="relative">
-                <div className="mb-8 pointer-events-auto">
-                  <h2 className="text-white text-xl font-semibold font-adamant">Work Experience</h2>
-                </div>
-                <div className="relative h-full">
-                  {workJobs.map(({ id, company, position, logo, layout, displayDate, isCompact }) => (
-                    <div
-                      key={id}
-                      className="absolute w-full pointer-events-auto"
-                      style={{
-                        top: `${layout.top}px`,
-                        minHeight: `${layout.height}px`,
-                      }}
-                    >
-                      {isCompact ? (
-                        // COMPACT CARD STYLE
-                        <div className="bg-white/5 rounded-xl px-4 py-1.5 ring-1 ring-white/10 
-                                        hover:bg-white/10 hover:ring-white/20 transition-all duration-300 shadow-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="size-6 p-0.5 bg-white rounded flex justify-center items-center 
-                                          shadow-md flex-shrink-0">
-                              <img 
-                                className="w-full h-full rounded object-contain" 
-                                src={logo} 
-                                alt={`${company} logo`}
-                                loading="lazy"
-                              />
-                            </div>
-
-                            <div className="flex-1 min-w-0 flex items-center gap-2">
-                              <h3 className="text-white text-sm font-semibold font-adamant truncate">
-                                {position}
-                              </h3>
-                              <span className="text-white/40 text-sm">•</span>
-                              <p className="text-white/70 text-sm font-normal font-adamant truncate">
-                                {company}
-                              </p>
-                            </div>
-
-                            <div className="text-white/50 text-[10px] font-normal font-adamant uppercase tracking-wider flex-shrink-0">
-                              {displayDate}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        // EXPANDED CARD STYLE
-                        <div className="bg-white/5 rounded-xl px-6 py-5 ring-1 ring-white/10 
-                                        hover:bg-white/10 hover:ring-white/20 transition-all duration-300 shadow-lg">
-                          <div className="flex items-start gap-4 mb-3">
-                            <div className="size-12 p-1.5 bg-white rounded-lg flex justify-center items-center 
-                                          shadow-md flex-shrink-0">
-                              <img 
-                                className="w-full h-full rounded object-contain" 
-                                src={logo} 
-                                alt={`${company} logo`}
-                                loading="lazy"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-1">
-                            <h3 className="text-white text-base font-semibold font-adamant">
-                              {position}
-                            </h3>
-                            <p className="text-white/70 text-sm font-normal font-adamant">
-                              {company}
-                            </p>
-                            
-                            <div className="pt-2">
-                              <p className="text-white/50 text-[10px] font-normal font-adamant uppercase tracking-wider">
-                                {displayDate}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN - Club Experience */}
-              <div className="relative">
-                <div className="mb-8 pointer-events-auto">
-                  <h2 className="text-white text-xl font-semibold font-adamant">Club Experience</h2>
-                </div>
-                <div className="relative h-full">
-                  {clubJobs.map(({ id, company, position, logo, layout, displayDate, isCompact }) => (
-                    <div
-                      key={id}
-                      className="absolute w-full pointer-events-auto"
-                      style={{
-                        top: `${layout.top}px`,
-                        minHeight: `${layout.height}px`,
-                      }}
-                    >
-                      {isCompact ? (
-                        // COMPACT CARD STYLE
-                        <div className="bg-white/5 rounded-xl px-4 py-1.5 ring-1 ring-white/10 
-                                        hover:bg-white/10 hover:ring-white/20 transition-all duration-300 shadow-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="size-6 p-0.5 bg-white rounded flex justify-center items-center 
-                                          shadow-md flex-shrink-0">
-                              <img 
-                                className="w-full h-full rounded object-contain" 
-                                src={logo} 
-                                alt={`${company} logo`}
-                                loading="lazy"
-                              />
-                            </div>
-
-                            <div className="flex-1 min-w-0 flex items-center gap-2">
-                              <h3 className="text-white text-sm font-semibold font-adamant truncate">
-                                {position}
-                              </h3>
-                              <span className="text-white/40 text-sm">•</span>
-                              <p className="text-white/70 text-sm font-normal font-adamant truncate">
-                                {company}
-                              </p>
-                            </div>
-
-                            <div className="text-white/50 text-[10px] font-normal font-adamant uppercase tracking-wider flex-shrink-0">
-                              {displayDate}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        // EXPANDED CARD STYLE
-                        <div className="bg-white/5 rounded-xl px-6 py-5 ring-1 ring-white/10 
-                                        hover:bg-white/10 hover:ring-white/20 transition-all duration-300 shadow-lg">
-                          <div className="flex items-start gap-4 mb-3">
-                            <div className="size-12 p-1.5 bg-white rounded-lg flex justify-center items-center 
-                                          shadow-md flex-shrink-0">
-                              <img 
-                                className="w-full h-full rounded object-contain" 
-                                src={logo} 
-                                alt={`${company} logo`}
-                                loading="lazy"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-1">
-                            <h3 className="text-white text-base font-semibold font-adamant">
-                              {position}
-                            </h3>
-                            <p className="text-white/70 text-sm font-normal font-adamant">
-                              {company}
-                            </p>
-                            
-                            <div className="pt-2">
-                              <p className="text-white/50 text-[10px] font-normal font-adamant uppercase tracking-wider">
-                                {displayDate}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
+              <TimelineColumn jobs={workJobs} />
+              <TimelineColumn jobs={clubJobs} />
             </div>
           </div>
         </div>

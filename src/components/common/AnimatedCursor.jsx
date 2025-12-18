@@ -1,6 +1,6 @@
 // AnimatedCursor.jsx
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import CursorSVG from './CursorSVG';
+import { MousePointer2 } from 'lucide-react';
 
 /**
  * AnimatedCursor simulates a cursor moving in from the left, clicking and dragging a target,
@@ -148,12 +148,12 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
     transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`,
   };
 
-  // Label style
+  // Label style: positioned to the right of the cursor
   const labelStyle = {
     position: 'absolute',
-    left: '50%',
-    top: CURSOR_SIZE + 8,
-    transform: 'translateX(-50%)',
+    left: `${CURSOR_SIZE + 10}px`,
+    top: '50%',
+    transform: 'translateY(-50%)',
     background: CURSOR_COLOR,
     color: 'white',
     borderRadius: 20,
@@ -167,7 +167,7 @@ const AnimatedCursor = ({ targetRef, onDragComplete, onCursorReadyToDrag, should
 
   return (
     <div ref={cursorRef} style={cursorStyle} aria-hidden>
-      <CursorSVG color={CURSOR_COLOR} size={CURSOR_SIZE} />
+      <MousePointer2 color={CURSOR_COLOR} size={CURSOR_SIZE} strokeWidth={1.5} />
       <div style={labelStyle}>{LABEL}</div>
     </div>
   );

@@ -24,9 +24,9 @@ const sections = [
     title: "Navigation",
     items: [
       { kind: "internal", to: "/", label: "Home", Icon: HomeIcon },
-      { kind: "internal", to: "/about", label: "About", Icon: UserRound },
       { kind: "internal", to: "/projects", label: "Projects", Icon: Briefcase },
-      { kind: "internal", to: "/resume", label: "Resume", Icon: FileText },
+      { kind: "internal", to: "/about", label: "About", Icon: UserRound },
+
     ],
   },
   {
@@ -37,7 +37,6 @@ const sections = [
       { kind: "external", href: "https://www.linkedin.com/in/aaryanj/", label: "LinkedIn", Icon: Linkedin },
       { kind: "external", href: "https://github.com/aCupOfCoff33", label: "GitHub", Icon: Github },
       { kind: "external", href: "https://x.com/aaryanj05", label: "X", Icon: XIcon },
-      { kind: "external", href: "https://www.instagram.com/aaryan.s/", label: "Instagram", Icon: Instagram },
     ],
   },
 ];
