@@ -359,7 +359,7 @@ const HeroTypingAnimation = React.memo(() => {
 
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <section className="relative w-full max-w-screen-xl mx-auto px-3 pt-16 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
+    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-8 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
       {/* Animated cursor overlay - shown on both mobile and desktop */}
       {state.showAnimatedCursor && (
         <AnimatedCursor

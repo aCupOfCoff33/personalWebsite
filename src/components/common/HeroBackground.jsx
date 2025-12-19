@@ -160,7 +160,7 @@ const GradientMesh = () => {
 
 const HeroBackground = () => {
   return (
-    <div className="fixed inset-0 w-full h-full -z-10 bg-[#151515]">
+    <div className="absolute inset-0 w-full h-full z-0 bg-[#151515]">
       <Canvas
         camera={{ position: [0, 0, 1] }}
         dpr={[1, 1.5]}

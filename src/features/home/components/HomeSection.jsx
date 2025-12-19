@@ -14,9 +14,8 @@ export default function HomeSection() {
           <Hero />
         </div>
         {/* remove previous black fade to keep continuous background */}
-        {/* spacer removed intentionally */}
       </section>
-      {/* Stories Section (replaces previous "Things I've Built in My Cave") */}
+      {/* Stories Section */}
       <Suspense fallback={null}>
         <div className="w-full flex justify-center items-center" data-bg-scene="stories">
           <Stories />

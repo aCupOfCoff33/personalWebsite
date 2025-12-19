@@ -4,6 +4,7 @@ import { useReveal } from '../../hooks/useReveal';
 import { HIDDEN } from '../common/RevealStarter';
 import ContentCarousel from './ContentCarousel';
 import ContentGrid from './ContentGrid';
+import SectionHeading from './SectionHeading';
 
 // Main content section wrapper
 function ContentSection({
@@ -11,7 +12,7 @@ function ContentSection({
   subtitle,
   items = [],
   layout = 'carousel', // 'carousel' or 'grid'
-  showGradientBar = true,
+  showGradientBar = false,
   showControls = true,
   columns = { base: 1, md: 2, lg: 3 },
   cardVariant, // Auto-determined based on layout if not provided
@@ -39,33 +40,16 @@ function ContentSection({
       <div className={`container mx-auto px-4 sm:px-6 lg:px-8 ${containerClassName}`}>
         {/* Section Header */}
         {/* Fixed invalid z-index utility: use z-[1] instead of z-1 */}
-        <div className={`mb-12 z-[1] ${layout === 'carousel' ? 'flex items-center justify-between' : ''}`}>
-          <div>
-            {showGradientBar && (
-              <span 
-                data-reveal 
-                className={`${HIDDEN} inline-block h-1 w-16 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500`} 
-              />
-            )}
-            <h2 
-              data-reveal 
-              className={`${HIDDEN} mt-4 text-4xl font-semibold italic text-white`}
-            >
-              {title}
-            </h2>
-            {subtitle && (
-              <p 
-                data-reveal 
-                className={`${HIDDEN} mt-2 max-w-xl text-lg text-gray-300`}
-              >
-                {subtitle}
-              </p>
-            )}
-          </div>
+        <div className={`z-[1] ${layout === 'carousel' ? 'flex items-end justify-between mb-12' : ''}`}>
+          <SectionHeading 
+            title={title} 
+            subtitle={subtitle} 
+            className="mb-0"
+          />
 
           {/* Carousel Controls */}
           {layout === 'carousel' && showControls && (
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 mb-2">
               <button
                 onClick={() => {
                   const carousel = document.querySelector(`[data-carousel-id="${carouselId}"]`);

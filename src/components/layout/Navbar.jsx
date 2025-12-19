@@ -152,7 +152,7 @@ function Navbar() {
     <>
       {/* Desktop vertical sidebar */}
       <aside
-        className="hidden md:flex fixed left-0 top-0 h-screen w-60 pt-8 px-4 border-r border-white/10 bg-[#0C100D]/95 backdrop-blur flex-col gap-4 z-40"
+        className="hidden md:flex w-60 pt-8 px-4 flex-col gap-4 z-40 h-full"
         style={{ "--left-color": "#121813" }}
       >
         {/* Brand */}
@@ -289,7 +289,7 @@ function Navbar() {
       </div>
 
       {/* Spacer keeps mobile content from sliding under the fixed navbar */}
-      <div className="md:hidden h-[2.5rem]" aria-hidden="true" />
+      <div className="md:hidden h-[7.5rem]" aria-hidden="true" />
 
       {/* Mobile dropdown panel - slides from top */}
       <AnimatePresence>

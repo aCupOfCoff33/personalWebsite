@@ -1,4 +1,5 @@
 import React from 'react';
+import SectionHeading from '../../../components/ui/SectionHeading';
 // Figma-aligned simplified layout without reveal animations
 
 // Experience data structure designed for easy SQL/MongoDB migration
@@ -104,9 +105,7 @@ const Experience = React.memo(() => {
     <section className="w-full bg-transparent py-12 lg:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Title */}
-        <div className="inline-flex items-center gap-2.5 mb-2">
-          <h2 className="text-white text-3xl sm:text-4xl italic font-normal font-adamant">Experience</h2>
-        </div>
+        <SectionHeading title="Experience" />
 
         {/* List */}
         <div className="w-full flex flex-col">

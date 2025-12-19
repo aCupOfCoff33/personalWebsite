@@ -1,4 +1,5 @@
 import React from "react";
+import SectionHeading from "../../../components/ui/SectionHeading";
 import PhotoMosaic from "./PhotoMosaic";
 import aboutImages from "../data/aboutImagesData";
 
@@ -8,10 +9,7 @@ const AboutMe = () => (
     <section className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24 text-white font-adamant">
       <div className="container mx-auto max-w-screen-xl">
         {/* Section Title */}
-        <div className="mb-12">
-          <span className="inline-block h-1 w-16 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-          <h2 className="mt-4 text-4xl font-semibold italic text-white">About Me</h2>
-        </div>
+        <SectionHeading title="About Me" />
 
         {/* Content Layout */}
         <div className="flex flex-col lg:flex-row justify-center items-start lg:items-center gap-8 lg:gap-12">

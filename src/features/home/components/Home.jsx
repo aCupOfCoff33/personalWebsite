@@ -8,7 +8,7 @@ export default function Home() {
     return (
       <>
         <section className="relative min-h-[calc(100svh-44px)] md:min-h-screen flex items-start pt-0 md:pt-8" data-bg-scene="hero">
-          <div className="mx-auto max-w-screen-xl px-4 md:px-6 w-full z-10">
+          <div className="mx-auto max-w-screen-xl px-0 md:px-6 w-full z-10">
             <Hero />
           </div>
           {/* remove previous black fade to keep continuous background */}
