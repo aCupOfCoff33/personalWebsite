@@ -397,51 +397,6 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* Smoothly collapse into icons-only when reading (unified with desktop collapse state) */}
-        <Motion.div
-          initial={false}
-          animate={
-            collapsed ? { width: 200, opacity: 1 } : { width: 0, opacity: 0 }
-          }
-          transition={{ type: "tween", duration: 0.25 }}
-          className="overflow-hidden flex items-center justify-end gap-3 mr-1"
-        >
-          <a
-            href="mailto:aaryanj@outlook.com"
-            className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110"
-            aria-label="Email"
-          >
-            <Mail className="h-5 w-5" />
-          </a>
-          <a
-            href="https://www.linkedin.com/in/aaryanj/"
-            target="_blank"
-            rel="noopener"
-            className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110"
-            aria-label="LinkedIn"
-          >
-            <Linkedin className="h-5 w-5" />
-          </a>
-          <a
-            href="https://github.com/aCupOfCoff33"
-            target="_blank"
-            rel="noopener"
-            className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110"
-            aria-label="GitHub"
-          >
-            <Github className="h-5 w-5" />
-          </a>
-          <a
-            href="https://x.com/aaryanj05"
-            target="_blank"
-            rel="noopener"
-            className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110"
-            aria-label="X"
-          >
-            <XIcon className="h-5 w-5" />
-          </a>
-        </Motion.div>
-
         <button
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           className="rounded-full p-4 bg-neutral-900 text-white hover:bg-neutral-800 transition"
