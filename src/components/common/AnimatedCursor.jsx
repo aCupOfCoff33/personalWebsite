@@ -154,7 +154,13 @@ const AnimatedCursor = ({
       if (scrollHandler) window.removeEventListener("scroll", scrollHandler);
       isMountedRef.current = false;
     };
-  }, [phase, onCursorReadyToDrag, onDragComplete, computeGrabPosition]);
+  }, [
+    phase,
+    onCursorReadyToDrag,
+    onDragComplete,
+    computeGrabPosition,
+    offScreenX,
+  ]);
 
   // Cursor style (use user's image as background)
   const cursorStyle = {
