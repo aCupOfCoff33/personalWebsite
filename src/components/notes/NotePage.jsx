@@ -1,17 +1,22 @@
-import React, { useEffect, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { useParams, Link } from 'react-router-dom';
-import NoteSection from './NoteSection';
-import { getNoteBySlug } from './mockNotesData';
-import { useNotesTOC } from './NotesContext';
-import { motion } from 'framer-motion';
+import React, { useEffect, useMemo } from "react";
+import PropTypes from "prop-types";
+import { useParams, Link } from "react-router-dom";
+import NoteSection from "./NoteSection";
+import { getNoteBySlug } from "./mockNotesData";
+import { useNotesTOCActions } from "./NotesContext";
+import { motion } from "framer-motion";
 
 // Presents a single note page at route /notes/:slug
 export default function NotePage() {
   const { slug } = useParams();
   const [note, setNote] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  const { setTocItems, setTocVisible, setContactCollapsed, setReadingProgress } = useNotesTOC();
+  const {
+    setTocItems,
+    setTocVisible,
+    setContactCollapsed,
+    setReadingProgress,
+  } = useNotesTOCActions();
   const sentinelRef = React.useRef(null);
 
   useEffect(() => {
@@ -34,7 +39,7 @@ export default function NotePage() {
   const tocItems = useMemo(() => {
     if (!note) return [];
     return note.sections
-      .filter((s) => s.type === 'heading')
+      .filter((s) => s.type === "heading")
       .map((s) => ({ id: s.id, text: s.text, level: s.level || 2 }));
   }, [note]);
 
@@ -51,7 +56,7 @@ export default function NotePage() {
     // Slightly above-center sentinel to consider a heading "active" when it reaches near the top of the viewport
     const observerOptions = {
       root: null,
-      rootMargin: '-30% 0px -70% 0px',
+      rootMargin: "-30% 0px -70% 0px",
       threshold: 0.01,
     };
 
@@ -102,7 +107,7 @@ export default function NotePage() {
 
       // Hysteresis: enter reading slightly below sentinel; exit only after moving well above it
       const enterY = sentinelTop - 32; // collapse once we pass near sentinel
-      const exitY = sentinelTop - 96;  // expand only when back near the very top
+      const exitY = sentinelTop - 96; // expand only when back near the very top
 
       const current = readingRef.current;
       let next = current;
@@ -140,11 +145,11 @@ export default function NotePage() {
       computeAndSet();
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
       if (onScroll._raf) cancelAnimationFrame(onScroll._raf);
     };
   }, [note, tocItems, setTocVisible, setContactCollapsed, setReadingProgress]);
@@ -162,14 +167,18 @@ export default function NotePage() {
     return (
       <div className="mx-auto max-w-screen-xl px-4 md:px-6 py-20 text-white">
         <p className="text-lg">Note not found.</p>
-        <Link to="/" className="text-blue-400 underline">Go home</Link>
+        <Link to="/" className="text-blue-400 underline">
+          Go home
+        </Link>
       </div>
     );
   }
 
   // Compute published label safely now that `note` is defined
   const publishedDate = new Date(note.date);
-  const publishedLabel = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(publishedDate);
+  const publishedLabel = new Intl.DateTimeFormat(undefined, {
+    dateStyle: "long",
+  }).format(publishedDate);
   const MotionH1 = motion.h1;
 
   return (
@@ -185,7 +194,9 @@ export default function NotePage() {
           >
             {note.title}
           </MotionH1>
-          <p className="mt-3 text-neutral-400 font-adamant text-lg">Published: {publishedLabel}</p>
+          <p className="mt-3 text-neutral-400 font-adamant text-lg">
+            Published: {publishedLabel}
+          </p>
         </div>
       </header>
 
@@ -193,7 +204,11 @@ export default function NotePage() {
         {/* Large thumbnail */}
         <div className="w-full">
           <div className="w-full aspect-video overflow-hidden rounded-2xl border border-white/10">
-            <img src={note.thumbnail} alt="thumbnail" className="w-full h-full object-cover" />
+            <img
+              src={note.thumbnail}
+              alt="thumbnail"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
@@ -216,5 +231,3 @@ export default function NotePage() {
 NotePage.propTypes = {
   // no props; uses router and context
 };
-
-
