@@ -26,9 +26,16 @@ const CURSOR_COLOR = "#9B7CF6"; // Match label background
 const ENTRANCE_DURATION = 1200; // entrance duration
 const DRAG_DURATION = 600; // match frame drag speed (kept for reference)
 const EXIT_DURATION = 1200; // exit duration
-// Off-screen position: far enough left to hide cursor + label completely
-// Label is ~120px wide + 10px gap, so -200px ensures everything is hidden
-const OFF_SCREEN_X = -200;
+
+// Calculate off-screen position dynamically to ensure cursor + label are completely hidden
+// Label is ~120px wide + 10px gap + cursor 40px = ~170px total width
+// Use a larger offset to guarantee it's fully off-screen on all devices
+const getOffScreenX = () => {
+  // For mobile (narrow screens), use a fixed large negative value
+  // For desktop, calculate based on actual needs
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  return isMobile ? -300 : -250;
+};
 
 const AnimatedCursor = ({
   targetRef,
@@ -39,12 +46,13 @@ const AnimatedCursor = ({
   const cursorRef = useRef(null);
   const [phase, setPhase] = useState("enter"); // enter, drag, exit
   const rafRef = useRef(null);
-  const posRef = useRef({ x: OFF_SCREEN_X, y: 200 });
+  const offScreenX = getOffScreenX();
+  const posRef = useRef({ x: offScreenX, y: 200 });
   const isMountedRef = useRef(false);
 
   // Compute a stable grab point on the target: middle edge so it looks like it "grabs" the box from the middle
   const computeGrabPosition = useCallback(() => {
-    if (!targetRef.current) return { x: OFF_SCREEN_X, y: 200 };
+    if (!targetRef.current) return { x: offScreenX, y: 200 };
     const rect = targetRef.current.getBoundingClientRect();
     const anchorX = rect.left + rect.width / 2; // middle edge
     const anchorY = rect.bottom - 10; // vertical center
@@ -52,7 +60,7 @@ const AnimatedCursor = ({
     const targetX = anchorX - CURSOR_TIP_OFFSET_X;
     const targetY = anchorY - CURSOR_TIP_OFFSET_Y;
     return { x: targetX, y: targetY };
-  }, [targetRef]);
+  }, [targetRef, offScreenX]);
 
   const setCursorTransform = (x, y) => {
     if (!cursorRef.current) return;
@@ -104,7 +112,7 @@ const AnimatedCursor = ({
 
       // Start completely off-screen left (including label), aligned on Y with current target
       const { y } = computeGrabPosition();
-      setCursorTransform(OFF_SCREEN_X, y);
+      setCursorTransform(offScreenX, y);
 
       // Ensure we animate to live target (updates if user scrolls before arrival)
       const applyTarget = () => {
@@ -133,7 +141,7 @@ const AnimatedCursor = ({
         el.style.transition = `transform ${EXIT_DURATION}ms cubic-bezier(0.4,0,0.2,1)`;
       // Slide completely off-screen to the left (including label), keep current Y
       const { y } = posRef.current;
-      setCursorTransform(OFF_SCREEN_X, y);
+      setCursorTransform(offScreenX, y);
       enterTimeout = setTimeout(() => {
         if (onDragComplete) onDragComplete();
       }, EXIT_DURATION);
@@ -155,7 +163,7 @@ const AnimatedCursor = ({
     top: 0,
     width: CURSOR_SIZE,
     height: CURSOR_SIZE,
-    zIndex: 9999,
+    zIndex: 40,
     pointerEvents: "none",
     background: "none",
     display: "flex",

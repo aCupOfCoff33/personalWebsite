@@ -223,7 +223,7 @@ function Navbar() {
     <>
       {/* Desktop vertical sidebar */}
       <aside
-        className="hidden md:flex w-60 pt-8 px-4 flex-col gap-4 z-40 h-full"
+        className="hidden md:flex w-60 pt-8 px-4 flex-col gap-4 z-40 h-full bg-[#0C100D]"
         style={{ "--left-color": "#121813" }}
       >
         {/* Brand */}
@@ -386,7 +386,7 @@ function Navbar() {
       </aside>
 
       {/* Mobile top bar with morphing contact area */}
-      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-5 py-5 min-h-[7.5rem] z-50 bg-[#0C100D] border-b border-white/20">
+      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-5 py-5 min-h-[7.5rem] z-50 bg-[#0C100D] border-b border-white/10">
         <div
           className="flex items-center gap-5"
           style={{ position: "relative" }}
