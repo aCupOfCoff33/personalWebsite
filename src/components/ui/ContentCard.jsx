@@ -21,10 +21,9 @@ function ContentCard({
   return (
     <div
       className={clsx(
-        'group shrink-0 snap-start',
-        'relative isolate p-px z-[100]',           // 1-px padding for gradient border and high z-index
-        'w-full max-w-[420px] mx-auto',            // fill available width on mobile and center, cap width
-        'aspect-[5/8] md:w-80 md:h-[512px] md:aspect-auto', // maintain aspect ratio on mobile, keep desktop sizes on md+
+        'group relative isolate p-px',             // 1-px padding for gradient border
+        'w-full max-w-[320px] mx-auto',            // fill container up to a max width
+        'aspect-[5/8]',                            // maintain aspect ratio always
         'transition-transform duration-300 ease-out hover:scale-[1.02]',
         className,
       )}

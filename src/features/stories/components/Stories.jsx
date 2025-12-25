@@ -13,7 +13,7 @@ function Stories() {
       items={storiesData}
       layout="carousel"
       showControls={true}
-      cardVariant="panel" // Flat-modern panel style
+      cardVariant="panel"
       showViewAll={true}
       maxItems={7}
       onViewAllClick={() => navigate('/notes')}

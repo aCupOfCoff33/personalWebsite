@@ -6,11 +6,10 @@ import aboutImages from "../data/aboutImagesData";
 const AboutMe = () => (
   <>
     {/* ---- Foreground content ---- */}
-    <section className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24 text-white font-adamant">
-      <div className="container mx-auto max-w-screen-xl">
-        {/* Section Title */}
-        <SectionHeading title="About Me" />
-
+    <section className="relative z-10 w-full text-white font-adamant">
+      <SectionHeading title="About Me" />
+      
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         {/* Content Layout */}
         <div className="flex flex-col lg:flex-row justify-center items-start lg:items-center gap-8 lg:gap-12">
           

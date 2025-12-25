@@ -14,7 +14,7 @@ function ContentSection({
   layout = 'carousel', // 'carousel' or 'grid'
   showGradientBar = false,
   showControls = true,
-  columns = { base: 1, md: 2, lg: 3 },
+  columns = { base: 1, md: 2, lg: 3, xl: 3, '2xl': 4 },
   cardVariant, // Auto-determined based on layout if not provided
   className = '',
   containerClassName = '',
@@ -45,6 +45,7 @@ function ContentSection({
             title={title} 
             subtitle={subtitle} 
             className="mb-0"
+            noContainer={true}
           />
 
           {/* Carousel Controls */}
@@ -113,6 +114,8 @@ ContentSection.propTypes = {
     base: PropTypes.number,
     md: PropTypes.number,
     lg: PropTypes.number,
+    xl: PropTypes.number,
+    '2xl': PropTypes.number,
   }),
   cardVariant: PropTypes.string,
   className: PropTypes.string,

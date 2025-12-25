@@ -244,13 +244,13 @@ export default function Resume() {
   const clubJobs = stackColumnCards(jobsWithLayout.filter(job => job.category === 'club'));
 
   return (
-    <section className="w-full bg-transparent py-24">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="w-full bg-transparent">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24">
         
         {/* Header Section */}
         <div className="mb-16 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
           <div className="inline-flex flex-col items-start gap-1">
-            <h1 className="text-white text-4xl lg:text-5xl font-normal font-adamant tracking-wide">
+            <h1 className="text-white text-4xl lg:text-5xl font-semibold italic font-adamant tracking-wide">
               CAREER JOURNEY
             </h1>
           </div>

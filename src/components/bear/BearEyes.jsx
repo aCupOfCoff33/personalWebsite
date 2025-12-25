@@ -90,10 +90,19 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
 
     let mouseX = 0;
     let mouseY = 0;
+    let leftBbox = null;
+    let rightBbox = null;
+
+    const updateBboxes = () => {
+      if (leftEl) leftBbox = leftEl.getBoundingClientRect();
+      if (rightEl) rightBbox = rightEl.getBoundingClientRect();
+    };
 
     const updateHighlights = () => {
-      const move = (el) => {
-        const bbox = el.getBoundingClientRect();
+      if (!leftBbox || !rightBbox) updateBboxes();
+      
+      const move = (el, bbox) => {
+        if (!el || !bbox) return;
         const cx = bbox.left + bbox.width / 2;
         const cy = bbox.top + bbox.height / 2;
         const dx = mouseX - cx;
@@ -102,14 +111,13 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
         const nx = dx / dist;
         const ny = dy / dist;
         // Limit movement to stay within iris boundaries
-        // Iris radius is ~3.2px, highlight radius is ~1.2px, so max safe translation is ~2px
         const maxMove = 1.0;
         const tx = nx * maxMove;
         const ty = ny * maxMove;
         el.style.transform = `translate(${tx}px, ${ty}px)`;
       };
-      move(leftEl);
-      move(rightEl);
+      move(leftEl, leftBbox);
+      move(rightEl, rightBbox);
       rafRef.current = null;
     };
 
@@ -118,15 +126,37 @@ const BearEyes = React.memo(function BearEyes({ mode = 'default' }) {
       if (!rafRef.current) rafRef.current = requestAnimationFrame(updateHighlights);
     };
     const onLeave = () => {
-      [leftEl, rightEl].forEach((el) => { el.style.transform = 'translate(0px, 0px)'; });
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      [leftEl, rightEl].forEach((el) => { 
+        if (el) el.style.transform = 'translate(0px, 0px)'; 
+      });
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) onLeave();
     };
 
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseleave', onLeave);
+    window.addEventListener('blur', onLeave);
+    window.addEventListener('resize', updateBboxes);
+    window.addEventListener('scroll', updateBboxes, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    // Initial bbox calculation
+    updateBboxes();
+
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseleave', onLeave);
+      window.removeEventListener('blur', onLeave);
+      window.removeEventListener('resize', updateBboxes);
+      window.removeEventListener('scroll', updateBboxes);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [mode]);
 

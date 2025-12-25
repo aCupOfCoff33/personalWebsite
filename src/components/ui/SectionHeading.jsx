@@ -12,8 +12,9 @@ const SectionHeading = ({
   className = '',
   titleClassName = '',
   subtitleClassName = '',
+  noContainer = false,
 }) => {
-  return (
+  const content = (
     <div className={`mb-12 ${className}`}>
       <h2
         className={`text-4xl font-normal italic text-white font-adamant ${titleClassName}`}
@@ -29,6 +30,14 @@ const SectionHeading = ({
       )}
     </div>
   );
+
+  if (noContainer) return content;
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+      {content}
+    </div>
+  );
 };
 
 SectionHeading.propTypes = {
@@ -37,6 +46,7 @@ SectionHeading.propTypes = {
   className: PropTypes.string,
   titleClassName: PropTypes.string,
   subtitleClassName: PropTypes.string,
+  noContainer: PropTypes.bool,
 };
 
 export default SectionHeading;

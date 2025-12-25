@@ -14,8 +14,8 @@ const vertexShader = `
 
 const fragmentShader = `
   uniform float uTime;
-  uniform vec3 uColor1; // Lighter gray
-  uniform vec3 uColor2; // Mid gray  
+  uniform vec3 uColor1; // Lighter purple
+  uniform vec3 uColor2; // Mid purple  
   uniform vec3 uColor3; // Dark base (#151515)
   uniform vec2 uResolution;
   varying vec2 vUv;
@@ -54,57 +54,65 @@ const fragmentShader = `
   }
 
   void main() {
-    // Flip Y so top of screen is vUv.y = 1.0
-    float yFlipped = 1.0 - vUv.y;
+    // Use normalized UV coordinates
+    vec2 uv = vUv;
     
-    // Animation only in top strip (top ~15% of screen)
-    float topEdgeHeight = 0.15;
-    float edgeFactor = smoothstep(topEdgeHeight, 0.0, yFlipped);
+    // Slow time for smooth, organic animation
+    float time = uTime * 0.08;
     
-    // If below the top edge, just show solid dark background
-    if (edgeFactor <= 0.001) {
-      // Add grain to the solid background too
-      float grain = hash(vUv * uResolution + uTime * 0.5) * 0.08;
-      vec3 bgColor = uColor3 + vec3(grain - 0.04);
-      gl_FragColor = vec4(bgColor, 1.0);
-      return;
-    }
+    // Scale UVs for the noise pattern
+    vec2 noiseUv = uv * 2.5;
     
-    // Slow time for smooth animation
-    float time = uTime * 0.1;
-    
-    // Scale UVs for the noise - stretch horizontally for edge effect
-    vec2 uv = vec2(vUv.x * 3.0, yFlipped * 8.0);
-
-    // Domain warping for organic flow
+    // DOMAIN WARPING - Layer 1
+    // First level of distortion
     vec2 q = vec2(0.);
-    q.x = snoise(uv + vec2(0.0, time * 0.3));
-    q.y = snoise(uv + vec2(5.2, 1.3) + time * 0.2);
+    q.x = snoise(noiseUv + vec2(0.0, time * 0.3));
+    q.y = snoise(noiseUv + vec2(5.2, 1.3) + time * 0.25);
 
+    // DOMAIN WARPING - Layer 2
+    // Use first distortion to warp the second
     vec2 r = vec2(0.);
-    r.x = snoise(uv + 0.8 * q + vec2(1.7, 9.2) + 0.15 * time);
-    r.y = snoise(uv + 0.8 * q + vec2(8.3, 2.8) + 0.1 * time);
+    r.x = snoise(noiseUv + 1.2 * q + vec2(1.7, 9.2) + time * 0.15);
+    r.y = snoise(noiseUv + 1.2 * q + vec2(8.3, 2.8) + time * 0.12);
 
-    float f = snoise(uv + r * 0.5);
-
-    // Color mixing - all in gray/black tones
-    vec3 color = mix(uColor3, uColor1, clamp(length(q) * 0.5, 0.0, 1.0));
-    color = mix(color, uColor2, clamp(length(r.x) * 0.3, 0.0, 1.0));
+    // DOMAIN WARPING - Layer 3
+    // Final layer for maximum complexity - like ink in water
+    vec2 s = vec2(0.);
+    s.x = snoise(noiseUv + 1.5 * r + vec2(3.1, 4.7) + time * 0.08);
+    s.y = snoise(noiseUv + 1.5 * r + vec2(2.4, 7.1) + time * 0.1);
     
-    // Add subtle variation
-    color += f * 0.02;
-
-    // Heavy grain overlay
-    float grain = hash(vUv * uResolution + uTime * 0.3);
-    float grainIntensity = 0.15; // Strong grain
+    // Get final noise value using all warped coordinates
+    float f = snoise(noiseUv + r * 1.0 + s * 0.5);
+    
+    // Create smooth flowing patterns
+    float pattern = length(q) * 0.6 + length(r) * 0.4 + f * 0.3;
+    
+    // Normalize pattern
+    pattern = clamp(pattern * 0.5, 0.0, 1.0);
+    
+    // Create ridges and swirls by modulating the pattern
+    float ridges = abs(sin(pattern * 3.14159 * 3.0 + time * 0.5)) * 0.5 + 0.5;
+    
+    // Mix colors based on pattern - from dark base to purple
+    vec3 color = mix(uColor3, uColor1, pattern * ridges);
+    color = mix(color, uColor2, clamp(length(r) * 0.4, 0.0, 1.0));
+    
+    // Add subtle noise variation for texture
+    color += f * 0.015;
+    
+    // Subtle grain for texture
+    float grain = hash(vUv * uResolution + uTime * 0.2);
+    float grainIntensity = 0.03; // Very subtle grain
     color += (grain - 0.5) * grainIntensity;
-
-    // Fade animation into solid background at edge
-    color = mix(uColor3, color, edgeFactor);
     
-    // Add grain to the transition area too
-    float transitionGrain = hash(vUv * uResolution * 0.5 + uTime * 0.2) * 0.05;
-    color += vec3(transitionGrain - 0.025);
+    // Fade the entire effect to keep it subtle
+    // Mix with dark background to reduce intensity
+    float fadeAmount = 0.25; // Only 25% of the effect shows
+    color = mix(uColor3, color, fadeAmount);
+    
+    // Add smooth vertical fade from top to bottom
+    float verticalFade = smoothstep(1.0, 0.3, vUv.y);
+    color = mix(uColor3, color, verticalFade);
 
     gl_FragColor = vec4(color, 1.0);
   }
@@ -122,14 +130,14 @@ const GradientMesh = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Gray/black color palette matching the site
+  // Faded purple color palette
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      // Lighter gray for subtle highlights
-      uColor1: { value: new THREE.Color("#2a2a2a") }, 
-      // Mid gray
-      uColor2: { value: new THREE.Color("#1e1e1e") }, 
+      // Lighter faded purple for highlights
+      uColor1: { value: new THREE.Color("#3d2f4f") }, // Muted purple
+      // Mid purple tone
+      uColor2: { value: new THREE.Color("#2a1f3a") }, // Deeper purple
       // Dark base matching site background (#151515)
       uColor3: { value: new THREE.Color("#151515") },
       uResolution: { value: new THREE.Vector2(resolution[0], resolution[1]) },

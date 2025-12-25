@@ -88,11 +88,16 @@ export default function NotePage() {
   // Scroll-driven sentinel with hysteresis to avoid flicker and keep state stable while reading.
   React.useEffect(() => {
     const readingRef = { current: false };
+    let sentinelTop = 0;
 
-    const computeAndSet = () => {
+    const updateSentinelPos = () => {
       const el = sentinelRef.current;
       if (!el) return;
-      const sentinelTop = el.getBoundingClientRect().top + window.scrollY;
+      sentinelTop = el.getBoundingClientRect().top + window.scrollY;
+    };
+
+    const computeAndSet = () => {
+      if (!sentinelTop) updateSentinelPos();
       const scrollY = window.scrollY;
 
       // Hysteresis: enter reading slightly below sentinel; exit only after moving well above it
@@ -120,6 +125,7 @@ export default function NotePage() {
     };
 
     // Initial compute and on events
+    updateSentinelPos();
     computeAndSet();
     const onScroll = () => {
       // Use rAF to coalesce multiple scroll events
@@ -129,7 +135,10 @@ export default function NotePage() {
         computeAndSet();
       });
     };
-    const onResize = () => computeAndSet();
+    const onResize = () => {
+      updateSentinelPos();
+      computeAndSet();
+    };
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
@@ -164,37 +173,41 @@ export default function NotePage() {
   const MotionH1 = motion.h1;
 
   return (
-    <article className="mx-auto max-w-screen-xl px-4 md:px-6 w-full text-white">
+    <article className="mx-auto w-full text-white">
       {/* Top heading — aligned to match hero spacing: push down considerably */}
-      <header className="pt-64 md:pt-64">
-        <MotionH1
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-4xl md:text-6xl font-semibold italic text-white font-adamant"
-        >
-          {note.title}
-        </MotionH1>
-        <p className="mt-3 text-neutral-400">Published: {publishedLabel}</p>
+      <header className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+        <div className="mb-12">
+          <MotionH1
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-4xl md:text-6xl font-semibold italic text-white font-adamant"
+          >
+            {note.title}
+          </MotionH1>
+          <p className="mt-3 text-neutral-400 font-adamant text-lg">Published: {publishedLabel}</p>
+        </div>
       </header>
 
-      {/* Large thumbnail */}
-      <div className="mt-6 w-full">
-        <div className="w-full aspect-video overflow-hidden rounded-2xl border border-white/10">
-          <img src={note.thumbnail} alt="thumbnail" className="w-full h-full object-cover" />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Large thumbnail */}
+        <div className="w-full">
+          <div className="w-full aspect-video overflow-hidden rounded-2xl border border-white/10">
+            <img src={note.thumbnail} alt="thumbnail" className="w-full h-full object-cover" />
+          </div>
         </div>
-      </div>
 
-      {/* Sentinel: right before content starts to drive reading state */}
-      <div ref={sentinelRef} aria-hidden="true" />
+        {/* Sentinel: right before content starts to drive reading state */}
+        <div ref={sentinelRef} aria-hidden="true" />
 
-      {/* Content — add large spacer so Introduction is below the fold initially */}
-      <div className="mt-28 flex flex-col gap-8 pb-24">
-        {note.sections.map((section) => (
-          <section key={section.id} id={section.id}>
-            <NoteSection section={section} />
-          </section>
-        ))}
+        {/* Content — add large spacer so Introduction is below the fold initially */}
+        <div className="mt-28 flex flex-col gap-8 pb-24">
+          {note.sections.map((section) => (
+            <section key={section.id} id={section.id}>
+              <NoteSection section={section} />
+            </section>
+          ))}
+        </div>
       </div>
     </article>
   );
