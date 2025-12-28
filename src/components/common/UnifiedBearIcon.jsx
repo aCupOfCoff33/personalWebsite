@@ -1,5 +1,5 @@
 // Unified Bear Icon orchestrator: single SVG with BaseBear and conditional accessories
-import React, { useId } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import { useBearState } from "../../hooks/useBearState";
 import BaseBear from "../bear/BaseBear";
@@ -8,16 +8,131 @@ import Book from "../bear/Book";
 import QuarterZip from "../bear/QuarterZip";
 import BearEyes from "../bear/BearEyes";
 
+const ANIM = {
+  DURATION: 420, // ms for transform/opacity animation
+  HALF: 210,
+  ENTRY_DELAY: 120, // increase to allow layout/paint before animating in
+};
+
 const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
   className = "",
 }) {
-  const { bearState } = useBearState();
+  const { bearType } = useBearState();
   const uid = useId();
+  const timeoutRefsRef = useRef([]);
+  const navTokenRef = useRef(0);
+  const [animState, setAnimState] = useState(() => ({
+    currentType: "default",
+    previousType: null,
+    pendingType: null,
+    itemPosition: "visible",
+  }));
+
+  const clearPendingTimeouts = () => {
+    timeoutRefsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
+    timeoutRefsRef.current = [];
+  };
+
+  const scheduleStateUpdate = (delayMs, updateFn, token) => {
+    const timeoutId = setTimeout(() => {
+      if (navTokenRef.current === token) updateFn();
+    }, delayMs);
+    timeoutRefsRef.current.push(timeoutId);
+  };
+
+  useEffect(() => {
+    const newType = bearType || "default";
+    clearPendingTimeouts();
+    const token = navTokenRef.current + 1;
+    navTokenRef.current = token;
+
+    setAnimState((prev) => {
+      if (newType === prev.currentType && !prev.pendingType) return prev;
+      if (newType === prev.currentType && prev.pendingType) {
+        return {
+          ...prev,
+          previousType: null,
+          pendingType: null,
+          itemPosition: "visible",
+        };
+      }
+
+      if (newType === "default") {
+        return {
+          ...prev,
+          currentType: "default",
+          previousType: null,
+          pendingType: null,
+          itemPosition: "visible",
+        };
+      }
+
+      const startState = {
+        ...prev,
+        previousType: prev.currentType,
+        pendingType: newType,
+      };
+
+      if (prev.currentType === "default") {
+        startState.itemPosition = "hidden";
+        scheduleStateUpdate(
+          ANIM.ENTRY_DELAY,
+          () => {
+            setAnimState((cur) => ({
+              ...cur,
+              itemPosition: "transitioning-up",
+            }));
+          },
+          token,
+        );
+        scheduleStateUpdate(
+          ANIM.ENTRY_DELAY + ANIM.DURATION,
+          () => {
+            setAnimState((cur) => ({
+              ...cur,
+              currentType: newType,
+              previousType: null,
+              pendingType: null,
+              itemPosition: "visible",
+            }));
+          },
+          token,
+        );
+        return startState;
+      }
+
+      startState.itemPosition = "transitioning-down";
+      scheduleStateUpdate(
+        ANIM.HALF + 40,
+        () => {
+          setAnimState((cur) => ({ ...cur, itemPosition: "transitioning-up" }));
+        },
+        token,
+      );
+      scheduleStateUpdate(
+        ANIM.DURATION + 100,
+        () => {
+          setAnimState((cur) => ({
+            ...cur,
+            currentType: newType,
+            previousType: null,
+            pendingType: null,
+            itemPosition: "visible",
+          }));
+        },
+        token,
+      );
+
+      return startState;
+    });
+  }, [bearType]);
+
+  useEffect(() => clearPendingTimeouts, []);
 
   const computeItems = () => {
     const items = [];
     const { currentType, pendingType, previousType, itemPosition } =
-      bearState || {};
+      animState || {};
 
     const typeToComp = (type) => {
       switch (type) {
@@ -58,7 +173,7 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
   const items = computeItems();
 
   const eyeMode = (() => {
-    const t = bearState?.pendingType || bearState?.currentType || "default";
+    const t = animState?.pendingType || animState?.currentType || "default";
     if (t === "projects") return "projects";
     if (t === "stories") return "stories";
     if (t === "about") return "about";
