@@ -30,7 +30,6 @@ const BearProvider = ({ children }) => {
     if (segments.includes("projects")) return "projects"; // macbook
     if (segments.includes("notes") || segments.includes("stories"))
       return "stories"; // reading/book
-    if (segments.includes("resume")) return "resume";
     if (segments.includes("about")) return "about"; // green quarter zip
     return "default";
   };

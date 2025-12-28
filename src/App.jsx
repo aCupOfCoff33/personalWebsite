@@ -12,7 +12,6 @@ const Home = lazy(() => import("./features/home/components/Home"));
 const AboutMe = lazy(() => import("./features/about/components/AboutMe"));
 const Projects = lazy(() => import("./features/projects/components/Projects"));
 const NotePage = lazy(() => import("./components/notes/NotePage"));
-const Resume = lazy(() => import("./features/resume/components/Resume"));
 
 function App() {
   return (
@@ -51,7 +50,6 @@ function App() {
                       <Route path="/" element={<Home />} />
                       <Route path="/projects" element={<Projects />} />
                       <Route path="/about" element={<AboutMe />} />
-                      <Route path="/resume" element={<Resume />} />
                       {/* Notes feature: only detail route is exposed */}
                       <Route path="/notes/:slug" element={<NotePage />} />
                     </Routes>

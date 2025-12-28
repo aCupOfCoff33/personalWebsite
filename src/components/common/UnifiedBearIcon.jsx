@@ -5,7 +5,6 @@ import { useBearState } from "../../hooks/useBearState";
 import BaseBear from "../bear/BaseBear";
 import Laptop from "../bear/Laptop";
 import Book from "../bear/Book";
-import Suit from "../bear/Suit";
 import QuarterZip from "../bear/QuarterZip";
 import BearEyes from "../bear/BearEyes";
 
@@ -26,8 +25,6 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
           return Laptop;
         case "stories":
           return Book;
-        case "resume":
-          return Suit;
         case "about":
           return QuarterZip;
         default:
@@ -42,16 +39,17 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
     };
 
     // Outgoing item during slide-down
-    if (previousType && itemPosition === 'transitioning-down') {
-      pushIf(previousType, 'transitioning-down');
+    if (previousType && itemPosition === "transitioning-down") {
+      pushIf(previousType, "transitioning-down");
     }
 
     // Incoming or steady-state
     if (pendingType) {
-  if (itemPosition === 'transitioning-up') pushIf(pendingType, 'transitioning-up');
-  if (itemPosition === 'visible') pushIf(pendingType, 'visible');
-    } else if (currentType && currentType !== 'default') {
-  pushIf(currentType, itemPosition || 'visible');
+      if (itemPosition === "transitioning-up")
+        pushIf(pendingType, "transitioning-up");
+      if (itemPosition === "visible") pushIf(pendingType, "visible");
+    } else if (currentType && currentType !== "default") {
+      pushIf(currentType, itemPosition || "visible");
     }
 
     return items;
@@ -63,7 +61,6 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
     const t = bearState?.pendingType || bearState?.currentType || "default";
     if (t === "projects") return "projects";
     if (t === "stories") return "stories";
-    if (t === "resume") return "resume";
     if (t === "about") return "about";
     return "default";
   })();
