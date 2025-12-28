@@ -48,52 +48,19 @@ export default function NotePage() {
     setTocItems(tocItems);
   }, [tocItems, setTocItems]);
 
-  // Use an IntersectionObserver on heading elements to drive discrete section changes
-  // This updates readingProgress to index/tocItems.length when a major heading becomes active.
-  React.useEffect(() => {
-    if (!tocItems || tocItems.length === 0) return undefined;
-
-    // Slightly above-center sentinel to consider a heading "active" when it reaches near the top of the viewport
-    const observerOptions = {
-      root: null,
-      rootMargin: "-30% 0px -70% 0px",
-      threshold: 0.01,
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const id = entry.target.id;
-        const idx = tocItems.findIndex((t) => t.id === id);
-        if (idx >= 0) {
-          // Map discrete index to a readingProgress in [0, 1)
-          setReadingProgress(idx / tocItems.length);
-        }
-      });
-    }, observerOptions);
-
-    // Observe the actual heading elements by id
-    const observedEls = [];
-    tocItems.forEach((item) => {
-      const el = document.getElementById(item.id);
-      if (el) {
-        observer.observe(el);
-        observedEls.push(el);
-      }
-    });
-
-    return () => {
-      observer.disconnect();
-      // no need to individually unobserve; disconnect handles it
-    };
-  }, [tocItems, setReadingProgress]);
-
   // Do not compute published label until after we know `note` is loaded
 
-  // Scroll-driven sentinel with hysteresis to avoid flicker and keep state stable while reading.
+  // IntersectionObserver + scroll sentinel in one effect to avoid racey teardown/setup.
   React.useEffect(() => {
+    if (!note) return undefined;
+
     const readingRef = { current: false };
+    const tocIndexById = new Map(
+      (tocItems || []).map((item, index) => [item.id, index]),
+    );
+    const hasToc = tocIndexById.size > 0;
     let sentinelTop = 0;
+    let observer;
 
     const updateSentinelPos = () => {
       const el = sentinelRef.current;
@@ -123,17 +90,39 @@ export default function NotePage() {
       // Compute progress from 0 (top) to 1 (just after sentinel hits top)
       const range = Math.max(1, enterY - exitY); // avoid divide by zero
       const progress = Math.min(1, Math.max(0, (scrollY - exitY) / range));
-      // Only use the continuous sentinel-based progress when there are no TOC headings to observe.
-      if (!tocItems || tocItems.length === 0) {
+      if (!hasToc) {
         setReadingProgress(progress);
       }
     };
 
-    // Initial compute and on events
+    if (hasToc) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const idx = tocIndexById.get(entry.target.id);
+            if (idx !== undefined) {
+              setReadingProgress(idx / tocIndexById.size);
+            }
+          });
+        },
+        {
+          root: null,
+          rootMargin: "-30% 0px -70% 0px",
+          threshold: 0.01,
+        },
+      );
+
+      tocItems.forEach((item) => {
+        const el = document.getElementById(item.id);
+        if (el) observer.observe(el);
+      });
+    }
+
     updateSentinelPos();
     computeAndSet();
+
     const onScroll = () => {
-      // Use rAF to coalesce multiple scroll events
       if (onScroll._raf) return;
       onScroll._raf = requestAnimationFrame(() => {
         onScroll._raf = null;
@@ -147,10 +136,12 @@ export default function NotePage() {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       if (onScroll._raf) cancelAnimationFrame(onScroll._raf);
+      if (observer) observer.disconnect();
     };
   }, [note, tocItems, setTocVisible, setContactCollapsed, setReadingProgress]);
 
