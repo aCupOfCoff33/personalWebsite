@@ -4,23 +4,10 @@ import { AnimatePresence, motion as Motion } from "framer-motion";
 import { useBearState } from "../../../hooks/useBearState";
 import { BEAR_MODES } from "../../../constants/bearModes";
 import BaseBear from "./BaseBear";
-import Laptop from "./Laptop";
-import Book from "./Book";
-import QuarterZip from "./QuarterZip";
 import BearEyes from "./BearEyes";
-
-const typeToComp = (type) => {
-  switch (type) {
-    case BEAR_MODES.PROJECTS:
-      return Laptop;
-    case BEAR_MODES.STORIES:
-      return Book;
-    case BEAR_MODES.ABOUT:
-      return QuarterZip;
-    default:
-      return null;
-  }
-};
+import BearAccessoryManager, {
+  hasAccessoryForType,
+} from "./BearAccessoryManager";
 
 const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
   className = "",
@@ -53,7 +40,7 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
     setPendingType(null);
   }, [pendingType]);
 
-  const ActiveComp = typeToComp(renderedType);
+  const shouldRenderAccessory = hasAccessoryForType(renderedType);
 
   return (
     <svg
@@ -71,7 +58,7 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
         mode="wait"
         onExitComplete={handleExitComplete}
       >
-        {ActiveComp ? (
+        {shouldRenderAccessory ? (
           <Motion.g
             key={renderedType}
             initial={{ opacity: 0 }}
@@ -79,7 +66,11 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <ActiveComp position="visible" idSuffix={`-${uid}-${renderedType}`} />
+            <BearAccessoryManager
+              type={renderedType}
+              position="visible"
+              idSuffix={`-${uid}-${renderedType}`}
+            />
           </Motion.g>
         ) : null}
       </AnimatePresence>
