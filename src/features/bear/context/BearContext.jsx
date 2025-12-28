@@ -1,5 +1,6 @@
 import React, { createContext, useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import { BEAR_MODES } from "../../../constants/bearModes";
 
 // Create context in separate file to avoid fast refresh issues
 const BearContext = createContext();
@@ -19,11 +20,11 @@ const BearProvider = ({ children }) => {
 
     const segments = rawSegments.filter(Boolean);
 
-    if (segments.includes("projects")) return "projects"; // macbook
-    if (segments.includes("notes") || segments.includes("stories"))
-      return "stories"; // reading/book
-    if (segments.includes("about")) return "about"; // green quarter zip
-    return "default";
+    if (segments.includes(BEAR_MODES.PROJECTS)) return BEAR_MODES.PROJECTS; // macbook
+    if (segments.includes("notes") || segments.includes(BEAR_MODES.STORIES))
+      return BEAR_MODES.STORIES; // reading/book
+    if (segments.includes(BEAR_MODES.ABOUT)) return BEAR_MODES.ABOUT; // green quarter zip
+    return BEAR_MODES.DEFAULT;
   };
 
   const bearType = useMemo(() => detectType(location), [location]);

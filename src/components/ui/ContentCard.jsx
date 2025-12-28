@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import clsx from "clsx";
 
 function ContentCard({
+  variant = "default",
   title,
   subtitle,
   dates,
@@ -18,6 +19,60 @@ function ContentCard({
     gradient && gradient.includes("bg-")
       ? gradient
       : `bg-gradient-to-r ${gradient}`;
+  if (variant === "inline") {
+    const Wrapper = href ? "a" : "div";
+    const wrapperProps = href ? { href } : {};
+    return (
+      <Wrapper
+        {...wrapperProps}
+        className={clsx(
+          "w-full py-5 md:py-6 px-4 sm:px-5 relative inline-flex items-center gap-4 rounded-xl overflow-hidden",
+          "after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-0 after:h-px",
+          "after:bg-gradient-to-r after:from-white/10 after:to-transparent",
+          "first:before:content-[''] first:before:absolute first:before:left-0 first:before:right-0 first:before:top-0 first:before:h-px",
+          "first:before:bg-gradient-to-r first:before:from-white/10 first:before:to-transparent",
+          "hover:bg-white/5 transition-colors",
+          href
+            ? "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+            : "",
+          className,
+        )}
+      >
+        {logo && (
+          <div className="size-10 sm:size-[42px] p-[5px] rounded-[10px] flex justify-center items-center shadow-[0_1px_8px_rgba(255,255,255,0.08)] bg-gradient-to-br from-white to-white/90 flex-shrink-0">
+            <img
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-md object-contain"
+              src={logo}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-baseline gap-[6px]">
+          <div className="text-white text-xl md:text-2xl font-normal font-adamant">
+            {title}
+          </div>
+          {subtitle && (
+            <div className="text-white/70 md:text-white/75 text-base md:text-lg font-normal font-adamant">
+              {subtitle}
+            </div>
+          )}
+        </div>
+
+        {dates && (
+          <div
+            className="ml-auto text-right text-white/70 md:text-white/80 text-xs sm:text-sm font-normal font-adamant drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]"
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {dates}
+          </div>
+        )}
+      </Wrapper>
+    );
+  }
+
   return (
     <div
       className={clsx(
@@ -146,6 +201,7 @@ export default React.memo(ContentCard);
 
 // PropTypes for clear component contracts and error catching
 ContentCard.propTypes = {
+  variant: PropTypes.string,
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string,
   dates: PropTypes.string,

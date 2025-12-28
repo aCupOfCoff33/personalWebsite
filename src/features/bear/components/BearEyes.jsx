@@ -5,10 +5,11 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { BEAR_MODES } from "../../../constants/bearModes";
 
 // Unified animated eyes that adapt behavior by mode
-// mode: 'default' | 'projects' | 'stories' | 'about'
-const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
+// mode: BEAR_MODES.DEFAULT | BEAR_MODES.PROJECTS | BEAR_MODES.STORIES | BEAR_MODES.ABOUT
+const BearEyes = React.memo(function BearEyes({ mode = BEAR_MODES.DEFAULT }) {
   const leftHighlightRef = useRef(null);
   const rightHighlightRef = useRef(null);
   const leftIrisGroupRef = useRef(null);
@@ -47,13 +48,13 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
   }, []);
 
   const cfg = useMemo(() => {
-    if (mode === "projects" || mode === "stories") {
+    if (mode === BEAR_MODES.PROJECTS || mode === BEAR_MODES.STORIES) {
       return {
         BLINK_MS: 120,
         BLINK_MIN_DELAY: 2000,
         BLINK_JITTER: 5000,
         SCAN_AMPLITUDE: 2.0,
-        SCAN_DOWN_BIAS: mode === "stories" ? 1.4 : 1.2,
+        SCAN_DOWN_BIAS: mode === BEAR_MODES.STORIES ? 1.4 : 1.2,
         SCAN_PERIOD_MS: 3200,
         SACCADE_THRESHOLD: 0.85,
         RANDOM_LOOK_MAX_PX: 3,
@@ -61,7 +62,7 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
         RANDOM_LOOK_MAX_MS: 4500,
       };
     }
-    if (mode === "about") {
+    if (mode === BEAR_MODES.ABOUT) {
       return {
         BLINK_MS: 120,
         BLINK_MIN_DELAY: 1800,
@@ -116,7 +117,10 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
   }, [schedulePeriodicBlink]);
 
   useEffect(() => {
-    if (!isInView || !(mode === "default" || mode === "about"))
+    if (
+      !isInView ||
+      !(mode === BEAR_MODES.DEFAULT || mode === BEAR_MODES.ABOUT)
+    )
       return undefined;
     const leftEl = leftHighlightRef.current;
     const rightEl = rightHighlightRef.current;
@@ -198,7 +202,8 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
 
   // Projects/Stories: scanning + random looks
   useEffect(() => {
-    if (!(mode === "projects" || mode === "stories")) return undefined;
+    if (!(mode === BEAR_MODES.PROJECTS || mode === BEAR_MODES.STORIES))
+      return undefined;
     const left = leftIrisGroupRef.current;
     const right = rightIrisGroupRef.current;
     if (!left || !right) return undefined;
@@ -228,7 +233,7 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
 
   // Random micro-looks for projects/stories
   const scheduleRandomLook = useCallback(() => {
-    if (!(mode === "projects" || mode === "stories")) return;
+    if (!(mode === BEAR_MODES.PROJECTS || mode === BEAR_MODES.STORIES)) return;
     if (lookTimeoutRef.current) clearTimeout(lookTimeoutRef.current);
     const delay =
       Math.random() * (cfg.RANDOM_LOOK_MAX_MS - cfg.RANDOM_LOOK_MIN_MS) +
@@ -270,7 +275,7 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
   const eyeOffsetStyle = {
     transform: `translate(${eyeOffset.x}px, ${eyeOffset.y}px)`,
     transition:
-      mode === "projects" || mode === "stories"
+      mode === BEAR_MODES.PROJECTS || mode === BEAR_MODES.STORIES
         ? "transform 280ms cubic-bezier(.2,.9,.3,1)"
         : undefined,
     transformBox: "fill-box",
@@ -301,7 +306,11 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
               cy="33.1655"
               r="1.19873"
               fill="#D9D9D9"
-              style={mode === "default" ? trackingTransitionStyle : undefined}
+              style={
+                mode === BEAR_MODES.DEFAULT
+                  ? trackingTransitionStyle
+                  : undefined
+              }
             />
           </g>
         </g>
@@ -326,7 +335,11 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
               cy="33.1655"
               r="1.19873"
               fill="#D9D9D9"
-              style={mode === "default" ? trackingTransitionStyle : undefined}
+              style={
+                mode === BEAR_MODES.DEFAULT
+                  ? trackingTransitionStyle
+                  : undefined
+              }
             />
           </g>
         </g>
