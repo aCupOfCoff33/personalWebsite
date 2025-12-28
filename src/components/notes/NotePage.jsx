@@ -55,6 +55,16 @@ export default function NotePage() {
     if (!note) return undefined;
 
     const readingRef = { current: false };
+    const scrollRoot =
+      sentinelRef.current?.closest('[data-scroll-container="main"]') || null;
+    const getScrollTop = () =>
+      scrollRoot && scrollRoot instanceof HTMLElement
+        ? scrollRoot.scrollTop
+        : window.scrollY;
+    const getContainerRect = () =>
+      scrollRoot && scrollRoot instanceof HTMLElement
+        ? scrollRoot.getBoundingClientRect()
+        : { top: 0 };
     const tocIndexById = new Map(
       (tocItems || []).map((item, index) => [item.id, index]),
     );
@@ -65,12 +75,15 @@ export default function NotePage() {
     const updateSentinelPos = () => {
       const el = sentinelRef.current;
       if (!el) return;
-      sentinelTop = el.getBoundingClientRect().top + window.scrollY;
+      const containerRect = getContainerRect();
+      const scrollTop = getScrollTop();
+      sentinelTop =
+        el.getBoundingClientRect().top - containerRect.top + scrollTop;
     };
 
     const computeAndSet = () => {
       if (!sentinelTop) updateSentinelPos();
-      const scrollY = window.scrollY;
+      const scrollY = getScrollTop();
 
       // Hysteresis: enter reading slightly below sentinel; exit only after moving well above it
       const enterY = sentinelTop - 32; // collapse once we pass near sentinel
@@ -107,7 +120,7 @@ export default function NotePage() {
           });
         },
         {
-          root: null,
+          root: scrollRoot,
           rootMargin: "-30% 0px -70% 0px",
           threshold: 0.01,
         },
@@ -134,11 +147,13 @@ export default function NotePage() {
       computeAndSet();
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const scrollTarget =
+      scrollRoot && scrollRoot instanceof HTMLElement ? scrollRoot : window;
+    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      scrollTarget.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       if (onScroll._raf) cancelAnimationFrame(onScroll._raf);
       if (observer) observer.disconnect();

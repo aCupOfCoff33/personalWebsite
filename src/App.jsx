@@ -30,7 +30,10 @@ function App() {
             <NavBar />
 
             {/* Layout: Main content window wrapper - SCROLLABLE */}
-            <div className="flex-1 h-full p-2 md:p-3 overflow-y-auto overflow-x-hidden relative scrollbar-gutter-stable">
+            <div
+              className="flex-1 h-full p-2 md:p-3 overflow-y-auto overflow-x-hidden relative scrollbar-gutter-stable"
+              data-scroll-container="main"
+            >
               <main
                 id="main-content"
                 tabIndex="-1"
