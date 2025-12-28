@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
-
+import React, { useState } from "react";
+import PropTypes from "prop-types";
+import clsx from "clsx";
 
 function ContentCard({
   title,
@@ -9,45 +8,48 @@ function ContentCard({
   dates,
   logo,
   image,
-  gradient = 'from-cyan-400 to-blue-500', // supply just the colour stops or a full bg-*
+  gradient = "from-cyan-400 to-blue-500", // supply just the colour stops or a full bg-*
   href,
-  className = '',
+  className = "",
 }) {
   // Track if the provided image failed to load so we can fall back to the gradient
   const [imageFailed, setImageFailed] = useState(false);
-  const gradientClass = gradient && gradient.includes('bg-')
-    ? gradient
-    : `bg-gradient-to-r ${gradient}`;
+  const gradientClass =
+    gradient && gradient.includes("bg-")
+      ? gradient
+      : `bg-gradient-to-r ${gradient}`;
   return (
     <div
       className={clsx(
-        'group relative isolate p-px',             // 1-px padding for gradient border
-        'w-full max-w-[320px] mx-auto',            // fill container up to a max width
-        'aspect-[5/8]',                            // maintain aspect ratio always
-        'transition-transform duration-300 ease-out hover:scale-[1.02]',
+        "group relative isolate p-px", // 1-px padding for gradient border
+        "w-full max-w-[600px] mx-auto", // fill container up to a max width
+        "aspect-[16/12]", // match wide project card proportions
+        "transition-transform duration-300 ease-out hover:scale-[1.02]",
         className,
       )}
     >
-      <div
-        className="absolute inset-0  bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0  bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
       {/* card body */}
-      {(href ? (
+      {href ? (
         <a
           href={href}
-          className="relative flex h-full w-full flex-col overflow-hidden rounded hover:backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 p-4 space-y-4 transition-colors duration-300 ease-out"
+          className="relative flex h-full w-full flex-col overflow-hidden rounded hover:backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 p-4 space-y-3 transition-colors duration-300 ease-out"
           onClick={() => {
             // allow anchor navigation to router; do not scroll to top of current page
           }}
         >
           {/* hero panel */}
-          <div className="relative flex-1 h-full rounded-xl overflow-hidden" style={{ willChange: 'transform' }}>
+          <div
+            className="relative flex-1 h-full rounded-xl overflow-hidden"
+            style={{ willChange: "transform" }}
+          >
             {/* If an image is provided, render it as the hero background; otherwise fall back to the gradient */}
             {/* Prefer the provided image, but if it fails to load (404 or other), fall back to the gradient */}
             {image && !imageFailed ? (
               <img
                 src={image}
-                alt={title || ''}
+                alt={title || ""}
                 className="absolute inset-0 w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
@@ -55,7 +57,7 @@ function ContentCard({
                 onLoad={() => setImageFailed(false)}
               />
             ) : (
-              <div className={clsx('absolute inset-0', gradientClass)} />
+              <div className={clsx("absolute inset-0", gradientClass)} />
             )}
             <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
           </div>
@@ -63,25 +65,40 @@ function ContentCard({
           {/* meta */}
           <div className="flex items-center gap-4">
             {logo && (
-              <img src={logo} alt="" className="h-12 w-12 flex-shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
+              <img
+                src={logo}
+                alt=""
+                className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+                loading="lazy"
+                decoding="async"
+              />
             )}
-            <h3 className="text-lg font-semibold leading-tight text-white">{title}</h3>
+            <h3 className="text-lg font-semibold leading-tight text-white">
+              {title}
+            </h3>
           </div>
 
           {subtitle && (
-            <p className="text-sm font-semibold tracking-wide text-white/90">{subtitle}</p>
+            <p className="text-sm font-semibold tracking-wide text-white/90">
+              {subtitle}
+            </p>
           )}
 
-          {dates && <p className="text-xs font-medium text-white/70">{dates}</p>}
+          {dates && (
+            <p className="text-xs font-medium text-white/70">{dates}</p>
+          )}
         </a>
       ) : (
-        <div className="relative flex h-full w-full flex-col overflow-hidden rounded p-4 space-y-4">
+        <div className="relative flex h-full w-full flex-col overflow-hidden rounded p-4 space-y-3">
           {/* hero panel */}
-          <div className="relative flex-1 h-full rounded-xl overflow-hidden" style={{ willChange: 'transform' }}>
+          <div
+            className="relative flex-1 h-full rounded-xl overflow-hidden"
+            style={{ willChange: "transform" }}
+          >
             {image && !imageFailed ? (
               <img
                 src={image}
-                alt={title || ''}
+                alt={title || ""}
                 className="absolute inset-0 w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
@@ -89,7 +106,7 @@ function ContentCard({
                 onLoad={() => setImageFailed(false)}
               />
             ) : (
-              <div className={clsx('absolute inset-0', gradientClass)} />
+              <div className={clsx("absolute inset-0", gradientClass)} />
             )}
             <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
           </div>
@@ -97,18 +114,30 @@ function ContentCard({
           {/* meta */}
           <div className="flex items-center gap-4">
             {logo && (
-              <img src={logo} alt="" className="h-12 w-12 flex-shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
+              <img
+                src={logo}
+                alt=""
+                className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+                loading="lazy"
+                decoding="async"
+              />
             )}
-            <h3 className="text-lg font-semibold leading-tight text-white">{title}</h3>
+            <h3 className="text-lg font-semibold leading-tight text-white">
+              {title}
+            </h3>
           </div>
 
           {subtitle && (
-            <p className="text-sm font-semibold tracking-wide text-white/90">{subtitle}</p>
+            <p className="text-sm font-semibold tracking-wide text-white/90">
+              {subtitle}
+            </p>
           )}
 
-          {dates && <p className="text-xs font-medium text-white/70">{dates}</p>}
+          {dates && (
+            <p className="text-xs font-medium text-white/70">{dates}</p>
+          )}
         </div>
-      ))}
+      )}
     </div>
   );
 }

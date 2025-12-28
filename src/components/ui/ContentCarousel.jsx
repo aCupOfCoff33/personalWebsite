@@ -1,21 +1,25 @@
-import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
-import ContentCard from './ContentCard';
+import React, { useMemo } from "react";
+import PropTypes from "prop-types";
+import ContentCard from "./ContentCard";
 
 // View All Projects Button Component - matches navbar card style and small size
-function ViewAllButton({ onClick, className = '', label = 'Venture Deeper Into\nThe Woods' }) {
+function ViewAllButton({
+  onClick,
+  className = "",
+  label = "Venture Deeper Into\nThe Woods",
+}) {
   // normalize either literal '/n' in label to real newline
-  const normalized = String(label).replace(/\/n/g, '\n').replace(/\/\\n/g, '\n');
-  const normalized2 = normalized.replace(/\/\/?n/g, '\n');
-  const lines = normalized2.split('\n');
+  const normalized = String(label)
+    .replace(/\/n/g, "\n")
+    .replace(/\/\\n/g, "\n");
+  const normalized2 = normalized.replace(/\/\/?n/g, "\n");
+  const lines = normalized2.split("\n");
 
   return (
-    <div className="snap-start shrink-0 w-44 flex items-center justify-center min-h-[320px]">
+    <div className="snap-start shrink-0 w-44 flex items-center justify-center min-h-[300px] md:min-h-[340px]">
       <button
         onClick={onClick}
-        className={
-          `group w-full rounded-xl border transition-colors min-h-[40px] border-white/10 bg-neutral-900/40 hover:bg-white/5 text-neutral-300 px-3 py-2.5 flex items-center justify-center gap-3 ${className}`
-        }
+        className={`group w-full rounded-xl border transition-colors min-h-[40px] border-white/10 bg-neutral-900/40 hover:bg-white/5 text-neutral-300 px-3 py-2.5 flex items-center justify-center gap-3 ${className}`}
       >
         <span className="text-md leading-tight font-normal font-adamant text-neutral-300 group-hover:text-neutral-100 transition-colors duration-200 text-center">
           {lines.map((line, i) => (
@@ -46,21 +50,24 @@ function ViewAllButton({ onClick, className = '', label = 'Venture Deeper Into\n
 }
 
 // Horizontal carousel layout component
-function ContentCarousel({ 
-  items = [], 
-  className = '',
-  cardVariant = 'glass',
+function ContentCarousel({
+  items = [],
+  className = "",
+  cardVariant = "glass",
   carouselId,
   showViewAll = false,
   maxItems = 6,
   onViewAllClick = () => {},
-  viewAllLabel = 'Venture Deeper Into\nThe Woods',
+  viewAllLabel = "Venture Deeper Into\nThe Woods",
 }) {
   // Show first maxItems only if showViewAll is true, otherwise show all items
-  const displayItems = useMemo(() => (showViewAll ? items.slice(0, maxItems) : items), [items, showViewAll, maxItems]);
+  const displayItems = useMemo(
+    () => (showViewAll ? items.slice(0, maxItems) : items),
+    [items, showViewAll, maxItems],
+  );
   // Removed console logs to avoid noisy renders in production
   // Optimized for performance: memoize derived array
-  
+
   return (
     <div className={`relative ${className}`}>
       {/* Carousel Container */}
@@ -70,20 +77,17 @@ function ContentCarousel({
         className="pt-4 pl-4 pr-4 flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory will-change-transform [&::-webkit-scrollbar]:hidden"
       >
         {displayItems.map((item, index) => (
-          <div key={item.id || index} className="shrink-0 snap-start w-72 md:w-80">
-            <ContentCard
-              variant={cardVariant}
-              {...item}
-            />
+          <div
+            key={item.id || index}
+            className="shrink-0 snap-start min-w-[240px] md:min-w-[400px] max-w-[600px] w-full"
+          >
+            <ContentCard variant={cardVariant} {...item} />
           </div>
         ))}
-        
+
         {/* View All Button - only show if showViewAll is true and there are more items */}
         {showViewAll && items.length > maxItems && (
-          <ViewAllButton 
-            onClick={onViewAllClick}
-            label={viewAllLabel}
-          />
+          <ViewAllButton onClick={onViewAllClick} label={viewAllLabel} />
         )}
       </div>
     </div>
