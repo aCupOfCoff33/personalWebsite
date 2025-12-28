@@ -13,16 +13,30 @@ const ANIM = {
 const BearProvider = ({ children }) => {
   const location = useLocation();
 
-  const detectType = (path) => {
-    if (path.startsWith("/projects")) return "projects";
-    if (path.startsWith("/notes")) return "stories";
-    if (path.startsWith("/resume")) return "resume";
-    if (path.startsWith("/about")) return "about";
+  const getLocationKey = (loc) => `${loc.pathname}${loc.hash || ""}`;
+
+  const detectType = (loc) => {
+    // Be resilient to nested base paths and hash routing by checking segments from pathname + hash
+    const rawSegments = []
+      .concat(loc.pathname || "")
+      .concat(loc.hash || "")
+      .join("/")
+      .split("/")
+      .filter(Boolean)
+      .map((seg) => seg.replace(/^#/, ""));
+
+    const segments = rawSegments.filter(Boolean);
+
+    if (segments.includes("projects")) return "projects"; // macbook
+    if (segments.includes("notes") || segments.includes("stories"))
+      return "stories"; // reading/book
+    if (segments.includes("resume")) return "resume";
+    if (segments.includes("about")) return "about"; // green quarter zip
     return "default";
   };
 
   const getInitialState = () => {
-    const t = detectType(location.pathname);
+    const t = detectType(location);
 
     // If the app loads on a non-default route, start with default as current and
     // make the real route a pendingType so it can animate in (hidden -> transitioning-up -> visible).
@@ -51,12 +65,12 @@ const BearProvider = ({ children }) => {
   const timeoutRefsRef = useRef([]);
   const navigationIntentRef = useRef(null);
   const isMountedRef = useRef(true);
-  const currentPathnameRef = useRef(location.pathname);
+  const currentPathnameRef = useRef(getLocationKey(location));
 
   // Update pathname ref whenever location changes
   useEffect(() => {
-    currentPathnameRef.current = location.pathname;
-  }, [location.pathname]);
+    currentPathnameRef.current = getLocationKey(location);
+  }, [location.pathname, location.hash]);
 
   // Helper to schedule state updates that respect navigation intent
   const scheduleStateUpdate = (delayMs, updateFn) => {
@@ -84,7 +98,7 @@ const BearProvider = ({ children }) => {
     // Only run once after mount
     if (bearState.pendingType && bearState.itemPosition === "hidden") {
       // Update navigation intent
-      navigationIntentRef.current = location.pathname;
+      navigationIntentRef.current = getLocationKey(location);
 
       // small delay to ensure DOM painted
       scheduleStateUpdate(ANIM.ENTRY_DELAY, () => {
@@ -106,7 +120,7 @@ const BearProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const newType = detectType(location.pathname);
+    const newType = detectType(location);
 
     setBearState((prev) => {
       if (newType === prev.currentType) return prev;
@@ -115,7 +129,19 @@ const BearProvider = ({ children }) => {
       clearPendingTimeouts();
 
       // Update navigation intent to current path
-      navigationIntentRef.current = location.pathname;
+      navigationIntentRef.current = getLocationKey(location);
+
+      // Case: navigating to home (default) -> snap back to plain bear immediately
+      if (newType === "default") {
+        return {
+          ...prev,
+          currentType: "default",
+          previousType: null,
+          pendingType: null,
+          itemPosition: "visible",
+          isTransitioning: false,
+        };
+      }
 
       // Start a transition. We'll keep currentType as the currently visible item
       // and set pendingType to the target so both can be rendered during animation.
@@ -125,26 +151,6 @@ const BearProvider = ({ children }) => {
         pendingType: newType,
         isTransitioning: true,
       };
-
-      // Case: navigating to home (from something -> default)
-      if (newType === "default") {
-        // slide current item down
-        startState.itemPosition = "transitioning-down";
-
-        scheduleStateUpdate(ANIM.DURATION + 20, () => {
-          // After animation, make default the current
-          setBearState((cur) => ({
-            ...cur,
-            currentType: "default",
-            previousType: null, // Clear previousType
-            pendingType: null,
-            itemPosition: "visible",
-            isTransitioning: false,
-          }));
-        });
-
-        return startState;
-      }
 
       // Case: coming from home -> entering projects/stories
       if (prev.currentType === "default") {
@@ -190,10 +196,11 @@ const BearProvider = ({ children }) => {
 
       return startState;
     });
-  }, [location.pathname]);
+  }, [location.pathname, location.hash]);
 
   // Cleanup on unmount
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
       // Clear any remaining timeouts
