@@ -1,8 +1,8 @@
 /* HeroTypingAnimation.jsx */
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import AnimatedCursor from "../../../components/common/AnimatedCursor";
-// eslint-disable-next-line no-unused-vars
-import { motion, useMotionValue, animate } from "framer-motion";
+import { motion, useMotionValue } from "framer-motion";
+import useHeroAnimation from "../hooks/useHeroAnimation";
 
 /* ── constants ─────────────────────────────────────────────── */
 const HEADLINE = "Hey there! I'm Aaryan!";
@@ -85,61 +85,6 @@ const HeroTypingAnimation = React.memo(() => {
     markHeroIntroSeen();
   }, []);
 
-  // Initialize state first
-  const initialState = {
-    frameAligned: false,
-    showCursor: false,
-    showFrame: false,
-    phase: "initial",
-    showBody: false,
-    dragOK: false,
-    centreX: 0,
-    frameFrozen: true,
-    frameThick: false,
-    pointerHover: false,
-    showAnimatedCursor: false,
-    cursorShouldExit: false,
-    cursorTriggered: false,
-    isAnimatingBack: false, // NEW: tracks when snap-back animation is in progress
-  };
-
-  function reducer(state, action) {
-    switch (action.type) {
-      case "SET_FRAME_ALIGNED":
-        return { ...state, frameAligned: action.value };
-      case "SET_SHOW_CURSOR":
-        return { ...state, showCursor: action.value };
-      case "SET_SHOW_FRAME":
-        return { ...state, showFrame: action.value };
-      case "SET_PHASE":
-        return { ...state, phase: action.value };
-      case "SET_SHOW_BODY":
-        return { ...state, showBody: action.value };
-      case "SET_DRAG_OK":
-        return { ...state, dragOK: action.value };
-      case "SET_CENTRE_X":
-        return { ...state, centreX: action.value };
-      case "SET_FRAME_FROZEN":
-        return { ...state, frameFrozen: action.value };
-      case "SET_FRAME_THICK":
-        return { ...state, frameThick: action.value };
-      case "SET_POINTER_HOVER":
-        return { ...state, pointerHover: action.value };
-      case "SET_SHOW_ANIMATED_CURSOR":
-        return { ...state, showAnimatedCursor: action.value };
-      case "SET_CURSOR_SHOULD_EXIT":
-        return { ...state, cursorShouldExit: action.value };
-      case "SET_CURSOR_TRIGGERED":
-        return { ...state, cursorTriggered: action.value };
-      case "SET_IS_ANIMATING_BACK":
-        return { ...state, isAnimatingBack: action.value };
-      default:
-        return state;
-    }
-  }
-
-  const [state, dispatch] = useReducer(reducer, initialState);
-
   /* motion values for drag / snap */
   const frameRef = useRef(null);
 
@@ -158,6 +103,16 @@ const HeroTypingAnimation = React.memo(() => {
 
   const x = useMotionValue(getInitialX());
   const y = useMotionValue(0);
+
+  const {
+    state,
+    dispatch,
+    cursorKey,
+    pendingSnapBack,
+    snapBack,
+    handleCursorDragComplete,
+    handleCursorReadyToDragSnap,
+  } = useHeroAnimation({ frameRef, bodyRef, x, y, markIntroSeen });
 
   // Dynamic safe margins that respect the new layout:
   // - desktop: reserve space for the fixed left sidebar (16rem) + padding
@@ -303,113 +258,6 @@ const HeroTypingAnimation = React.memo(() => {
     });
     return () => cancelAnimationFrame(rafId);
   }, [shouldRunIntro, markIntroSeen]);
-
-  // AnimatedCursor orchestration
-  const handleCursorReadyToDrag = React.useCallback(async () => {
-    if (frameRef.current && bodyRef.current) {
-      const frameRect = frameRef.current.getBoundingClientRect();
-      const bodyRect = bodyRef.current.getBoundingClientRect();
-      const targetLeft = bodyRect.left;
-      const currentLeft = frameRect.left;
-      const deltaNeeded = targetLeft - currentLeft;
-      const finalX = x.get() + deltaNeeded;
-      dispatch({ type: "SET_CENTRE_X", value: finalX });
-      dispatch({ type: "SET_FRAME_FROZEN", value: false });
-      dispatch({ type: "SET_FRAME_THICK", value: true });
-      await animate(x, finalX, { type: "spring", stiffness: 55, damping: 18 });
-      dispatch({ type: "SET_FRAME_THICK", value: false });
-      dispatch({ type: "SET_PHASE", value: "frameMoved" });
-      dispatch({ type: "SET_FRAME_ALIGNED", value: true });
-      await new Promise((r) => setTimeout(r, 500));
-      dispatch({ type: "SET_CURSOR_SHOULD_EXIT", value: true });
-    }
-  }, [x]);
-
-  // Called by cursor after exit, hides cursor and enables drag
-  const handleCursorDragComplete = React.useCallback(() => {
-    dispatch({ type: "SET_SHOW_ANIMATED_CURSOR", value: false });
-    dispatch({ type: "SET_IS_ANIMATING_BACK", value: false });
-    dispatch({ type: "SET_DRAG_OK", value: true });
-    markIntroSeen();
-  }, [markIntroSeen]);
-
-  // Show cursor only after typing and frame is ready
-  // Only trigger cursor animation once
-  const cursorTriggered = state.cursorTriggered;
-  useEffect(() => {
-    if (
-      state.showFrame &&
-      state.showBody &&
-      state.frameFrozen &&
-      !state.showAnimatedCursor &&
-      !cursorTriggered
-    ) {
-      dispatch({ type: "SET_CURSOR_TRIGGERED", value: true });
-      // Show paddington cursor on both mobile and desktop
-      setTimeout(
-        () => dispatch({ type: "SET_SHOW_ANIMATED_CURSOR", value: true }),
-        100,
-      );
-    }
-  }, [
-    state.showFrame,
-    state.showBody,
-    state.showAnimatedCursor,
-    cursorTriggered,
-    state.frameFrozen,
-  ]);
-
-  /* snap the frame back after dragging */
-  // Snap the frame back after dragging, with Paddington cursor sequence
-  const [pendingSnapBack, setPendingSnapBack] = React.useState(false);
-  // Counter to force fresh cursor instance on each show (fixes stale state issues)
-  const [cursorKey, setCursorKey] = React.useState(0);
-
-  const snapBack = React.useCallback(() => {
-    // Immediately disable dragging to prevent race conditions
-    dispatch({ type: "SET_DRAG_OK", value: false });
-    dispatch({ type: "SET_IS_ANIMATING_BACK", value: true });
-    setPendingSnapBack(true);
-    // Show paddington cursor on both mobile and desktop for snap-back
-    dispatch({ type: "SET_CURSOR_SHOULD_EXIT", value: false });
-    setCursorKey((k) => k + 1); // Force new cursor instance
-    dispatch({ type: "SET_SHOW_ANIMATED_CURSOR", value: true });
-  }, []);
-
-  // Mobile-only snap-back effect is no longer needed since we now show cursor on mobile too
-  // The handleCursorReadyToDragSnap will handle the animation for both platforms
-
-  // When the cursor reaches the box (after user drag), snap the box back in sync
-  const handleCursorReadyToDragSnap = React.useCallback(async () => {
-    if (pendingSnapBack) {
-      // Thicken border while the frame animates back
-      dispatch({ type: "SET_FRAME_THICK", value: true });
-      // Store animation controls for potential cancellation
-      try {
-        // Animate both x and y simultaneously for diagonal movement
-        await Promise.all([
-          animate(x, state.centreX, {
-            type: "spring",
-            stiffness: 65,
-            damping: 18,
-          }),
-          animate(y, 0, { type: "spring", stiffness: 65, damping: 18 }),
-        ]);
-      } catch (e) {
-        // Animation was cancelled, don't proceed with state changes
-        return;
-      }
-      // Return border to thin after reaching target
-      dispatch({ type: "SET_FRAME_THICK", value: false });
-      dispatch({ type: "SET_IS_ANIMATING_BACK", value: false });
-      setPendingSnapBack(false);
-      // Signal cursor to exit after the snap animation completes
-      dispatch({ type: "SET_CURSOR_SHOULD_EXIT", value: true });
-    } else if (handleCursorReadyToDrag) {
-      // Onboarding animation: call the original handler
-      handleCursorReadyToDrag();
-    }
-  }, [pendingSnapBack, state.centreX, x, y, handleCursorReadyToDrag]);
 
   /* ── render ─────────────────────────────────────────────── */
   return (
