@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 const HeroFrame = React.memo(function HeroFrame({
   frameRef,
@@ -81,7 +81,7 @@ const HeroFrame = React.memo(function HeroFrame({
   }, [frameRef, getViewportBounds, x, y]);
 
   return (
-    <motion.div
+    <Motion.div
       ref={frameRef}
       drag={state.dragOK && !state.isAnimatingBack}
       dragMomentum={false}
@@ -114,7 +114,7 @@ const HeroFrame = React.memo(function HeroFrame({
     >
       {state.showFrame && (
         <>
-          <motion.div
+          <Motion.div
             className="absolute inset-0 border-solid"
             style={{ borderColor: "#198ce7" }}
             initial={{ opacity: 0, borderWidth: 2 }}
@@ -141,7 +141,7 @@ const HeroFrame = React.memo(function HeroFrame({
       )}
 
       {children}
-    </motion.div>
+    </Motion.div>
   );
 });
 

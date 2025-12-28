@@ -1,7 +1,7 @@
 /* HeroTypingAnimation.jsx */
 import React, { useEffect, useRef } from "react";
 import AnimatedCursor from "../../../components/common/AnimatedCursor";
-import { motion, useMotionValue } from "framer-motion";
+import { motion as Motion, useMotionValue } from "framer-motion";
 import useHeroAnimation from "../hooks/useHeroAnimation";
 import HeroFrame from "./HeroFrame";
 import TypewriterText from "./TypewriterText";
@@ -22,7 +22,7 @@ const isSessionStorageReady = () => {
     window.sessionStorage.setItem(testKey, "1");
     window.sessionStorage.removeItem(testKey);
     sessionStorageStatus = true;
-  } catch (error) {
+  } catch {
     sessionStorageStatus = false;
   }
   return sessionStorageStatus;
@@ -132,7 +132,7 @@ const HeroTypingAnimation = React.memo(() => {
       const newX = getInitialX();
       x.set(newX);
     }
-  }, [x, state.frameAligned]);
+  }, [x, state.frameAligned, dispatch]);
 
   /* ── orchestrate the sequence ───────────────────────────── */
   useEffect(() => {
@@ -159,7 +159,7 @@ const HeroTypingAnimation = React.memo(() => {
       dispatch({ type: "SET_SHOW_BODY", value: true });
       dispatch({ type: "SET_FRAME_FROZEN", value: true });
     })();
-  }, [shouldRunIntro, x, markIntroSeen]);
+  }, [shouldRunIntro, x, markIntroSeen, dispatch]);
 
   // Skip intro: immediately show final state when returning to Home without a hard refresh
   useEffect(() => {
@@ -179,7 +179,7 @@ const HeroTypingAnimation = React.memo(() => {
       if (headlineRef.current) headlineRef.current.textContent = HEADLINE;
     });
     return () => cancelAnimationFrame(rafId);
-  }, [shouldRunIntro, markIntroSeen]);
+  }, [shouldRunIntro, markIntroSeen, dispatch]);
 
   /* ── render ─────────────────────────────────────────────── */
   return (
@@ -213,7 +213,7 @@ const HeroTypingAnimation = React.memo(() => {
 
       {/* ── body: tagline + meta grid ── */}
       {state.showBody && (
-        <motion.div
+        <Motion.div
           ref={bodyRef}
           initial={false} // Avoid animating LCP content on mount
           className="mt-8 md:mt-12 space-y-10 md:space-y-12 max-w-[72rem] pb-20"
@@ -243,7 +243,7 @@ const HeroTypingAnimation = React.memo(() => {
               </p>
             </div>
           </div>
-        </motion.div>
+        </Motion.div>
       )}
     </section>
   );

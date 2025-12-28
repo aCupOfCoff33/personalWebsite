@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import XIcon from "../icons/XIcon";
 import TOC from "../notes/TOC";
-import { useNotesTOC } from "../notes/NotesContext";
+import { useNotesTOC } from "../notes/NotesHooks";
 import UnifiedBearIcon from "../common/UnifiedBearIcon";
 
 const sections = [

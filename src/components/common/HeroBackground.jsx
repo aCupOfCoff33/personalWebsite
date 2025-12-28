@@ -1,6 +1,6 @@
-import React, { useRef, useMemo, useEffect, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import React, { useRef, useMemo, useEffect, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 // --- GLSL SHADER CODE ---
 
@@ -15,7 +15,7 @@ const vertexShader = `
 const fragmentShader = `
   uniform float uTime;
   uniform vec3 uColor1; // Lighter purple
-  uniform vec3 uColor2; // Mid purple  
+  uniform vec3 uColor2; // Mid purple
   uniform vec3 uColor3; // Dark base (#151515)
   uniform vec2 uResolution;
   varying vec2 vUv;
@@ -56,13 +56,13 @@ const fragmentShader = `
   void main() {
     // Use normalized UV coordinates
     vec2 uv = vUv;
-    
+
     // Slow time for smooth, organic animation
     float time = uTime * 0.08;
-    
+
     // Scale UVs for the noise pattern
     vec2 noiseUv = uv * 2.5;
-    
+
     // DOMAIN WARPING - Layer 1
     // First level of distortion
     vec2 q = vec2(0.);
@@ -80,36 +80,36 @@ const fragmentShader = `
     vec2 s = vec2(0.);
     s.x = snoise(noiseUv + 1.5 * r + vec2(3.1, 4.7) + time * 0.08);
     s.y = snoise(noiseUv + 1.5 * r + vec2(2.4, 7.1) + time * 0.1);
-    
+
     // Get final noise value using all warped coordinates
     float f = snoise(noiseUv + r * 1.0 + s * 0.5);
-    
+
     // Create smooth flowing patterns
     float pattern = length(q) * 0.6 + length(r) * 0.4 + f * 0.3;
-    
+
     // Normalize pattern
     pattern = clamp(pattern * 0.5, 0.0, 1.0);
-    
+
     // Create ridges and swirls by modulating the pattern
     float ridges = abs(sin(pattern * 3.14159 * 3.0 + time * 0.5)) * 0.5 + 0.5;
-    
+
     // Mix colors based on pattern - from dark base to purple
     vec3 color = mix(uColor3, uColor1, pattern * ridges);
     color = mix(color, uColor2, clamp(length(r) * 0.4, 0.0, 1.0));
-    
+
     // Add subtle noise variation for texture
     color += f * 0.015;
-    
+
     // Subtle grain for texture
     float grain = hash(vUv * uResolution + uTime * 0.2);
     float grainIntensity = 0.03; // Very subtle grain
     color += (grain - 0.5) * grainIntensity;
-    
+
     // Fade the entire effect to keep it subtle
     // Mix with dark background to reduce intensity
     float fadeAmount = 0.25; // Only 25% of the effect shows
     color = mix(uColor3, color, fadeAmount);
-    
+
     // Add smooth vertical fade from top to bottom
     float verticalFade = smoothstep(1.0, 0.3, vUv.y);
     color = mix(uColor3, color, verticalFade);
@@ -120,16 +120,19 @@ const fragmentShader = `
 
 const GradientMesh = () => {
   const meshRef = useRef();
-  const [resolution, setResolution] = useState([window.innerWidth, window.innerHeight]);
-  
+  const [resolution, setResolution] = useState([
+    window.innerWidth,
+    window.innerHeight,
+  ]);
+
   useEffect(() => {
     const handleResize = () => {
       setResolution([window.innerWidth, window.innerHeight]);
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
-  
+
   // Faded purple color palette
   const uniforms = useMemo(
     () => ({
@@ -142,19 +145,23 @@ const GradientMesh = () => {
       uColor3: { value: new THREE.Color("#151515") },
       uResolution: { value: new THREE.Vector2(resolution[0], resolution[1]) },
     }),
-    []
+    [resolution],
   );
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.material.uniforms.uTime.value = state.clock.getElapsedTime();
-      meshRef.current.material.uniforms.uResolution.value.set(resolution[0], resolution[1]);
+      meshRef.current.material.uniforms.uTime.value =
+        state.clock.getElapsedTime();
+      meshRef.current.material.uniforms.uResolution.value.set(
+        resolution[0],
+        resolution[1],
+      );
     }
   });
 
   return (
-    <mesh ref={meshRef} scale={[10, 10, 1]}> 
-      <planeGeometry args={[2, 2, 32, 32]} /> 
+    <mesh ref={meshRef} scale={[10, 10, 1]}>
+      <planeGeometry args={[2, 2, 32, 32]} />
       <shaderMaterial
         fragmentShader={fragmentShader}
         vertexShader={vertexShader}
@@ -172,9 +179,9 @@ const HeroBackground = () => {
       <Canvas
         camera={{ position: [0, 0, 1] }}
         dpr={[1, 1.5]}
-        gl={{ 
+        gl={{
           antialias: false,
-          toneMapping: THREE.NoToneMapping 
+          toneMapping: THREE.NoToneMapping,
         }}
       >
         <GradientMesh />

@@ -26,10 +26,7 @@ const BearProvider = ({ children }) => {
     return "default";
   };
 
-  const bearType = useMemo(
-    () => detectType(location),
-    [location.pathname, location.hash],
-  );
+  const bearType = useMemo(() => detectType(location), [location]);
 
   return (
     <BearContext.Provider value={{ bearType }}>{children}</BearContext.Provider>

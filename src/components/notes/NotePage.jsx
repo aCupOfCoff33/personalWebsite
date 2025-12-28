@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useParams, Link } from "react-router-dom";
 import NoteSection from "./NoteSection";
 import { getNoteBySlug } from "./mockNotesData";
-import { useNotesTOCActions } from "./NotesContext";
+import { useNotesTOCActions } from "./NotesHooks";
 import { motion } from "framer-motion";
 
 // Presents a single note page at route /notes/:slug

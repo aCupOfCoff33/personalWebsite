@@ -139,7 +139,7 @@ const useHeroAnimation = ({ frameRef, bodyRef, x, y, markIntroSeen }) => {
           }),
           animate(y, 0, { type: "spring", stiffness: 65, damping: 18 }),
         ]);
-      } catch (e) {
+      } catch {
         return;
       }
       dispatch({ type: "SET_FRAME_THICK", value: false });
