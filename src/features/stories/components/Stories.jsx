@@ -1,7 +1,7 @@
 import React from "react";
-import ContentSection from '../../../components/ui/ContentSection';
-import storiesData from '../../../constants/storiesData';
-import { useNavigate } from 'react-router-dom';
+import ContentSection from "../../../components/ui/ContentSection";
+import storiesData from "../../../constants/storiesData";
+import { useNavigate } from "react-router-dom";
 
 // Stories section using the reusable ContentSection with horizontal carousel layout
 function Stories() {
@@ -16,8 +16,8 @@ function Stories() {
       cardVariant="panel"
       showViewAll={true}
       maxItems={7}
-      onViewAllClick={() => navigate('/notes')}
-      viewAllLabel={'Venture Deeper Into\nThe Woods'}
+      onViewAllClick={() => navigate("/notes")}
+      viewAllLabel={"Venture Deeper Into\nThe Woods"}
     />
   );
 }

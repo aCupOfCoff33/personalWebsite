@@ -1,10 +1,11 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/layout/Navbar";
 import HeroBackground from "./components/common/HeroBackground";
 import { NotesProvider } from "./features/notes/NotesContext";
 import BearProvider from "./features/bear/context/BearContext";
 import ErrorBoundary from "./components/common/ErrorBoundary";
+import ScrollRestoration from "./components/common/ScrollRestoration";
 
 // Optimized for performance by lazy-loading route components
 // This reduces initial bundle size without changing functionality
@@ -14,6 +15,8 @@ const Projects = lazy(() => import("./features/projects/components/Projects"));
 const NotePage = lazy(() => import("./features/notes/NotePage"));
 
 function App() {
+  const scrollContainerRef = useRef(null);
+
   return (
     <ErrorBoundary>
       <BearProvider>
@@ -31,9 +34,11 @@ function App() {
 
             {/* Layout: Main content window wrapper - SCROLLABLE */}
             <div
+              ref={scrollContainerRef}
               className="flex-1 h-full p-2 md:p-3 overflow-y-auto overflow-x-hidden relative scrollbar-gutter-stable"
               data-scroll-container="main"
             >
+              <ScrollRestoration containerRef={scrollContainerRef} />
               <main
                 id="main-content"
                 tabIndex="-1"
