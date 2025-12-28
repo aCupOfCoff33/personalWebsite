@@ -2,8 +2,8 @@ import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/layout/Navbar";
 import HeroBackground from "./components/common/HeroBackground";
-import { NotesProvider } from "./components/notes/NotesContext";
-import BearProvider from "./components/common/BearContext";
+import { NotesProvider } from "./features/notes/NotesContext";
+import BearProvider from "./features/bear/context/BearContext";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 
 // Optimized for performance by lazy-loading route components
@@ -11,7 +11,7 @@ import ErrorBoundary from "./components/common/ErrorBoundary";
 const Home = lazy(() => import("./features/home/components/Home"));
 const AboutMe = lazy(() => import("./features/about/components/AboutMe"));
 const Projects = lazy(() => import("./features/projects/components/Projects"));
-const NotePage = lazy(() => import("./components/notes/NotePage"));
+const NotePage = lazy(() => import("./features/notes/NotePage"));
 
 function App() {
   return (

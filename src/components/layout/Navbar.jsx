@@ -14,9 +14,9 @@ import {
   Instagram,
 } from "lucide-react";
 import XIcon from "../icons/XIcon";
-import TOC from "../notes/TOC";
-import { useNotesTOC } from "../notes/NotesHooks";
-import UnifiedBearIcon from "../common/UnifiedBearIcon";
+import TOC from "../../features/notes/TOC";
+import { useNotesTOC } from "../../features/notes/NotesHooks";
+import UnifiedBearIcon from "../../features/bear/components/UnifiedBearIcon";
 
 const sections = [
   {

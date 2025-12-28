@@ -62,7 +62,7 @@ export function CodeBlockItem({ value, children }) {
 export function CodeBlockContent({ language, children }) {
   // Reuse existing notes CodeBlock for rendering the highlighted code
   const LazyCode = React.useMemo(
-    () => React.lazy(() => import("../../../notes/CodeBlock.jsx")),
+    () => React.lazy(() => import("../../../../features/notes/CodeBlock.jsx")),
     [],
   );
   return (
