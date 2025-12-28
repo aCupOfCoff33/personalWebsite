@@ -13,6 +13,7 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
   const rightHighlightRef = useRef(null);
   const leftIrisGroupRef = useRef(null);
   const rightIrisGroupRef = useRef(null);
+  const eyesRootRef = useRef(null);
 
   const [isBlinking, setIsBlinking] = useState(false);
   const blinkTimeoutRef = useRef(null);
@@ -22,6 +23,7 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
   const lookTimeoutRef = useRef(null);
   const settleTimeoutRef = useRef(null);
   const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
+  const [isInView, setIsInView] = useState(true);
   // Track mounted state to avoid stale timeouts causing UI to remain in blink state
   const isMountedRef = useRef(true);
 
@@ -30,6 +32,18 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
     return () => {
       isMountedRef.current = false;
     };
+  }, []);
+
+  useEffect(() => {
+    const node = eyesRootRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return undefined;
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      setIsInView(entry.isIntersecting);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
   }, []);
 
   const cfg = useMemo(() => {
@@ -102,7 +116,8 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
   }, [schedulePeriodicBlink]);
 
   useEffect(() => {
-    if (!(mode === "default" || mode === "about")) return undefined;
+    if (!isInView || !(mode === "default" || mode === "about"))
+      return undefined;
     const leftEl = leftHighlightRef.current;
     const rightEl = rightHighlightRef.current;
     if (!leftEl || !rightEl) return undefined;
@@ -179,7 +194,7 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
       window.removeEventListener("scroll", updateBboxes);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [mode]);
+  }, [mode, isInView]);
 
   // Projects/Stories: scanning + random looks
   useEffect(() => {
@@ -265,7 +280,7 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
   const trackingTransitionStyle = { transition: "transform 0.1s ease-out" };
 
   return (
-    <>
+    <g ref={eyesRootRef}>
       {/* Left eye */}
       <g style={eyeBlinkStyle}>
         <g
@@ -316,7 +331,7 @@ const BearEyes = React.memo(function BearEyes({ mode = "default" }) {
           </g>
         </g>
       </g>
-    </>
+    </g>
   );
 });
 

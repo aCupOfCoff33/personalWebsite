@@ -1,14 +1,14 @@
 import React from "react";
-import ContentSection from '../../ui/ContentSection';
-import { useNavigate } from 'react-router-dom';
-import projectsData from '../../../constants/projectsData';
+import ContentSection from "../../ui/ContentSection";
+import { useNavigate } from "react-router-dom";
+import projectsData from "../../../constants/projectsData";
 
 // Selected Works section using the reusable ContentSection
 function SelectedWorks() {
   const navigate = useNavigate();
-  const handleViewAllClick = () => {
-    navigate('/projects');
-  };
+  const handleViewAllClick = React.useCallback(() => {
+    navigate("/projects");
+  }, [navigate]);
 
   return (
     <ContentSection
