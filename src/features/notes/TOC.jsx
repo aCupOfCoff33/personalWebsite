@@ -1,33 +1,39 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { motion } from 'framer-motion';
+import React from "react";
+import PropTypes from "prop-types";
+import { motion } from "framer-motion";
 // Alias to capitalized variable so linters recognize JSX usage
 const M = motion;
 
 function TOCItem({ id, text, level, onClick }) {
   return (
-    <li className="my-1">
+    <div className="w-full py-2.5 px-1 relative">
       <a
         href={`#${id}`}
         onClick={(e) => {
           e.preventDefault();
           const el = document.getElementById(id);
           if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
           }
           if (onClick) onClick(id);
         }}
-        className={[
-          'block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded transition-colors',
-          level > 1
-            ? 'pl-3 text-sm text-neutral-300 hover:text-white'
-            : 'pl-0 text-base text-white font-normal',
-        ].join(' ')}
+        className="inline-flex items-center focus:outline-none group"
         aria-label={`Jump to ${text}`}
       >
-        {text}
+        <span
+          className={[
+            "font-adamant transition-colors text-xs",
+            level > 1
+              ? "text-white/50 group-hover:text-white"
+              : "text-white/50 group-hover:text-white",
+          ].join(" ")}
+        >
+          {text}
+        </span>
       </a>
-    </li>
+      {/* Border on the bottom of each item - starts at left-1 to align with text */}
+      <div className="absolute left-1 right-0 bottom-0 h-px bg-gradient-to-r from-white/10 to-transparent" />
+    </div>
   );
 }
 
@@ -38,7 +44,7 @@ TOCItem.propTypes = {
   onClick: PropTypes.func,
 };
 
-const TOC = React.memo(function TOC({ items, className = '', visible = true }) {
+const TOC = React.memo(function TOC({ items, className = "", visible = true }) {
   if (!items?.length) return null;
   return (
     <M.nav
@@ -47,14 +53,16 @@ const TOC = React.memo(function TOC({ items, className = '', visible = true }) {
       transition={{ duration: 0.25 }}
       aria-label="Table of contents"
       aria-hidden={!visible}
-      style={{ pointerEvents: visible ? 'auto' : 'none' }}
-      className={`hidden lg:block sticky top-28 max-h-[70vh] overflow-auto p-4 rounded-xl border border-white/10 bg-[#0C100D]/70 backdrop-blur ${className}`}
+      style={{ pointerEvents: visible ? "auto" : "none" }}
+      className={`hidden lg:block sticky top-28 max-h-[70vh] overflow-auto rounded-xl bg-[#0C100D]/70 backdrop-blur ${className}`}
     >
-      <ul>
+      <div className="flex flex-col relative">
+        {/* Top border - starts at left-1 to align with "IN THIS STORY" text */}
+        <div className="absolute left-1 right-0 top-0 h-px bg-gradient-to-r from-white/10 to-transparent" />
         {items.map((item) => (
           <TOCItem key={item.id} {...item} />
         ))}
-      </ul>
+      </div>
     </M.nav>
   );
 });
@@ -72,5 +80,3 @@ TOC.propTypes = {
 };
 
 export default TOC;
-
-
