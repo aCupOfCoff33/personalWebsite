@@ -1,0 +1,82 @@
+// Centralized projects data
+// This file contains ONLY actual projects (hackathons, side projects, etc.)
+// NOT internships or work experience - those are in experiences.js
+// When migrating to a database, this entire array can be moved as-is
+
+export const projects = [
+  {
+    id: "american-global-dashboard",
+    title: "American Global Loss-Ratio Dashboard",
+    subtitle: "Data Analytics Project",
+    dates: "May 2025 – Present",
+    description:
+      "Built a loss-ratio dashboard adopted by 30+ brokers, using React, Sanity, and Python ETL.",
+    image: "https://placehold.co/481x280/3b82f6/ffffff?text=American+Global",
+    logo: "https://media.licdn.com/dms/image/v2/C4E0BAQFxOWSzcQlx7w/company-logo_200_200/company-logo_200_200/0/1672776000338/american_global_llc_logo?e=2147483647&v=beta&t=6eASPMK3qET6z-fVO8yv4YWrhgf7l7wjaAwu_iF8q2s",
+    gradient: "bg-gradient-to-r from-cyan-400 to-blue-500",
+    category: "Data Analytics",
+    technologies: ["React", "Sanity", "Python", "ETL"],
+    featured: true,
+    sortOrder: 1,
+    isActive: true,
+    createdAt: "2025-05-01T00:00:00Z",
+    updatedAt: "2025-05-01T00:00:00Z",
+  },
+  {
+    id: "government-canada-automation",
+    title: "Government of Canada Automation Tools",
+    subtitle: "Financial Services Project",
+    dates: "May 2024 – Aug 2024",
+    description:
+      "Automated reconciliation for 10+ accounts, saving 20 hrs/month; built reporting tools in R.",
+    image: "https://placehold.co/481x280/dc2626/ffffff?text=Gov+Canada",
+    logo: "https://pbs.twimg.com/profile_images/1305515099218751489/AcSX2X9I_400x400.jpg",
+    gradient: "bg-gradient-to-bl from-[#991b1b] via-[#dc2626] to-[#f87171]",
+    category: "Automation",
+    technologies: ["R", "Python", "SAP", "Power BI"],
+    featured: true,
+    sortOrder: 2,
+    isActive: true,
+    createdAt: "2024-05-01T00:00:00Z",
+    updatedAt: "2024-08-01T00:00:00Z",
+  },
+  {
+    id: "wds-web-apps",
+    title: "Western Developers Society Web Apps",
+    subtitle: "Student Organization Projects",
+    dates: "Sept 2023 – Present",
+    description:
+      "Led a team of 8 to launch 3 web apps for student orgs; mentored new devs and ran weekly code-reviews.",
+    image: "https://placehold.co/481x280/3b82f6/ffffff?text=WDS",
+    logo: "https://www.aaryanj.tech/assets/WDS-BqX8pcx0.png",
+    gradient: "bg-gradient-to-r from-blue-600 to-indigo-800",
+    category: "Web Development",
+    technologies: ["React", "Node.js", "MongoDB", "Leadership"],
+    featured: true,
+    sortOrder: 3,
+    isActive: true,
+    createdAt: "2023-09-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+  },
+  {
+    id: "ivey-fintech-market-sizing",
+    title: "Ivey Fintech Market Sizing Tool",
+    subtitle: "Consulting Project",
+    dates: "Sept 2024 – Apr 2025",
+    description:
+      "Analysed fintech trends and presented findings to 50+ students; built a Python tool for market-sizing.",
+    image: "https://placehold.co/481x280/10b981/ffffff?text=Ivey+Fintech",
+    logo: "https://cdn-images-1.medium.com/max/1200/1*429tXOeB5sYvQ37L-zasBQ.jpeg",
+    gradient:
+      "bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-[#fef08a] via-[#84cc16] to-[#16a34a]",
+    category: "Fintech",
+    technologies: ["Python", "Data Analysis", "Strategy"],
+    featured: true,
+    sortOrder: 4,
+    isActive: true,
+    createdAt: "2024-09-01T00:00:00Z",
+    updatedAt: "2025-04-01T00:00:00Z",
+  },
+];
+
+export default projects;
