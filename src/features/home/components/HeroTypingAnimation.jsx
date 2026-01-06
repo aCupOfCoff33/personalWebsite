@@ -16,7 +16,7 @@ const HERO_INTRO_SESSION_KEY = "heroIntroSeen";
 
 // Set to true to skip typing animation and show final state immediately
 // Set to false to play the full typing animation sequence
-const SKIP_TYPING_ANIMATION = true;
+const SKIP_TYPING_ANIMATION = false;
 
 // Track whether the hero intro has already played in this SPA session
 let heroIntroHasPlayed = false;
@@ -94,10 +94,11 @@ const HeroTypingAnimation = React.memo(() => {
     !SKIP_TYPING_ANIMATION && !getHeroIntroSeen(),
   ).current;
   const [showDragHint, setShowDragHint] = React.useState(true);
-  const [frameInitialPosition, setFrameInitialPosition] = React.useState({
+  const [hintPosition, setHintPosition] = React.useState({
     x: 0,
     y: 0,
   });
+  const sectionRef = useRef(null);
 
   const markIntroSeen = React.useCallback(() => {
     markHeroIntroSeen();
@@ -132,13 +133,31 @@ const HeroTypingAnimation = React.memo(() => {
     handleCursorReadyToDragSnap,
   } = useHeroAnimation({ frameRef, bodyRef, x, y, markIntroSeen });
 
-  // Track frame's initial position for positioning the drag hint
+  // Track frame's position relative to section for positioning the drag hint
+  // Calculate when dragOK becomes true (when hint is about to show) to ensure frame is in final position
   useEffect(() => {
-    if (frameRef.current && state.showFrame) {
-      const rect = frameRef.current.getBoundingClientRect();
-      setFrameInitialPosition({ x: rect.left, y: rect.top });
-    }
-  }, [state.showFrame]);
+    if (!state.showFrame || !state.dragOK) return;
+    if (!frameRef.current || !sectionRef.current) return;
+
+    // Use requestAnimationFrame to ensure layout is complete
+    const rafId = requestAnimationFrame(() => {
+      if (!frameRef.current || !sectionRef.current) return;
+
+      const frameRect = frameRef.current.getBoundingClientRect();
+      const sectionRect = sectionRef.current.getBoundingClientRect();
+
+      // Calculate position relative to the section
+      // Position at the right edge of the frame (frameRect.right relative to section)
+      const frameRightEdge = frameRect.right - sectionRect.left;
+
+      setHintPosition({
+        x: frameRightEdge - 20, // 20px to the right of frame's right edge
+        y: frameRect.top - sectionRect.top - 110, // 110px above frame
+      });
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [state.showFrame, state.dragOK]);
 
   // Update x position when screen size changes
   useEffect(() => {
@@ -207,7 +226,10 @@ const HeroTypingAnimation = React.memo(() => {
 
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-8 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
+    <section
+      ref={sectionRef}
+      className="relative w-full max-w-screen-xl mx-auto px-4 pt-8 md:px-6 md:pt-64 text-white font-adamant overflow-visible"
+    >
       {/* Animated cursor overlay - shown on both mobile and desktop */}
       {state.showAnimatedCursor && (
         <AnimatedCursor
@@ -248,17 +270,16 @@ const HeroTypingAnimation = React.memo(() => {
               duration: 0.3,
               exit: { duration: 0.8, ease: "easeOut" },
             }}
-            className="hidden md:block fixed pointer-events-none z-50"
+            className="hidden md:block absolute pointer-events-none z-50"
             style={{
-              left:
-                frameInitialPosition.x +
-                (frameRef.current?.offsetWidth || 200) -
-                20,
-              top: frameInitialPosition.y - 75,
+              left: hintPosition.x,
+              top: hintPosition.y,
+              transform: "scale(1.25)",
+              transformOrigin: "top left",
             }}
           >
             <div className="flex flex-col items-start">
-              <span className="text-xl text-[#9b9cbe] font-medium italic whitespace-nowrap">
+              <span className="text-2xl text-[#9b9cbe] font-medium italic whitespace-nowrap">
                 drag me!
               </span>
               {/* Hand-drawn curved arrow pointing down-left toward frame */}
