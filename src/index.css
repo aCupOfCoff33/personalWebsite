@@ -4,78 +4,77 @@
 
 /* Screen reader only utility class for accessibility */
 @layer utilities {
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
 
-  .not-sr-only {
-    position: static;
-    width: auto;
-    height: auto;
-    padding: 0;
-    margin: 0;
-    overflow: visible;
-    clip: auto;
-    white-space: normal;
-  }
+    .not-sr-only {
+        position: static;
+        width: auto;
+        height: auto;
+        padding: 0;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+    }
 }
 
-
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #151515;
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #0b0f0c;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Regular */
 @font-face {
-  font-family: 'Adamant_BG';
-  src: url('/fonts/Adamant_BG.woff') format('woff');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
+    font-family: "Adamant_BG";
+    src: url("/fonts/Adamant_BG.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
 }
 
 /* Bold */
 @font-face {
-  font-family: 'Adamant_BG';
-  src: url('/fonts/Adamant_BG_B.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
+    font-family: "Adamant_BG";
+    src: url("/fonts/Adamant_BG_B.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
 }
 
 /* Italic */
 @font-face {
-  font-family: 'Adamant_BG';
-  src: url('/fonts/Adamant_BG_I.woff') format('woff');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
+    font-family: "Adamant_BG";
+    src: url("/fonts/Adamant_BG_I.woff") format("woff");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
 }
 
 /* Bold-Italic */
 @font-face {
-  font-family: 'Adamant_BG';
-  src: url('/fonts/Adamant_BG_BI.woff') format('woff');
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
+    font-family: "Adamant_BG";
+    src: url("/fonts/Adamant_BG_BI.woff") format("woff");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
 }

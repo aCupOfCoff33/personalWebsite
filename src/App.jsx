@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/layout/Navbar";
-import HeroBackground from "./components/common/HeroBackground";
+import PremiumBackground from "./components/common/PremiumBackground";
 import { NotesProvider } from "./features/notes/NotesContext";
 import BearProvider from "./features/bear/context/BearContext";
 import ErrorBoundary from "./components/common/ErrorBoundary";
@@ -42,13 +42,11 @@ function App() {
               <main
                 id="main-content"
                 tabIndex="-1"
-                className="relative min-h-full w-full bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col isolate"
+                className="relative min-h-full w-full bg-transparent rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col isolate"
               >
-                {/* Global background - Sticky inside the scrolling container */}
+                {/* Global background - Fixed to cover all content */}
                 <div className="absolute inset-0 -z-10 pointer-events-none">
-                  <div className="sticky top-0 h-screen w-full">
-                    <HeroBackground />
-                  </div>
+                  <PremiumBackground />
                 </div>
 
                 <div className="flex-1 relative z-0">
@@ -64,7 +62,7 @@ function App() {
                   </Suspense>
 
                   {/* Footer lives outside Routes so it shows on every page */}
-                  <footer className="relative bg-black/50 backdrop-blur-sm text-center py-10 text-gray-500 z-10">
+                  <footer className="relative bg-transparent text-center py-10 text-gray-500 z-10">
                     © 2025 Aaryan Joharapurkar. Designed from the depths of my
                     cave.
                   </footer>
