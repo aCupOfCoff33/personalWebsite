@@ -1,4 +1,5 @@
 import React from "react";
+import noiseTexture from "../../assets/noise-texture.png";
 
 /**
  * PremiumBackground - A reusable background component with premium SaaS aesthetic
@@ -29,7 +30,7 @@ const PremiumBackground = ({ className = "" }) => {
       <div
         className="absolute inset-0 opacity-[0.15] pointer-events-none"
         style={{
-          backgroundImage: "url('/noise-texture.png')",
+          backgroundImage: `url(${noiseTexture})`,
           backgroundRepeat: "repeat",
           backgroundSize: "216px auto",
         }}
