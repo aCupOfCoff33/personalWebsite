@@ -1,5 +1,5 @@
 // Unified Bear Icon orchestrator: single SVG with BaseBear and conditional accessories
-import React, { useEffect, useId, useState, useCallback } from "react";
+import React, { useEffect, useId, useState, useCallback, useRef } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import { useBearState } from "../../../hooks/useBearState";
 import { BEAR_MODES } from "../../../constants/bearModes";
@@ -17,6 +17,7 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
   const desiredType = bearType || BEAR_MODES.DEFAULT;
   const [renderedType, setRenderedType] = useState(desiredType);
   const [pendingType, setPendingType] = useState(null);
+  const bearEyesRef = useRef(null);
 
   useEffect(() => {
     if (pendingType) {
@@ -42,6 +43,12 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
 
   const shouldRenderAccessory = hasAccessoryForType(renderedType);
 
+  const handleClick = useCallback(() => {
+    if (bearEyesRef.current?.triggerBlink) {
+      bearEyesRef.current.triggerBlink();
+    }
+  }, []);
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -50,9 +57,11 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
       className={className}
       role="img"
       aria-hidden="true"
+      onClick={handleClick}
+      style={{ cursor: "pointer" }}
     >
       <BaseBear />
-      <BearEyes mode={desiredType} />
+      <BearEyes ref={bearEyesRef} mode={desiredType} />
       <AnimatePresence
         initial={false}
         mode="wait"

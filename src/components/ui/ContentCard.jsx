@@ -78,7 +78,7 @@ function ContentCard({
       className={clsx(
         "group relative isolate p-px", // 1-px padding for gradient border
         "w-full max-w-[600px] mx-auto", // fill container up to a max width
-        "aspect-[16/12]", // match wide project card proportions
+        "aspect-[16/12.5]",
         "transition-transform duration-300 ease-out hover:scale-[1.02]",
         className,
       )}
@@ -89,7 +89,7 @@ function ContentCard({
       {href ? (
         <a
           href={href}
-          className="relative flex h-full w-full flex-col overflow-hidden rounded hover:backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 p-4 space-y-3 transition-colors duration-300 ease-out"
+          className="relative flex h-full w-full flex-col overflow-hidden rounded hover:backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 p-3 md:p-4 space-y-2 md:space-y-3 transition-colors duration-300 ease-out"
           onClick={() => {
             // allow anchor navigation to router; do not scroll to top of current page
           }}
@@ -144,7 +144,7 @@ function ContentCard({
           )}
         </a>
       ) : (
-        <div className="relative flex h-full w-full flex-col overflow-hidden rounded p-4 space-y-3">
+        <div className="relative flex h-full w-full flex-col overflow-hidden rounded p-3 md:p-4 space-y-2 md:space-y-3">
           {/* hero panel */}
           <div
             className="relative flex-1 h-full rounded-xl overflow-hidden"

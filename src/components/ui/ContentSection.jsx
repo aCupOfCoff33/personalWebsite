@@ -34,7 +34,7 @@ function ContentSection({
   return (
     <section
       ref={revealRef}
-      className={`relative w-full z-[1] py-24 bg-transparent ${className}`}
+      className={`relative w-full z-[1] bg-transparent ${className}`}
       {...props}
     >
       <div

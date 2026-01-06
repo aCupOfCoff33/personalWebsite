@@ -79,7 +79,7 @@ function ContentCarousel({
         {displayItems.map((item, index) => (
           <div
             key={item.id || index}
-            className="shrink-0 snap-start min-w-[240px] md:min-w-[400px] max-w-[600px] w-full"
+            className="shrink-0 snap-start w-[85vw] sm:w-[70vw] md:w-[500px] lg:w-[600px] max-w-[600px]"
           >
             <ContentCard variant={cardVariant} {...item} />
           </div>

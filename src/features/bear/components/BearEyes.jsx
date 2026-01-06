@@ -4,12 +4,17 @@ import React, {
   useState,
   useCallback,
   useMemo,
+  useImperativeHandle,
+  forwardRef,
 } from "react";
 import { BEAR_MODES } from "../../../constants/bearModes";
 
 // Unified animated eyes that adapt behavior by mode
 // mode: BEAR_MODES.DEFAULT | BEAR_MODES.PROJECTS | BEAR_MODES.STORIES | BEAR_MODES.ABOUT
-const BearEyes = React.memo(function BearEyes({ mode = BEAR_MODES.DEFAULT }) {
+const BearEyes = forwardRef(function BearEyes(
+  { mode = BEAR_MODES.DEFAULT },
+  ref,
+) {
   const leftHighlightRef = useRef(null);
   const rightHighlightRef = useRef(null);
   const leftIrisGroupRef = useRef(null);
@@ -78,6 +83,22 @@ const BearEyes = React.memo(function BearEyes({ mode = BEAR_MODES.DEFAULT }) {
       HIGHLIGHT_MOVE: 1.5,
     };
   }, [mode]);
+
+  // Expose triggerBlink to parent components via ref
+  useImperativeHandle(
+    ref,
+    () => ({
+      triggerBlink: () => {
+        if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
+        setIsBlinking(true);
+        blinkTimeoutRef.current = setTimeout(() => {
+          if (isMountedRef.current) setIsBlinking(false);
+          blinkTimeoutRef.current = null;
+        }, cfg.BLINK_MS);
+      },
+    }),
+    [cfg.BLINK_MS],
+  );
 
   const triggerBlink = useCallback(() => {
     if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
