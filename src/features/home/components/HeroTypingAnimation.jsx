@@ -1,7 +1,11 @@
 /* HeroTypingAnimation.jsx */
 import React, { useEffect, useRef } from "react";
 import AnimatedCursor from "../../../components/common/AnimatedCursor";
-import { motion as Motion, useMotionValue } from "framer-motion";
+import {
+  motion as Motion,
+  useMotionValue,
+  AnimatePresence,
+} from "framer-motion";
 import useHeroAnimation from "../hooks/useHeroAnimation";
 import HeroFrame from "./HeroFrame";
 import TypewriterText from "./TypewriterText";
@@ -9,6 +13,10 @@ import TypewriterText from "./TypewriterText";
 /* ── constants ─────────────────────────────────────────────── */
 const HEADLINE = "Hey there! I'm Aaryan!";
 const HERO_INTRO_SESSION_KEY = "heroIntroSeen";
+
+// Set to true to skip typing animation and show final state immediately
+// Set to false to play the full typing animation sequence
+const SKIP_TYPING_ANIMATION = true;
 
 // Track whether the hero intro has already played in this SPA session
 let heroIntroHasPlayed = false;
@@ -82,7 +90,15 @@ if (detectNavigationType() === "reload" && isSessionStorageReady()) {
 const HeroTypingAnimation = React.memo(() => {
   const bodyRef = useRef(null);
   const headlineRef = useRef(null);
-  const shouldRunIntro = React.useRef(!getHeroIntroSeen()).current;
+  const shouldRunIntro = React.useRef(
+    !SKIP_TYPING_ANIMATION && !getHeroIntroSeen(),
+  ).current;
+  const [showDragHint, setShowDragHint] = React.useState(true);
+  const [frameInitialPosition, setFrameInitialPosition] = React.useState({
+    x: 0,
+    y: 0,
+  });
+
   const markIntroSeen = React.useCallback(() => {
     markHeroIntroSeen();
   }, []);
@@ -115,6 +131,14 @@ const HeroTypingAnimation = React.memo(() => {
     handleCursorDragComplete,
     handleCursorReadyToDragSnap,
   } = useHeroAnimation({ frameRef, bodyRef, x, y, markIntroSeen });
+
+  // Track frame's initial position for positioning the drag hint
+  useEffect(() => {
+    if (frameRef.current && state.showFrame) {
+      const rect = frameRef.current.getBoundingClientRect();
+      setFrameInitialPosition({ x: rect.left, y: rect.top });
+    }
+  }, [state.showFrame]);
 
   // Update x position when screen size changes
   useEffect(() => {
@@ -194,6 +218,7 @@ const HeroTypingAnimation = React.memo(() => {
           shouldExit={state.cursorShouldExit}
         />
       )}
+
       {/* ── headline & draggable blue frame ── */}
       <HeroFrame
         frameRef={frameRef}
@@ -204,12 +229,75 @@ const HeroTypingAnimation = React.memo(() => {
         x={x}
         y={y}
         getInitialX={getInitialX}
+        onDragStart={() => setShowDragHint(false)}
       >
         <TypewriterText
           headlineRef={headlineRef}
           showCursor={state.showCursor}
         />
       </HeroFrame>
+
+      {/* "drag me!" hint - positioned absolutely, independent of draggable frame */}
+      <AnimatePresence>
+        {state.showFrame && state.dragOK && showDragHint && (
+          <Motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.3,
+              exit: { duration: 0.8, ease: "easeOut" },
+            }}
+            className="hidden md:block fixed pointer-events-none z-50"
+            style={{
+              left:
+                frameInitialPosition.x +
+                (frameRef.current?.offsetWidth || 200) -
+                20,
+              top: frameInitialPosition.y - 75,
+            }}
+          >
+            <div className="flex flex-col items-start">
+              <span className="text-xl text-[#9b9cbe] font-medium italic whitespace-nowrap">
+                drag me!
+              </span>
+              {/* Hand-drawn curved arrow pointing down-left toward frame */}
+              <svg
+                width="60"
+                height="50"
+                viewBox="0 0 60 50"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-[#9b9cbe]"
+                style={{ marginLeft: "5px" }}
+              >
+                {/* Curved path from top-right sweeping down to bottom-left */}
+                <path
+                  d="M 50 8 Q 40 12, 30 22 Q 20 32, 12 42"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Arrowhead - both lines go backward from tip forming V */}
+                <path
+                  d="M 11 35 L 12 42"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M 20 41 L 12 42"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </Motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── body: tagline + meta grid ── */}
       {state.showBody && (

@@ -10,6 +10,7 @@ const HeroFrame = React.memo(function HeroFrame({
   x,
   y,
   getInitialX,
+  onDragStart,
   children,
 }) {
   // Dynamic safe margins that respect the layout (sidebar on desktop, top bar on mobile).
@@ -90,6 +91,7 @@ const HeroFrame = React.memo(function HeroFrame({
         if (state.isAnimatingBack || pendingSnapBack) {
           return false;
         }
+        onDragStart?.();
       }}
       onDrag={handleDrag}
       onDragEnd={() => {
