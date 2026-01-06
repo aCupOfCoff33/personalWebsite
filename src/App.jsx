@@ -7,7 +7,6 @@ import BearProvider from "./features/bear/context/BearContext";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import ScrollRestoration from "./components/common/ScrollRestoration";
 
-// Optimized for performance by lazy-loading route components
 // This reduces initial bundle size without changing functionality
 const Home = lazy(() => import("./features/home/components/Home"));
 const AboutMe = lazy(() => import("./features/about/components/AboutMe"));
