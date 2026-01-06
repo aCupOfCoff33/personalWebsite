@@ -1,7 +1,4 @@
 // Centralized projects data
-// This file contains ONLY actual projects (hackathons, side projects, etc.)
-// NOT internships or work experience - those are in experiences.js
-// When migrating to a database, this entire array can be moved as-is
 
 export const projects = [
   {

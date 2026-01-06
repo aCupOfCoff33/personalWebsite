@@ -1,6 +1,4 @@
 // Centralized experience data
-// This file contains ALL work experience, internships, and leadership roles
-// When migrating to a database, this entire array can be moved as-is
 
 export const experiences = [
   {

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useParams, Link } from "react-router-dom";
 import NoteSection from "./NoteSection";
-import { getNoteBySlug } from "./mockNotesData";
+import { contentService } from "@/services/content";
 import { useNotesTOCActions } from "./NotesHooks";
 import { motion } from "framer-motion";
 
@@ -22,7 +22,7 @@ export default function NotePage() {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    getNoteBySlug(slug).then((data) => {
+    contentService.getNoteBySlug(slug).then((data) => {
       if (!mounted) return;
       setNote(data);
       setLoading(false);
