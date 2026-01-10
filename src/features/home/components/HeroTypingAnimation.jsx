@@ -1,13 +1,12 @@
 /* HeroTypingAnimation.jsx */
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import AnimatedCursor from "../../../components/common/AnimatedCursor";
-// eslint-disable-next-line no-unused-vars
-import { motion, useMotionValue, animate } from "framer-motion";
-
+import { motion, useMotionValue } from "framer-motion";
+import useHeroAnimation from "../hooks/useHeroAnimation";
 
 /* ── constants ─────────────────────────────────────────────── */
 const HEADLINE = "Hey there! I'm Aaryan!";
-const HERO_INTRO_SESSION_KEY = 'heroIntroSeen';
+const HERO_INTRO_SESSION_KEY = "heroIntroSeen";
 
 // Track whether the hero intro has already played in this SPA session
 let heroIntroHasPlayed = false;
@@ -15,10 +14,10 @@ let sessionStorageStatus = null;
 
 const isSessionStorageReady = () => {
   if (sessionStorageStatus !== null) return sessionStorageStatus;
-  if (typeof window === 'undefined' || !window.sessionStorage) return false;
+  if (typeof window === "undefined" || !window.sessionStorage) return false;
   try {
-    const testKey = '__hero_intro_test__';
-    window.sessionStorage.setItem(testKey, '1');
+    const testKey = "__hero_intro_test__";
+    window.sessionStorage.setItem(testKey, "1");
     window.sessionStorage.removeItem(testKey);
     sessionStorageStatus = true;
   } catch (error) {
@@ -28,26 +27,36 @@ const isSessionStorageReady = () => {
 };
 
 const detectNavigationType = () => {
-  if (typeof window === 'undefined' || typeof performance === 'undefined') return 'navigate';
-  if (typeof performance.getEntriesByType === 'function') {
-    const [navEntry] = performance.getEntriesByType('navigation');
+  if (typeof window === "undefined" || typeof performance === "undefined")
+    return "navigate";
+  if (typeof performance.getEntriesByType === "function") {
+    const [navEntry] = performance.getEntriesByType("navigation");
     if (navEntry && navEntry.type) return navEntry.type;
   }
-  if (performance.navigation && typeof performance.navigation.type === 'number') {
-    const { TYPE_RELOAD, TYPE_BACK_FORWARD, TYPE_NAVIGATE } = performance.navigation;
+  if (
+    performance.navigation &&
+    typeof performance.navigation.type === "number"
+  ) {
+    const { TYPE_RELOAD, TYPE_BACK_FORWARD, TYPE_NAVIGATE } =
+      performance.navigation;
     switch (performance.navigation.type) {
-      case TYPE_RELOAD: return 'reload';
-      case TYPE_BACK_FORWARD: return 'back_forward';
-      case TYPE_NAVIGATE: return 'navigate';
-      default: return 'navigate';
+      case TYPE_RELOAD:
+        return "reload";
+      case TYPE_BACK_FORWARD:
+        return "back_forward";
+      case TYPE_NAVIGATE:
+        return "navigate";
+      default:
+        return "navigate";
     }
   }
-  return 'navigate';
+  return "navigate";
 };
 
 const getHeroIntroSeen = () => {
   if (isSessionStorageReady()) {
-    const seen = window.sessionStorage.getItem(HERO_INTRO_SESSION_KEY) === 'true';
+    const seen =
+      window.sessionStorage.getItem(HERO_INTRO_SESSION_KEY) === "true";
     if (seen) heroIntroHasPlayed = true;
     return seen;
   }
@@ -57,12 +66,12 @@ const getHeroIntroSeen = () => {
 const markHeroIntroSeen = () => {
   heroIntroHasPlayed = true;
   if (isSessionStorageReady()) {
-    window.sessionStorage.setItem(HERO_INTRO_SESSION_KEY, 'true');
+    window.sessionStorage.setItem(HERO_INTRO_SESSION_KEY, "true");
   }
 };
 
 // Allow a hard refresh on the home route to replay the intro sequence
-if (detectNavigationType() === 'reload' && isSessionStorageReady()) {
+if (detectNavigationType() === "reload" && isSessionStorageReady()) {
   window.sessionStorage.removeItem(HERO_INTRO_SESSION_KEY);
   heroIntroHasPlayed = false;
 }
@@ -75,52 +84,13 @@ const HeroTypingAnimation = React.memo(() => {
   const markIntroSeen = React.useCallback(() => {
     markHeroIntroSeen();
   }, []);
-  
-  // Initialize state first
-  const initialState = {
-    frameAligned: false,
-    showCursor: false,
-    showFrame: false,
-    phase: 'initial',
-    showBody: false,
-    dragOK: false,
-    centreX: 0,
-    frameFrozen: true,
-    frameThick: false,
-    pointerHover: false,
-    showAnimatedCursor: false,
-    cursorShouldExit: false,
-    cursorTriggered: false,
-  };
-  
-  function reducer(state, action) {
-    switch (action.type) {
-      case 'SET_FRAME_ALIGNED': return { ...state, frameAligned: action.value };
-      case 'SET_SHOW_CURSOR': return { ...state, showCursor: action.value };
-      case 'SET_SHOW_FRAME': return { ...state, showFrame: action.value };
-      case 'SET_PHASE': return { ...state, phase: action.value };
-      case 'SET_SHOW_BODY': return { ...state, showBody: action.value };
-      case 'SET_DRAG_OK': return { ...state, dragOK: action.value };
-      case 'SET_CENTRE_X': return { ...state, centreX: action.value };
-      case 'SET_FRAME_FROZEN': return { ...state, frameFrozen: action.value };
-      case 'SET_FRAME_THICK': return { ...state, frameThick: action.value };
-      case 'SET_POINTER_HOVER': return { ...state, pointerHover: action.value };
-      case 'SET_SHOW_ANIMATED_CURSOR': return { ...state, showAnimatedCursor: action.value };
-      case 'SET_CURSOR_SHOULD_EXIT': return { ...state, cursorShouldExit: action.value };
-      case 'SET_CURSOR_TRIGGERED': return { ...state, cursorTriggered: action.value };
-      default: return state;
-    }
-  }
-  
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const [isMobile, setIsMobile] = React.useState(false);
 
   /* motion values for drag / snap */
   const frameRef = useRef(null);
 
   // Calculate proper initial position based on screen size and text width
   const getInitialX = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const screenWidth = window.innerWidth;
       if (screenWidth < 768) {
         return 16;
@@ -130,29 +100,26 @@ const HeroTypingAnimation = React.memo(() => {
     }
     return -120;
   };
-  
+
   const x = useMotionValue(getInitialX());
   const y = useMotionValue(0);
 
-  useEffect(() => {
-    const updateIsMobile = () => {
-      if (typeof window !== "undefined") {
-        setIsMobile(window.innerWidth < 768);
-      }
-    };
-
-    updateIsMobile();
-    window.addEventListener("resize", updateIsMobile);
-    return () => {
-      window.removeEventListener("resize", updateIsMobile);
-    };
-  }, []);
+  const {
+    state,
+    dispatch,
+    cursorKey,
+    pendingSnapBack,
+    snapBack,
+    handleCursorDragComplete,
+    handleCursorReadyToDragSnap,
+  } = useHeroAnimation({ frameRef, bodyRef, x, y, markIntroSeen });
 
   // Dynamic safe margins that respect the new layout:
   // - desktop: reserve space for the fixed left sidebar (16rem) + padding
   // - mobile: reserve space for the top bar height
   const getSafeMargin = React.useCallback(() => {
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    const viewportWidth =
+      typeof window !== "undefined" ? window.innerWidth : 1024;
     const isDesktop = viewportWidth >= 768; // md breakpoint
     const SIDEBAR_WIDTH_PX = 240; // md:ml-60 (15rem)
     const MOBILE_TOPBAR_PX = 64; // pt-16 on main
@@ -164,57 +131,69 @@ const HeroTypingAnimation = React.memo(() => {
     };
   }, []);
 
-  const clampIntoViewport = React.useCallback(() => {
-    if (!frameRef.current) return;
+  // Calculate viewport bounds for clamping - returns {minX, maxX, minY, maxY} as delta limits
+  const getViewportBounds = React.useCallback(() => {
+    if (!frameRef.current)
+      return {
+        minX: -Infinity,
+        maxX: Infinity,
+        minY: -Infinity,
+        maxY: Infinity,
+      };
     const rect = frameRef.current.getBoundingClientRect();
     const SAFE_MARGIN = getSafeMargin();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    let dx = 0;
-    let dy = 0;
+    // Current position in motion values
+    const currentX = x.get();
+    const currentY = y.get();
 
-    if (rect.left < SAFE_MARGIN.left) {
-      dx += SAFE_MARGIN.left - rect.left;
-    }
-    if (rect.right > viewportWidth - SAFE_MARGIN.right) {
-      dx += (viewportWidth - SAFE_MARGIN.right) - rect.right;
-    }
-    if (rect.top < SAFE_MARGIN.top) {
-      dy += SAFE_MARGIN.top - rect.top;
-    }
-    if (rect.bottom > viewportHeight - SAFE_MARGIN.bottom) {
-      dy += (viewportHeight - SAFE_MARGIN.bottom) - rect.bottom;
-    }
+    // Calculate the absolute position limits, then convert to motion value limits
+    // rect.left = some_origin + currentX, so some_origin = rect.left - currentX
+    const originX = rect.left - currentX;
+    const originY = rect.top - currentY;
 
-    if (dx !== 0) x.set(x.get() + dx);
-    if (dy !== 0) y.set(y.get() + dy);
+    const minX = SAFE_MARGIN.left - originX;
+    const maxX = viewportWidth - SAFE_MARGIN.right - rect.width - originX;
+    const minY = SAFE_MARGIN.top - originY;
+    const maxY = viewportHeight - SAFE_MARGIN.bottom - rect.height - originY;
+
+    return { minX, maxX, minY, maxY };
   }, [getSafeMargin, x, y]);
 
-  const handleDrag = React.useCallback((event, info) => {
+  const clampIntoViewport = React.useCallback(() => {
+    const bounds = getViewportBounds();
+    const currentX = x.get();
+    const currentY = y.get();
+
+    const clampedX = Math.max(bounds.minX, Math.min(bounds.maxX, currentX));
+    const clampedY = Math.max(bounds.minY, Math.min(bounds.maxY, currentY));
+
+    if (clampedX !== currentX) x.set(clampedX);
+    if (clampedY !== currentY) y.set(clampedY);
+  }, [getViewportBounds, x, y]);
+
+  // Proactive drag handler that prevents going out of bounds entirely
+  const handleDrag = React.useCallback(() => {
     if (!frameRef.current) return;
-    const frame = frameRef.current.getBoundingClientRect();
-    const SAFE_MARGIN = getSafeMargin();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
 
-    // Compute allowed delta window relative to current on-screen rect
-    const minDeltaX = SAFE_MARGIN.left - frame.left;
-    const maxDeltaX = (viewportWidth - SAFE_MARGIN.right) - frame.right;
-    const minDeltaY = SAFE_MARGIN.top - frame.top;
-    const maxDeltaY = (viewportHeight - SAFE_MARGIN.bottom) - frame.bottom;
+    // Get bounds based on current frame position
+    const bounds = getViewportBounds();
 
-    // Clamp the incoming delta so we never exceed viewport bounds
-    const nextDeltaX = Math.max(minDeltaX, Math.min(maxDeltaX, info.delta.x));
-    const nextDeltaY = Math.max(minDeltaY, Math.min(maxDeltaY, info.delta.y));
+    // Get the current motion values (already updated by framer)
+    const currentX = x.get();
+    const currentY = y.get();
 
-    // Framer already applied info.delta.* to x/y; only apply the correction diff
-    const correctionX = nextDeltaX - info.delta.x;
-    const correctionY = nextDeltaY - info.delta.y;
-    if (correctionX !== 0) x.set(x.get() + correctionX);
-    if (correctionY !== 0) y.set(y.get() + correctionY);
-  }, [x, y, getSafeMargin]);
-  
+    // Clamp to bounds - this creates a "hard stop" effect
+    const clampedX = Math.max(bounds.minX, Math.min(bounds.maxX, currentX));
+    const clampedY = Math.max(bounds.minY, Math.min(bounds.maxY, currentY));
+
+    // Apply correction if needed
+    if (clampedX !== currentX) x.set(clampedX);
+    if (clampedY !== currentY) y.set(clampedY);
+  }, [x, y, getViewportBounds]);
+
   // Update x position when screen size changes
   useEffect(() => {
     if (state.frameAligned && frameRef.current && bodyRef.current) {
@@ -224,9 +203,9 @@ const HeroTypingAnimation = React.memo(() => {
       const currentLeft = frameRect.left;
       const deltaNeeded = targetLeft - currentLeft;
       const finalX = x.get() + deltaNeeded;
-      dispatch({ type: 'SET_CENTRE_X', value: finalX });
+      dispatch({ type: "SET_CENTRE_X", value: finalX });
       x.set(finalX);
-      dispatch({ type: 'SET_FRAME_FROZEN', value: false });
+      dispatch({ type: "SET_FRAME_FROZEN", value: false });
     } else {
       const newX = getInitialX();
       x.set(newX);
@@ -239,36 +218,40 @@ const HeroTypingAnimation = React.memo(() => {
     markIntroSeen();
     (async () => {
       await new Promise((r) => setTimeout(r, 100));
-      dispatch({ type: 'SET_SHOW_FRAME', value: true });
-      dispatch({ type: 'SET_PHASE', value: 'typing' });
+      dispatch({ type: "SET_SHOW_FRAME", value: true });
+      dispatch({ type: "SET_PHASE", value: "typing" });
       // Typing animation: update textContent directly for performance
       // Only dispatch once to set phase, then use ref for all text updates
-      if (headlineRef.current) headlineRef.current.textContent = '';
+      if (headlineRef.current) headlineRef.current.textContent = "";
       for (let i = 0; i <= HEADLINE.length; i++) {
-        if (headlineRef.current) headlineRef.current.textContent = HEADLINE.slice(0, i);
+        if (headlineRef.current)
+          headlineRef.current.textContent = HEADLINE.slice(0, i);
         // REMOVED: dispatch call that was causing 23 re-renders per typing sequence
         await new Promise((r) => setTimeout(r, 65));
       }
-      setTimeout(() => dispatch({ type: 'SET_SHOW_CURSOR', value: false }), 200);
+      setTimeout(
+        () => dispatch({ type: "SET_SHOW_CURSOR", value: false }),
+        200,
+      );
       await new Promise((r) => setTimeout(r, 300));
-      dispatch({ type: 'SET_SHOW_BODY', value: true });
-      dispatch({ type: 'SET_FRAME_FROZEN', value: true });
+      dispatch({ type: "SET_SHOW_BODY", value: true });
+      dispatch({ type: "SET_FRAME_FROZEN", value: true });
     })();
   }, [shouldRunIntro, x, markIntroSeen]);
 
   // Skip intro: immediately show final state when returning to Home without a hard refresh
   useEffect(() => {
     if (shouldRunIntro) return;
-    dispatch({ type: 'SET_SHOW_FRAME', value: true });
-    dispatch({ type: 'SET_PHASE', value: 'frameMoved' });
-    dispatch({ type: 'SET_SHOW_BODY', value: true });
-    dispatch({ type: 'SET_FRAME_FROZEN', value: false });
-    dispatch({ type: 'SET_CURSOR_TRIGGERED', value: true });
-    dispatch({ type: 'SET_DRAG_OK', value: true });
-    dispatch({ type: 'SET_FRAME_ALIGNED', value: true });
-    dispatch({ type: 'SET_SHOW_CURSOR', value: false });
-    dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
-    dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: true });
+    dispatch({ type: "SET_SHOW_FRAME", value: true });
+    dispatch({ type: "SET_PHASE", value: "frameMoved" });
+    dispatch({ type: "SET_SHOW_BODY", value: true });
+    dispatch({ type: "SET_FRAME_FROZEN", value: false });
+    dispatch({ type: "SET_CURSOR_TRIGGERED", value: true });
+    dispatch({ type: "SET_DRAG_OK", value: true });
+    dispatch({ type: "SET_FRAME_ALIGNED", value: true });
+    dispatch({ type: "SET_SHOW_CURSOR", value: false });
+    dispatch({ type: "SET_SHOW_ANIMATED_CURSOR", value: false });
+    dispatch({ type: "SET_CURSOR_SHOULD_EXIT", value: true });
     markIntroSeen();
     const rafId = requestAnimationFrame(() => {
       if (headlineRef.current) headlineRef.current.textContent = HEADLINE;
@@ -276,105 +259,13 @@ const HeroTypingAnimation = React.memo(() => {
     return () => cancelAnimationFrame(rafId);
   }, [shouldRunIntro, markIntroSeen]);
 
-  // AnimatedCursor orchestration
-  const handleCursorReadyToDrag = React.useCallback(async () => {
-    if (frameRef.current && bodyRef.current) {
-      const frameRect = frameRef.current.getBoundingClientRect();
-      const bodyRect = bodyRef.current.getBoundingClientRect();
-      const targetLeft = bodyRect.left;
-      const currentLeft = frameRect.left;
-      const deltaNeeded = targetLeft - currentLeft;
-      const finalX = x.get() + deltaNeeded;
-      dispatch({ type: 'SET_CENTRE_X', value: finalX });
-      dispatch({ type: 'SET_FRAME_FROZEN', value: false });
-      dispatch({ type: 'SET_FRAME_THICK', value: true });
-      await animate(x, finalX, { type: "spring", stiffness: 55, damping: 18 });
-      dispatch({ type: 'SET_FRAME_THICK', value: false });
-      dispatch({ type: 'SET_PHASE', value: 'frameMoved' });
-      dispatch({ type: 'SET_FRAME_ALIGNED', value: true });
-      await new Promise((r) => setTimeout(r, 500));
-      dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: true });
-    }
-  }, [x]);
-  
-  // Called by cursor after exit, hides cursor and enables drag
-  const handleCursorDragComplete = React.useCallback(() => {
-    dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
-    dispatch({ type: 'SET_DRAG_OK', value: true });
-    markIntroSeen();
-  }, [markIntroSeen]);
-
-  // Show cursor only after typing and frame is ready
-  // Only trigger cursor animation once
-  const cursorTriggered = state.cursorTriggered;
-  useEffect(() => {
-    if (state.showFrame && state.showBody && state.frameFrozen && !state.showAnimatedCursor && !cursorTriggered) {
-      dispatch({ type: 'SET_CURSOR_TRIGGERED', value: true });
-      if (isMobile) {
-        (async () => {
-          await handleCursorReadyToDrag();
-          dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: false });
-          dispatch({ type: 'SET_DRAG_OK', value: true });
-          markIntroSeen();
-        })();
-      } else {
-        setTimeout(() => dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true }), 100);
-      }
-    }
-  }, [state.showFrame, state.showBody, state.showAnimatedCursor, cursorTriggered, state.frameFrozen, isMobile, handleCursorReadyToDrag, markIntroSeen]);
-
-  /* snap the frame back after dragging */
-  // Snap the frame back after dragging, with Paddington cursor sequence
-  const [pendingSnapBack, setPendingSnapBack] = React.useState(false);
-  const snapBack = React.useCallback(() => {
-    setPendingSnapBack(true);
-    if (!isMobile) {
-      dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: false });
-      dispatch({ type: 'SET_SHOW_ANIMATED_CURSOR', value: true });
-    }
-  }, [isMobile]);
-
-  useEffect(() => {
-    if (pendingSnapBack && isMobile) {
-      (async () => {
-        dispatch({ type: 'SET_FRAME_THICK', value: true });
-        await Promise.all([
-          animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
-          animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
-        ]);
-        dispatch({ type: 'SET_FRAME_THICK', value: false });
-        setPendingSnapBack(false);
-      })();
-    }
-  }, [pendingSnapBack, isMobile, x, y, state.centreX]);
-
-  // When the cursor reaches the box (after user drag), snap the box back in sync
-  const handleCursorReadyToDragSnap = React.useCallback(async () => {
-    if (pendingSnapBack) {
-      // Thicken border while the frame animates back
-      dispatch({ type: 'SET_FRAME_THICK', value: true });
-      // Animate both x and y simultaneously for diagonal movement
-      await Promise.all([
-        animate(x, state.centreX, { type: "spring", stiffness: 65, damping: 18 }),
-        animate(y, 0, { type: "spring", stiffness: 65, damping: 18 })
-      ]);
-      // Return border to thin after reaching target
-      dispatch({ type: 'SET_FRAME_THICK', value: false });
-      setPendingSnapBack(false);
-      // Signal cursor to exit after the snap animation completes
-      dispatch({ type: 'SET_CURSOR_SHOULD_EXIT', value: true });
-    } else if (handleCursorReadyToDrag) {
-      // Onboarding animation: call the original handler
-      handleCursorReadyToDrag();
-    }
-  }, [pendingSnapBack, state.centreX, x, y, handleCursorReadyToDrag]);
-
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <section className="relative w-full max-w-screen-xl mx-auto px-3 pt-16 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
-      {/* Animated cursor overlay */}
-      {state.showAnimatedCursor && !isMobile && (
+    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-8 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
+      {/* Animated cursor overlay - shown on both mobile and desktop */}
+      {state.showAnimatedCursor && (
         <AnimatedCursor
+          key={cursorKey}
           targetRef={frameRef}
           onDragComplete={handleCursorDragComplete}
           onCursorReadyToDrag={handleCursorReadyToDragSnap}
@@ -384,22 +275,40 @@ const HeroTypingAnimation = React.memo(() => {
       {/* ── headline & draggable blue frame ── */}
       <motion.div
         ref={frameRef}
-        drag={state.dragOK}
+        drag={state.dragOK && !state.isAnimatingBack}
         dragMomentum={false}
         dragElastic={0}
-        onDrag={handleDrag}
-        onDragEnd={() => { 
-          clampIntoViewport(); 
-          // Ensure thin border right after user drops
-          dispatch({ type: 'SET_FRAME_THICK', value: false });
-          snapBack(); 
+        onDragStart={(event, info) => {
+          // Double-check: abort if animation is running (defensive)
+          if (state.isAnimatingBack || pendingSnapBack) {
+            return false;
+          }
         }}
-        onMouseEnter={() => dispatch({ type: 'SET_POINTER_HOVER', value: true })}
-        onMouseLeave={() => dispatch({ type: 'SET_POINTER_HOVER', value: false })}
+        onDrag={handleDrag}
+        onDragEnd={() => {
+          // Only trigger snap-back if not already animating
+          if (!state.isAnimatingBack && !pendingSnapBack) {
+            clampIntoViewport();
+            // Ensure thin border right after user drops
+            dispatch({ type: "SET_FRAME_THICK", value: false });
+            snapBack();
+          }
+        }}
+        onMouseEnter={() =>
+          dispatch({ type: "SET_POINTER_HOVER", value: true })
+        }
+        onMouseLeave={() =>
+          dispatch({ type: "SET_POINTER_HOVER", value: false })
+        }
         dragConstraints={false}
-        style={{ x: state.frameFrozen && !state.frameAligned ? getInitialX() : x, y }}
+        style={{
+          x: state.frameFrozen && !state.frameAligned ? getInitialX() : x,
+          y,
+        }}
         className={`relative inline-block px-4 py-6 md:px-10 ${
-          state.dragOK ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+          state.dragOK && !state.isAnimatingBack
+            ? "cursor-grab active:cursor-grabbing"
+            : "cursor-default"
         } max-w-full`}
       >
         {state.showFrame && (
@@ -407,9 +316,12 @@ const HeroTypingAnimation = React.memo(() => {
             {/* outline - dynamic thickness on hover and during animations */}
             <motion.div
               className="absolute inset-0 border-solid"
-              style={{ borderColor: '#198ce7' }}
+              style={{ borderColor: "#198ce7" }}
               initial={{ opacity: 0, borderWidth: 2 }}
-              animate={{ opacity: 1, borderWidth: (state.frameThick || state.pointerHover) ? 6 : 2 }}
+              animate={{
+                opacity: 1,
+                borderWidth: state.frameThick || state.pointerHover ? 6 : 2,
+              }}
               transition={{ duration: 0.2 }}
             />
 
@@ -451,9 +363,10 @@ const HeroTypingAnimation = React.memo(() => {
         >
           {/* tagline */}
           <p className="text-2xl md:text-3xl leading-relaxed">
-            A Software Engineering&nbsp;&amp;&nbsp;Business student at Ivey Business School
-            based near Toronto, building tools that <em>(ideally)</em> make life
-            easier — or at least break things in more interesting ways.
+            A Software Engineering&nbsp;&amp;&nbsp;Business student at Ivey
+            Business School based near Toronto, building tools that{" "}
+            <em>(ideally)</em> make life easier — or at least break things in
+            more interesting ways.
           </p>
 
           {/* "currently / driven by" grid */}
@@ -461,9 +374,8 @@ const HeroTypingAnimation = React.memo(() => {
             <div>
               <p className="italic text-2xl mb-2">currently</p>
               <p className="text-[#9b9cbe] font-semibold leading-snug">
-                data analytics &amp; strategy intern 
-                <br />
-                @ american global
+                data analytics &amp; strategy intern
+                <br />@ american global
               </p>
             </div>
             <div>
@@ -480,6 +392,6 @@ const HeroTypingAnimation = React.memo(() => {
   );
 });
 
-HeroTypingAnimation.displayName = 'HeroTypingAnimation';
+HeroTypingAnimation.displayName = "HeroTypingAnimation";
 
 export default HeroTypingAnimation;

@@ -70,11 +70,12 @@ function ContentCarousel({
         className="pt-4 pl-4 pr-4 flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory will-change-transform [&::-webkit-scrollbar]:hidden"
       >
         {displayItems.map((item, index) => (
-          <ContentCard
-            key={item.id || index}
-            variant={cardVariant}
-            {...item}
-          />
+          <div key={item.id || index} className="shrink-0 snap-start w-72 md:w-80">
+            <ContentCard
+              variant={cardVariant}
+              {...item}
+            />
+          </div>
         ))}
         
         {/* View All Button - only show if showViewAll is true and there are more items */}

@@ -1,226 +1,186 @@
-// src/components/HeroBackground.jsx
-import React from "react";
+import React, { useRef, useMemo, useEffect, useState } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
-const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-const ease = (t) => t * t * (3 - 2 * t); // smoothstep
+// --- GLSL SHADER CODE ---
 
-function HeroBackground() {
-  const containerRef = React.useRef(null);
-  const rafRef = React.useRef(null);
-  const sectionsRef = React.useRef([]);
-  const centersRef = React.useRef([]); // precomputed absolute centers to avoid layout thrash on scroll
-  const currentVarsRef = React.useRef({ hue: 0, magenta: 0.18, blue: 0.18 });
-  const lastAppliedRef = React.useRef({
-    radialX: null,
-    radialY: null,
-    sat: null,
-    bright: null,
-    hue: null,
-    magenta: null,
-    blue: null,
-  });
+const vertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
 
-  const scenes = React.useMemo(
+const fragmentShader = `
+  uniform float uTime;
+  uniform vec3 uColor1; // Lighter purple
+  uniform vec3 uColor2; // Mid purple  
+  uniform vec3 uColor3; // Dark base (#151515)
+  uniform vec2 uResolution;
+  varying vec2 vUv;
+
+  // --- SIMPLEX NOISE FUNCTIONS (Standard WebGL Noise) ---
+  vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+  float snoise(vec2 v){
+    const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+             -0.577350269189626, 0.024390243902439);
+    vec2 i  = floor(v + dot(v, C.yy) );
+    vec2 x0 = v -   i + dot(i, C.xx);
+    vec2 i1;
+    i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+    vec4 x12 = x0.xyxy + C.xxzz;
+    x12.xy -= i1;
+    i = mod(i, 289.0);
+    vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+    + i.x + vec3(0.0, i1.x, 1.0 ));
+    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+    m = m*m ;
+    m = m*m ;
+    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+    vec3 h = abs(x) - 0.5;
+    vec3 ox = floor(x + 0.5);
+    vec3 a0 = x - ox;
+    m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+    vec3 g;
+    g.x  = a0.x  * x0.x  + h.x  * x0.y;
+    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+    return 130.0 * dot(m, g);
+  }
+
+  // High-frequency grain noise
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  }
+
+  void main() {
+    // Use normalized UV coordinates
+    vec2 uv = vUv;
+    
+    // Slow time for smooth, organic animation
+    float time = uTime * 0.08;
+    
+    // Scale UVs for the noise pattern
+    vec2 noiseUv = uv * 2.5;
+    
+    // DOMAIN WARPING - Layer 1
+    // First level of distortion
+    vec2 q = vec2(0.);
+    q.x = snoise(noiseUv + vec2(0.0, time * 0.3));
+    q.y = snoise(noiseUv + vec2(5.2, 1.3) + time * 0.25);
+
+    // DOMAIN WARPING - Layer 2
+    // Use first distortion to warp the second
+    vec2 r = vec2(0.);
+    r.x = snoise(noiseUv + 1.2 * q + vec2(1.7, 9.2) + time * 0.15);
+    r.y = snoise(noiseUv + 1.2 * q + vec2(8.3, 2.8) + time * 0.12);
+
+    // DOMAIN WARPING - Layer 3
+    // Final layer for maximum complexity - like ink in water
+    vec2 s = vec2(0.);
+    s.x = snoise(noiseUv + 1.5 * r + vec2(3.1, 4.7) + time * 0.08);
+    s.y = snoise(noiseUv + 1.5 * r + vec2(2.4, 7.1) + time * 0.1);
+    
+    // Get final noise value using all warped coordinates
+    float f = snoise(noiseUv + r * 1.0 + s * 0.5);
+    
+    // Create smooth flowing patterns
+    float pattern = length(q) * 0.6 + length(r) * 0.4 + f * 0.3;
+    
+    // Normalize pattern
+    pattern = clamp(pattern * 0.5, 0.0, 1.0);
+    
+    // Create ridges and swirls by modulating the pattern
+    float ridges = abs(sin(pattern * 3.14159 * 3.0 + time * 0.5)) * 0.5 + 0.5;
+    
+    // Mix colors based on pattern - from dark base to purple
+    vec3 color = mix(uColor3, uColor1, pattern * ridges);
+    color = mix(color, uColor2, clamp(length(r) * 0.4, 0.0, 1.0));
+    
+    // Add subtle noise variation for texture
+    color += f * 0.015;
+    
+    // Subtle grain for texture
+    float grain = hash(vUv * uResolution + uTime * 0.2);
+    float grainIntensity = 0.03; // Very subtle grain
+    color += (grain - 0.5) * grainIntensity;
+    
+    // Fade the entire effect to keep it subtle
+    // Mix with dark background to reduce intensity
+    float fadeAmount = 0.25; // Only 25% of the effect shows
+    color = mix(uColor3, color, fadeAmount);
+    
+    // Add smooth vertical fade from top to bottom
+    float verticalFade = smoothstep(1.0, 0.3, vUv.y);
+    color = mix(uColor3, color, verticalFade);
+
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+const GradientMesh = () => {
+  const meshRef = useRef();
+  const [resolution, setResolution] = useState([window.innerWidth, window.innerHeight]);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setResolution([window.innerWidth, window.innerHeight]);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Faded purple color palette
+  const uniforms = useMemo(
     () => ({
-      hero:       { hue: 0,   magenta: 0.16, blue: 0.16 },
-      projects:   { hue: 6,   magenta: 0.22, blue: 0.10 },
-      stories:    { hue: -8,  magenta: 0.12, blue: 0.20 },
-      experience: { hue: -4,  magenta: 0.16, blue: 0.16 },
+      uTime: { value: 0 },
+      // Lighter faded purple for highlights
+      uColor1: { value: new THREE.Color("#3d2f4f") }, // Muted purple
+      // Mid purple tone
+      uColor2: { value: new THREE.Color("#2a1f3a") }, // Deeper purple
+      // Dark base matching site background (#151515)
+      uColor3: { value: new THREE.Color("#151515") },
+      uResolution: { value: new THREE.Vector2(resolution[0], resolution[1]) },
     }),
     []
   );
 
-  const lerp = (a, b, t) => a + (b - a) * t;
-
-  React.useEffect(() => {
-    // Cache scenes anchors once on mount and on resize
-    const computeAnchors = () => {
-      sectionsRef.current = Array.from(document.querySelectorAll('[data-bg-scene]'));
-      centersRef.current = sectionsRef.current.map((el) => {
-        const rect = el.getBoundingClientRect();
-        const centerAbs = rect.top + window.scrollY + rect.height / 2;
-        const key = el.getAttribute('data-bg-scene') || 'hero';
-        return { key, centerAbs };
-      });
-    };
-    const debounced = (() => {
-      let t; return () => { clearTimeout(t); t = setTimeout(computeAnchors, 150); };
-    })();
-    computeAnchors();
-
-    const pickActiveScene = () => {
-      const viewportCenterAbs = window.scrollY + window.innerHeight / 2;
-      let closest = { key: 'hero', dist: Infinity };
-      for (const item of centersRef.current) {
-        const dist = Math.abs(item.centerAbs - viewportCenterAbs);
-        if (dist < closest.dist) closest = { key: item.key, dist };
-      }
-      return closest.key in scenes ? closest.key : 'hero';
-    };
-
-    const update = () => {
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-      const rawP = scrollable > 0 ? window.scrollY / scrollable : 0;
-      const p = ease(clamp(rawP, 0, 1));
-
-      // Responsive gradient progression (no parallax)
-      const radialX = 110 - 15 * p; // 110% -> 95%
-      const radialY = 45 + 12 * p;  // 45% -> 57%
-      const saturate = 1 + 0.15 * p; // 1 -> 1.15
-      const brighten = 1 + 0.08 * p; // 1 -> 1.08
-
-      // Scene targeting
-      const activeKey = pickActiveScene();
-      const target = scenes[activeKey];
-      const current = currentVarsRef.current;
-      const speed = 0.06; // smoothing factor
-      current.hue = lerp(current.hue, target.hue, speed);
-      current.magenta = lerp(current.magenta, target.magenta, speed);
-      current.blue = lerp(current.blue, target.blue, speed);
-
-      if (containerRef.current) {
-        const el = containerRef.current;
-        // Apply only when values change beyond small epsilon to avoid extra paints
-        const last = lastAppliedRef.current;
-        const eps = 0.001;
-        const setIfChanged = (name, value) => {
-          if (last[name] === null || Math.abs(last[name] - value) > eps) {
-            el.style.setProperty(`--${name}`, typeof value === 'number' ? String(value) : value);
-            last[name] = value;
-          }
-        };
-        setIfChanged('radial-x', `${radialX}%`);
-        setIfChanged('radial-y', `${radialY}%`);
-        setIfChanged('sat', saturate);
-        setIfChanged('bright', brighten);
-        setIfChanged('hue', `${current.hue}deg`);
-        setIfChanged('magenta', current.magenta);
-        setIfChanged('blue', current.blue);
-      }
-    };
-
-    let lastY = window.scrollY;
-    const onScroll = () => {
-      const currentY = window.scrollY;
-      // Skip micro scroll updates under 2px to reduce RAF churn
-      if (Math.abs(currentY - lastY) < 2) return;
-      lastY = currentY;
-      if (rafRef.current) return;
-      rafRef.current = requestAnimationFrame(() => {
-        update();
-        rafRef.current = null;
-      });
-    };
-
-    update();
-    window.addEventListener('resize', debounced, { passive: true });
-    // Prefer scrollend where supported to reduce RAF churn; fallback to scroll
-    const opts = { passive: true };
-    const supportsScrollEnd = 'onscrollend' in window;
-    if (supportsScrollEnd) {
-      window.addEventListener('scrollend', onScroll, opts);
-    } else {
-      window.addEventListener('scroll', onScroll, opts);
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.material.uniforms.uTime.value = state.clock.getElapsedTime();
+      meshRef.current.material.uniforms.uResolution.value.set(resolution[0], resolution[1]);
     }
-    return () => {
-      window.removeEventListener('resize', debounced);
-      if (supportsScrollEnd) {
-        window.removeEventListener('scrollend', onScroll);
-      } else {
-        window.removeEventListener('scroll', onScroll);
-      }
-    };
-  }, [scenes]);
+  });
 
   return (
-    <div ref={containerRef} className="fixed inset-0 w-full h-full -z-10 overflow-hidden will-change-[filter]">
-      {/* Base blackish canvas */}
-      <div className="absolute inset-0" style={{ backgroundColor: "#0C100D" }} />
-
-      {/* Off-center radial glow - center near right edge (driven by CSS vars) */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `radial-gradient(120% 90% at var(--radial-x, 110%) var(--radial-y, 45%),
-            #20326D 0%,
-            #3D3660 35%,
-            #361B39 55%,
-            #301C26 72%,
-            #1B1416 88%,
-            #0C100D 100%)`,
-          filter: `saturate(var(--sat,1)) brightness(var(--bright,1)) hue-rotate(var(--hue, 0deg))`,
-        }}
+    <mesh ref={meshRef} scale={[10, 10, 1]}> 
+      <planeGeometry args={[2, 2, 32, 32]} /> 
+      <shaderMaterial
+        fragmentShader={fragmentShader}
+        vertexShader={vertexShader}
+        uniforms={uniforms}
+        depthWrite={false}
+        depthTest={false}
       />
+    </mesh>
+  );
+};
 
-      {/* Magenta-ish right-half tint (scene controlled) */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(90deg,
-            transparent 0 50%,
-            rgba(77,57,70, var(--magenta, 0.22)) 58%,
-            rgba(77,57,70, var(--magenta, 0.22)) 74%,
-            rgba(77,57,70, var(--magenta, 0.20)) 86%,
-            transparent 100%)`,
-          mixBlendMode: "screen",
+const HeroBackground = () => {
+  return (
+    <div className="absolute inset-0 w-full h-full z-0 bg-[#151515]">
+      <Canvas
+        camera={{ position: [0, 0, 1] }}
+        dpr={[1, 1.5]}
+        gl={{ 
+          antialias: false,
+          toneMapping: THREE.NoToneMapping 
         }}
-      />
-
-      {/* Blue wash (scene controlled) */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `radial-gradient(80% 60% at 95% 60%, rgba(32,50,109, var(--blue, 0.18)) 0%, rgba(32,50,109,0) 60%)`,
-          mixBlendMode: "screen",
-        }}
-      />
-
-      {/* Lighter top tint across the canvas */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(180deg,
-            rgba(77,57,70,0.25) 0%,
-            rgba(48,28,38,0.12) 18%,
-            transparent 42%)`,
-        }}
-      />
-
-      {/* Gentle left falloff (NO seam) */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `linear-gradient(90deg,
-            #0C100D 0%,
-            #0C100D 35%,
-            rgba(12,16,13,0.85) 50%,
-            rgba(12,16,13,0.55) 65%,
-            rgba(12,16,13,0.25) 78%,
-            transparent 88%,
-            transparent 100%)`,
-        }}
-      />
-
-      {/* Subtle vignette for depth */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `radial-gradient(120% 80% at 50% 50%, transparent 60%, rgba(0,0,0,0.35) 100%)`,
-        }}
-      />
-
-      {/* Grain / texture layer using SVG turbulence (reduced opacity for less overdraw) */}
-      <div className="absolute inset-0 opacity-[0.05] mix-blend-soft-light pointer-events-none">
-        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <filter id="noiseFilter">
-            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#noiseFilter)" fill="#ffffff" />
-        </svg>
-      </div>
+      >
+        <GradientMesh />
+      </Canvas>
     </div>
   );
-}
+};
 
-// Optimized for performance by adding React.memo since component has no props
 export default React.memo(HeroBackground);

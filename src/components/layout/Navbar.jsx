@@ -16,8 +16,8 @@ import {
 import XIcon from "../icons/XIcon";
 import TOC from "../notes/TOC";
 import { useNotesTOC } from "../notes/NotesContext";
-import { useBearState } from '../../hooks/useBearState';
-import UnifiedBearIcon from '../common/UnifiedBearIcon';
+import { useBearState } from "../../hooks/useBearState";
+import UnifiedBearIcon from "../common/UnifiedBearIcon";
 
 const sections = [
   {
@@ -26,28 +26,55 @@ const sections = [
       { kind: "internal", to: "/", label: "Home", Icon: HomeIcon },
       { kind: "internal", to: "/projects", label: "Projects", Icon: Briefcase },
       { kind: "internal", to: "/about", label: "About", Icon: UserRound },
-
     ],
   },
   {
     title: "Contact",
     items: [
-      // Fill these with your real links any time
-      { kind: "external", href: "mailto:aaryanj@outlook.com", label: "Email", Icon: Mail },
-      { kind: "external", href: "https://www.linkedin.com/in/aaryanj/", label: "LinkedIn", Icon: Linkedin },
-      { kind: "external", href: "https://github.com/aCupOfCoff33", label: "GitHub", Icon: Github },
-      { kind: "external", href: "https://x.com/aaryanj05", label: "X", Icon: XIcon },
+      {
+        kind: "external",
+        href: "mailto:aaryanj@outlook.com",
+        label: "Email",
+        Icon: Mail,
+      },
+      {
+        kind: "external",
+        href: "https://www.linkedin.com/in/aaryanj/",
+        label: "LinkedIn",
+        Icon: Linkedin,
+      },
+      {
+        kind: "external",
+        href: "https://github.com/aCupOfCoff33",
+        label: "GitHub",
+        Icon: Github,
+      },
+      {
+        kind: "external",
+        href: "https://x.com/aaryanj05",
+        label: "X",
+        Icon: XIcon,
+      },
     ],
   },
 ];
 
 const SectionLabel = ({ children }) => (
   <div className="px-1">
-    <p className="text-[12px] tracking-[0.08em] uppercase text-neutral-400/60">{children}</p>
+    <p className="text-[12px] tracking-[0.08em] uppercase text-neutral-400/60">
+      {children}
+    </p>
   </div>
 );
 
-const CardButton = React.memo(function CardButton({ label, icon: IconComponent, className = "", children, active = false, iconLayoutId }) {
+const CardButton = React.memo(function CardButton({
+  label,
+  icon: IconComponent,
+  className = "",
+  children,
+  active = false,
+  iconLayoutId,
+}) {
   return (
     <div
       className={[
@@ -59,11 +86,24 @@ const CardButton = React.memo(function CardButton({ label, icon: IconComponent, 
       ].join(" ")}
     >
       <div className="flex items-center gap-2.5 px-3 py-1.5">
-        <div className="shrink-0 opacity-90 flex items-center justify-center">{/* ensure icon stays centered */}
+        <div className="shrink-0 opacity-90 flex items-center justify-center">
+          {/* ensure icon stays centered */}
           {IconComponent ? (
             iconLayoutId ? (
               // Use a single layout node and center the icon using flexbox — no hard-coded y offsets
-              <Motion.div layout layoutId={iconLayoutId} transition={{ layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }} className="flex items-center justify-center">
+              <Motion.div
+                layout
+                layoutId={iconLayoutId}
+                transition={{
+                  layout: {
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 28,
+                    bounce: 0.18,
+                  },
+                }}
+                className="flex items-center justify-center"
+              >
                 <IconComponent className="h-4 w-4" />
               </Motion.div>
             ) : (
@@ -71,7 +111,14 @@ const CardButton = React.memo(function CardButton({ label, icon: IconComponent, 
             )
           ) : null}
         </div>
-        <span className={["text-md leading-none font-normal font-adamant", active ? "text-neutral-100" : "text-neutral-200"].join(" ")}>{label}</span>
+        <span
+          className={[
+            "text-md leading-none font-normal font-adamant",
+            active ? "text-neutral-100" : "text-neutral-200",
+          ].join(" ")}
+        >
+          {label}
+        </span>
         <div className="ml-auto opacity-50">{children}</div>
       </div>
     </div>
@@ -88,22 +135,26 @@ function InternalLink({ to, label, Icon: IconComponent, onClick }) {
     <NavLink
       to={to}
       onClick={handleClick}
-      className={"block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-xl"}
+      className={
+        "block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-xl"
+      }
       aria-label={label}
     >
       {({ isActive }) => (
-        <CardButton
-          label={label}
-          icon={IconComponent}
-          active={isActive}
-        />
+        <CardButton label={label} icon={IconComponent} active={isActive} />
       )}
     </NavLink>
   );
 }
 
-function ExternalLink({ href, label, Icon: IconComponent, layoutId, iconLayoutId }) {
-  const Anchor = layoutId ? Motion.a : 'a';
+function ExternalLink({
+  href,
+  label,
+  Icon: IconComponent,
+  layoutId,
+  iconLayoutId,
+}) {
+  const Anchor = layoutId ? Motion.a : "a";
   return (
     <Anchor
       {...(layoutId ? { layout: true, layoutId } : {})}
@@ -112,9 +163,24 @@ function ExternalLink({ href, label, Icon: IconComponent, layoutId, iconLayoutId
       rel={href.startsWith("http") ? "noopener" : undefined}
       aria-label={label}
       className="text-neutral-300 hover:text-white"
-      transition={layoutId ? { layout: { type: 'spring', stiffness: 500, damping: 38, bounce: 0.2 } } : undefined}
+      transition={
+        layoutId
+          ? {
+              layout: {
+                type: "spring",
+                stiffness: 500,
+                damping: 38,
+                bounce: 0.2,
+              },
+            }
+          : undefined
+      }
     >
-      <CardButton label={label} icon={IconComponent} iconLayoutId={iconLayoutId} />
+      <CardButton
+        label={label}
+        icon={IconComponent}
+        iconLayoutId={iconLayoutId}
+      />
     </Anchor>
   );
 }
@@ -123,11 +189,11 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const { tocItems, tocVisible, contactCollapsed } = useNotesTOC();
   const location = useLocation();
-  const isNotesRoute = location.pathname.startsWith('/notes');
+  const isNotesRoute = location.pathname.startsWith("/notes");
   // use bear state at top level so hooks are not called conditionally or inside callbacks
   useBearState();
-   // Collapse only based on contactCollapsed so it can revert when scrolling back up
-   const collapsed = isNotesRoute && contactCollapsed;
+  // Collapse only based on contactCollapsed so it can revert when scrolling back up
+  const collapsed = isNotesRoute && contactCollapsed;
 
   // Lock body scroll when mobile menu is open
   React.useEffect(() => {
@@ -145,7 +211,11 @@ function Navbar() {
   // Render the unified icon; size via tailwind classes
   const renderUnifiedBear = (size) => (
     <div style={{ width: size, height: size }}>
-      <UnifiedBearIcon className={size > 70 ? 'h-20 w-20' : size > 40 ? 'h-16 w-16' : 'h-8 w-8'} />
+      <UnifiedBearIcon
+        className={
+          size > 70 ? "h-20 w-20" : size > 40 ? "h-16 w-16" : "h-8 w-8"
+        }
+      />
     </div>
   );
 
@@ -153,18 +223,24 @@ function Navbar() {
     <>
       {/* Desktop vertical sidebar */}
       <aside
-        className="hidden md:flex fixed left-0 top-0 h-screen w-60 pt-8 px-4 border-r border-white/10 bg-[#0C100D]/95 backdrop-blur flex-col gap-4 z-40"
+        className="hidden md:flex w-60 pt-8 px-4 flex-col gap-4 z-40 h-full bg-[#0C100D]"
         style={{ "--left-color": "#121813" }}
       >
         {/* Brand */}
         <div className="w-full pb-5 border-b border-white/10">
-          <div className="flex items-center gap-3" style={{ position: 'relative' }}>
-          {/* unified bear icon */}
-          {renderUnifiedBear(80)}
-          <Link to="/" className="text-white text-3xl font-semibold leading-none">
-            aaryan
-          </Link>
-        </div>
+          <div
+            className="flex items-center gap-3"
+            style={{ position: "relative" }}
+          >
+            {/* unified bear icon */}
+            {renderUnifiedBear(80)}
+            <Link
+              to="/"
+              className="text-white text-3xl font-semibold leading-none"
+            >
+              aaryan
+            </Link>
+          </div>
         </div>
 
         {/* Sections */}
@@ -173,7 +249,7 @@ function Navbar() {
             {sections.map((section) => (
               <div key={section.title} className="w-full">
                 <SectionLabel>{section.title}</SectionLabel>
-                {section.title === 'Contact' && isNotesRoute ? (
+                {section.title === "Contact" && isNotesRoute ? (
                   <LayoutGroup id="contact-shared">
                     <Motion.div layout initial={false} className="mt-2">
                       <AnimatePresence mode="wait" initial={false}>
@@ -184,8 +260,16 @@ function Navbar() {
                             initial={{ opacity: 0, y: -6 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 0.35, layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }}
-                            className="grid grid-cols-5 gap-2 w-full"
+                            transition={{
+                              duration: 0.35,
+                              layout: {
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 28,
+                                bounce: 0.18,
+                              },
+                            }}
+                            className="grid grid-cols-4 gap-2 w-full"
                           >
                             {section.items.map((item) => (
                               <Motion.a
@@ -195,13 +279,40 @@ function Navbar() {
                                 href={item.href}
                                 aria-label={item.label}
                                 title={item.label}
-                                target={item.href?.startsWith('http') ? '_blank' : undefined}
-                                rel={item.href?.startsWith('http') ? 'noopener' : undefined}
+                                target={
+                                  item.href?.startsWith("http")
+                                    ? "_blank"
+                                    : undefined
+                                }
+                                rel={
+                                  item.href?.startsWith("http")
+                                    ? "noopener"
+                                    : undefined
+                                }
                                 className="flex h-8 w-full items-center justify-center rounded-xl border border-white/10 bg-neutral-900/40 hover:bg-white/5 text-neutral-300 hover:text-white transition-colors min-w-0"
-                                transition={{ layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }}
+                                transition={{
+                                  layout: {
+                                    type: "spring",
+                                    stiffness: 300,
+                                    damping: 28,
+                                    bounce: 0.18,
+                                  },
+                                }}
                               >
                                 {/* Make the layout node fill the anchor and center its child so the icon is always smack in the middle */}
-                                <Motion.div layout layoutId={`contact-icon-${item.label}`} transition={{ layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }} className="flex items-center justify-center h-full w-full">
+                                <Motion.div
+                                  layout
+                                  layoutId={`contact-icon-${item.label}`}
+                                  transition={{
+                                    layout: {
+                                      type: "spring",
+                                      stiffness: 300,
+                                      damping: 28,
+                                      bounce: 0.18,
+                                    },
+                                  }}
+                                  className="flex items-center justify-center h-full w-full"
+                                >
                                   <item.Icon className="h-4 w-4" />
                                 </Motion.div>
                               </Motion.a>
@@ -214,11 +325,24 @@ function Navbar() {
                             initial={{ opacity: 0, y: -6 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
-                            transition={{ duration: 0.35, layout: { type: 'spring', stiffness: 300, damping: 28, bounce: 0.18 } }}
+                            transition={{
+                              duration: 0.35,
+                              layout: {
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 28,
+                                bounce: 0.18,
+                              },
+                            }}
                           >
                             <div className="grid grid-cols-1 gap-2.5">
-                            {section.items.map((item) => (
-                                <ExternalLink key={item.label} {...item} layoutId={`contact-${item.label}`} iconLayoutId={`contact-icon-${item.label}`} />
+                              {section.items.map((item) => (
+                                <ExternalLink
+                                  key={item.label}
+                                  {...item}
+                                  layoutId={`contact-${item.label}`}
+                                  iconLayoutId={`contact-icon-${item.label}`}
+                                />
                               ))}
                             </div>
                           </Motion.div>
@@ -245,7 +369,9 @@ function Navbar() {
               <div className="hidden lg:block">
                 <Motion.div
                   initial={false}
-                  animate={tocVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }}
+                  animate={
+                    tocVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }
+                  }
                   transition={{ duration: 0.25 }}
                 >
                   <SectionLabel>In this story</SectionLabel>
@@ -257,39 +383,35 @@ function Navbar() {
             ) : null}
           </nav>
         </div>
-
       </aside>
 
       {/* Mobile top bar with morphing contact area */}
-      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-5 py-5 min-h-[7.5rem] z-50 bg-[#0C100D]/95 backdrop-blur border-b border-white/10">
-        <div className="flex items-center gap-5" style={{ position: 'relative' }}>
-          {renderUnifiedBear(72)}
-          <Link to="/" className="text-white text-3xl font-semibold">aaryan</Link>
-        </div>
-
-        {/* Smoothly collapse into icons-only when reading (unified with desktop collapse state) */}
-        <Motion.div
-          initial={false}
-          animate={collapsed ? { width: 148, opacity: 1 } : { width: 0, opacity: 0 }}
-          transition={{ type: "tween", duration: 0.25 }}
-          className="overflow-hidden flex items-center justify-end gap-3 mr-1"
+      <div className="md:hidden fixed top-0 inset-x-0 flex items-center justify-between px-5 py-5 min-h-[7.5rem] z-50 bg-[#0C100D] border-b border-white/10">
+        <div
+          className="flex items-center gap-5"
+          style={{ position: "relative" }}
         >
-          <a href="mailto:aaryanj@outlook.com" className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110" aria-label="Email"><Mail className="h-5 w-5" /></a>
-          <a href="https://www.linkedin.com/in/aaryanj/" target="_blank" rel="noopener" className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110" aria-label="LinkedIn"><Linkedin className="h-5 w-5" /></a>
-          <a href="https://github.com/aCupOfCoff33" target="_blank" rel="noopener" className="text-white/80 hover:text-white transition-transform duration-200 hover:scale-110" aria-label="GitHub"><Github className="h-5 w-5" /></a>
-        </Motion.div>
+          {renderUnifiedBear(72)}
+          <Link to="/" className="text-white text-3xl font-semibold">
+            aaryan
+          </Link>
+        </div>
 
         <button
           aria-label={menuOpen ? "Close menu" : "Open menu"}
-          className="rounded-full p-4 bg-neutral-900/70 text-white hover:bg-neutral-800 transition"
+          className="rounded-full p-4 bg-neutral-900 text-white hover:bg-neutral-800 transition"
           onClick={() => setMenuOpen((v) => !v)}
         >
-          {menuOpen ? <CloseIcon className="h-8 w-8" /> : <Menu className="h-8 w-8" />}
+          {menuOpen ? (
+            <CloseIcon className="h-8 w-8" />
+          ) : (
+            <Menu className="h-8 w-8" />
+          )}
         </button>
       </div>
 
       {/* Spacer keeps mobile content from sliding under the fixed navbar */}
-      <div className="md:hidden h-[2.5rem]" aria-hidden="true" />
+      <div className="md:hidden h-[7.5rem]" aria-hidden="true" />
 
       {/* Mobile dropdown panel - slides from top */}
       <AnimatePresence>
@@ -300,7 +422,7 @@ function Navbar() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "-100%", opacity: 0 }}
             transition={{ type: "tween", duration: 0.26 }}
-            className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#0C100D]/95 backdrop-blur border-b border-white/10 rounded-b-2xl pt-32 pb-6 px-5"
+            className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#0C100D] border-b border-white/20 rounded-b-2xl pt-32 pb-6 px-5"
           >
             <nav className="flex flex-col gap-5">
               {sections.map((section) => (
@@ -309,7 +431,11 @@ function Navbar() {
                   <div className="mt-2 grid grid-cols-1 gap-2.5">
                     {section.items.map((item) =>
                       item.kind === "internal" ? (
-                        <InternalLink key={item.label} {...item} onClick={() => setMenuOpen(false)} />
+                        <InternalLink
+                          key={item.label}
+                          {...item}
+                          onClick={() => setMenuOpen(false)}
+                        />
                       ) : (
                         <ExternalLink key={item.label} {...item} />
                       ),

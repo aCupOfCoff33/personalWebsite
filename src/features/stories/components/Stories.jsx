@@ -12,9 +12,8 @@ function Stories() {
       subtitle="Insights, learnings, and thoughts from my journey in tech."
       items={storiesData}
       layout="carousel"
-      showGradientBar={true}
       showControls={true}
-      cardVariant="panel" // Flat-modern panel style
+      cardVariant="panel"
       showViewAll={true}
       maxItems={7}
       onViewAllClick={() => navigate('/notes')}

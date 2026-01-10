@@ -1,31 +1,34 @@
 // Unified Bear Icon orchestrator: single SVG with BaseBear and conditional accessories
-import React, { useId } from 'react';
-import { AnimatePresence, motion as Motion } from 'framer-motion';
-import { useBearState } from '../../hooks/useBearState';
-import BaseBear from '../bear/BaseBear';
-import Laptop from '../bear/Laptop';
-import Book from '../bear/Book';
-import Suit from '../bear/Suit';
-import QuarterZip from '../bear/QuarterZip';
-import BearEyes from '../bear/BearEyes';
+import React, { useId } from "react";
+import { AnimatePresence, motion as Motion } from "framer-motion";
+import { useBearState } from "../../hooks/useBearState";
+import BaseBear from "../bear/BaseBear";
+import Laptop from "../bear/Laptop";
+import Book from "../bear/Book";
+import Suit from "../bear/Suit";
+import QuarterZip from "../bear/QuarterZip";
+import BearEyes from "../bear/BearEyes";
 
-const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) {
+const UnifiedBearIcon = React.memo(function UnifiedBearIcon({
+  className = "",
+}) {
   const { bearState } = useBearState();
   const uid = useId();
 
   const computeItems = () => {
     const items = [];
-    const { currentType, pendingType, previousType, itemPosition } = bearState || {};
+    const { currentType, pendingType, previousType, itemPosition } =
+      bearState || {};
 
     const typeToComp = (type) => {
       switch (type) {
-        case 'projects':
+        case "projects":
           return Laptop;
-        case 'stories':
+        case "stories":
           return Book;
-        case 'resume':
+        case "resume":
           return Suit;
-        case 'about':
+        case "about":
           return QuarterZip;
         default:
           return null;
@@ -57,18 +60,25 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) 
   const items = computeItems();
 
   const eyeMode = (() => {
-    const t = (bearState?.pendingType || bearState?.currentType || 'default');
-    if (t === 'projects') return 'projects';
-    if (t === 'stories') return 'stories';
-    if (t === 'resume') return 'resume';
-    if (t === 'about') return 'about';
-    return 'default';
+    const t = bearState?.pendingType || bearState?.currentType || "default";
+    if (t === "projects") return "projects";
+    if (t === "stories") return "stories";
+    if (t === "resume") return "resume";
+    if (t === "about") return "about";
+    return "default";
   })();
 
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 68" fill="none" className={className} role="img" aria-hidden="true">
-  <BaseBear />
-  <BearEyes mode={eyeMode} />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 68 68"
+      fill="none"
+      className={className}
+      role="img"
+      aria-hidden="true"
+    >
+      <BaseBear />
+      <BearEyes mode={eyeMode} />
       <AnimatePresence initial={false} mode="wait">
         {items.map((item) => (
           <Motion.g
@@ -86,5 +96,5 @@ const UnifiedBearIcon = React.memo(function UnifiedBearIcon({ className = '' }) 
   );
 });
 
-UnifiedBearIcon.displayName = 'UnifiedBearIcon';
+UnifiedBearIcon.displayName = "UnifiedBearIcon";
 export default UnifiedBearIcon;

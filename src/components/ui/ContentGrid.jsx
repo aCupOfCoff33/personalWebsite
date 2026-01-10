@@ -5,7 +5,7 @@ import ContentCard from './ContentCard';
 // Grid layout component
 function ContentGrid({ 
   items = [], 
-  columns = { base: 1, md: 2, lg: 3 },
+  columns = { base: 1, md: 2, lg: 3, xl: 3, '2xl': 4 },
   className = '',
   cardVariant = 'story'
 }) {
@@ -30,13 +30,25 @@ function ContentGrid({
     3: 'lg:grid-cols-3',
     4: 'lg:grid-cols-4',
   };
+  const responsiveXl = {
+    1: 'xl:grid-cols-1',
+    2: 'xl:grid-cols-2',
+    3: 'xl:grid-cols-3',
+    4: 'xl:grid-cols-4',
+  };
+  const responsive2xl = {
+    1: '2xl:grid-cols-1',
+    2: '2xl:grid-cols-2',
+    3: '2xl:grid-cols-3',
+    4: '2xl:grid-cols-4',
+  };
 
-  const gridCols = `${allowed[columns.base] || allowed[1]} ${responsiveMd[columns.md] || ''} ${responsiveLg[columns.lg] || ''}`.trim();
+  const gridCols = `${allowed[columns.base] || allowed[1]} ${responsiveMd[columns.md] || ''} ${responsiveLg[columns.lg] || ''} ${responsiveXl[columns.xl] || ''} ${responsive2xl[columns['2xl']] || ''}`.trim();
 
   return (
-    <div className={`grid ${gridCols} gap-8 ${className}`} style={{ contain: 'content' }}>
+    <div className={`grid ${gridCols} gap-8 justify-items-center ${className}`} style={{ contain: 'content' }}>
       {items.map((item, index) => (
-        <div key={item.id || index} className="w-full">
+        <div key={item.id || index} className="w-full flex justify-center">
           <ContentCard
             variant={cardVariant}
             {...item}
@@ -56,6 +68,8 @@ ContentGrid.propTypes = {
     base: PropTypes.number,
     md: PropTypes.number,
     lg: PropTypes.number,
+    xl: PropTypes.number,
+    '2xl': PropTypes.number,
   }),
   className: PropTypes.string,
   cardVariant: PropTypes.string,

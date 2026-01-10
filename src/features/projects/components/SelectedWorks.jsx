@@ -16,7 +16,6 @@ function SelectedWorks() {
       subtitle="Projects, roles, and highlights from my journey."
       items={projectsData}
       layout="carousel"
-      showGradientBar={true}
       showControls={true}
       cardVariant="glass" // Use glass variant for horizontal carousel
       maxItems={6} // Show only first 6 items initially
