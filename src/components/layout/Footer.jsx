@@ -21,7 +21,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-black text-white py-6 px-4 sm:px-12 w-full relative z-10">
+    <footer className="bg-transparent text-white py-6 px-4 sm:px-12 w-full relative z-10">
       <div className="flex gap-4 flex-wrap justify-center sm:justify-end text-sm sm:text-base">
         {socialLinks.map((link) => (
           <a
