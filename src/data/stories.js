@@ -123,6 +123,18 @@ export const storiesData = [
     category: "Testing",
     link: "https://www.bcg.com",
   },
+  {
+    id: "FEAS x OnePack",
+    title: "FEAS x OnePack",
+    description:
+      "Built OnePack, a reusable sustainable packaging product. Led market research, product design, and a business model balancing impact and convenience. Built Webite using React Three Fiber.",
+    dates: "2024-2025",
+    readTime: "11 min read",
+    image: "/imagesStories/onepack.jpg",
+    accent: "teal",
+    category: "Sustainability",
+    link: "https://onepack.aaryanj.tech/",
+  },
 ];
 
 export default storiesData;
