@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
 import PremiumBackground from "./components/common/PremiumBackground";
 import { NotesProvider } from "./features/notes/NotesContext";
 import BearProvider from "./features/bear/context/BearContext";
@@ -61,10 +62,7 @@ function App() {
                   </Suspense>
 
                   {/* Footer lives outside Routes so it shows on every page */}
-                  <footer className="relative bg-transparent text-center py-10 text-gray-500 z-10">
-                    © 2025 Aaryan Joharapurkar. Designed from the depths of my
-                    cave.
-                  </footer>
+                  <Footer />
                 </div>
               </main>
             </div>

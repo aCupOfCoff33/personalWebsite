@@ -25,6 +25,12 @@ const sections = [
       { kind: "internal", to: "/", label: "Home", Icon: HomeIcon },
       { kind: "internal", to: "/projects", label: "Projects", Icon: Briefcase },
       { kind: "internal", to: "/about", label: "About", Icon: UserRound },
+      {
+        kind: "external",
+        href: "/resume.pdf",
+        label: "Resume",
+        Icon: FileText,
+      },
     ],
   },
   {
