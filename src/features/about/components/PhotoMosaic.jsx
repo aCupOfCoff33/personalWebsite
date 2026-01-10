@@ -98,7 +98,7 @@ const PhotoMosaic = ({ images = [] }) => {
                   opacity-0
                   group cursor-pointer
                   transition-all duration-300 ease-out
-                  hover:scale-[1.02] hover:z-10
+                  hover:scale-[1.02] hover:z-20
                   ring-1 ring-white/10 hover:ring-white/20
                 `}
                 style={{ animationDelay: `${i * 0.05}s` }}
@@ -123,7 +123,7 @@ const PhotoMosaic = ({ images = [] }) => {
                 />
 
                 {/* Hover overlay with caption */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                 {item.caption && (
                   <figcaption

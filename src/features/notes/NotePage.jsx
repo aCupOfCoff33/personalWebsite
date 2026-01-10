@@ -71,6 +71,8 @@ export default function NotePage() {
     const hasToc = tocIndexById.size > 0;
     let sentinelTop = 0;
     let observer;
+    let lastProgressUpdate = 0;
+    let lastStateUpdate = 0;
 
     const updateSentinelPos = () => {
       const el = sentinelRef.current;
@@ -84,6 +86,7 @@ export default function NotePage() {
     const computeAndSet = () => {
       if (!sentinelTop) updateSentinelPos();
       const scrollY = getScrollTop();
+      const now = performance.now();
 
       // Hysteresis: enter reading slightly below sentinel; exit only after moving well above it
       const enterY = sentinelTop - 32; // collapse once we pass near sentinel
@@ -94,7 +97,9 @@ export default function NotePage() {
       if (!current && scrollY >= enterY) next = true;
       else if (current && scrollY <= exitY) next = false;
 
-      if (next !== current) {
+      // Throttle state updates to max 60fps (16ms)
+      if (next !== current && now - lastStateUpdate > 16) {
+        lastStateUpdate = now;
         readingRef.current = next;
         setTocVisible(next);
         setContactCollapsed(next);
@@ -103,7 +108,10 @@ export default function NotePage() {
       // Compute progress from 0 (top) to 1 (just after sentinel hits top)
       const range = Math.max(1, enterY - exitY); // avoid divide by zero
       const progress = Math.min(1, Math.max(0, (scrollY - exitY) / range));
-      if (!hasToc) {
+
+      // Throttle progress updates to max 30fps (33ms) and only if changed significantly
+      if (!hasToc && now - lastProgressUpdate > 33) {
+        lastProgressUpdate = now;
         setReadingProgress(progress);
       }
     };
@@ -135,27 +143,35 @@ export default function NotePage() {
     updateSentinelPos();
     computeAndSet();
 
+    let scrollRafId = null;
     const onScroll = () => {
-      if (onScroll._raf) return;
-      onScroll._raf = requestAnimationFrame(() => {
-        onScroll._raf = null;
+      if (scrollRafId) return;
+      scrollRafId = requestAnimationFrame(() => {
+        scrollRafId = null;
         computeAndSet();
       });
     };
+
+    let resizeTimeoutId = null;
     const onResize = () => {
-      updateSentinelPos();
-      computeAndSet();
+      // Debounce resize to reduce computation during window resizing
+      if (resizeTimeoutId) clearTimeout(resizeTimeoutId);
+      resizeTimeoutId = setTimeout(() => {
+        updateSentinelPos();
+        computeAndSet();
+      }, 100);
     };
 
     const scrollTarget =
       scrollRoot && scrollRoot instanceof HTMLElement ? scrollRoot : window;
     scrollTarget.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
+    window.addEventListener("resize", onResize, { passive: true });
 
     return () => {
       scrollTarget.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
-      if (onScroll._raf) cancelAnimationFrame(onScroll._raf);
+      if (scrollRafId) cancelAnimationFrame(scrollRafId);
+      if (resizeTimeoutId) clearTimeout(resizeTimeoutId);
       if (observer) observer.disconnect();
     };
   }, [note, tocItems, setTocVisible, setContactCollapsed, setReadingProgress]);
@@ -191,12 +207,13 @@ export default function NotePage() {
     <article className="mx-auto w-full text-white">
       {/* Top heading — aligned to match hero spacing: push down considerably */}
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24">
-        <div className="mb-12">
+        <div className="mb-12" style={{ contain: "layout style" }}>
           <MotionH1
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className="text-4xl md:text-6xl font-semibold italic text-white font-adamant"
+            style={{ willChange: "auto" }}
           >
             {note.title}
           </MotionH1>
@@ -224,7 +241,14 @@ export default function NotePage() {
         {/* Content — add large spacer so Introduction is below the fold initially */}
         <div className="mt-28 flex flex-col gap-8 pb-24">
           {note.sections.map((section) => (
-            <section key={section.id} id={section.id}>
+            <section
+              key={section.id}
+              id={section.id}
+              style={{
+                contain: "layout style paint",
+                contentVisibility: "auto",
+              }}
+            >
               <NoteSection section={section} />
             </section>
           ))}

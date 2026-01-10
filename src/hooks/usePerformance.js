@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 // Custom hook for performance monitoring and optimization
 export const usePerformanceMonitor = (componentName, enabled = false) => {
@@ -38,7 +38,9 @@ export const useMountTime = (componentName, enabled = false) => {
     return () => {
       const endTime = performance.now();
       const mountDuration = endTime - startTime;
-      console.log(`⏱️ Mount Time - ${componentName}: ${mountDuration.toFixed(2)}ms`);
+      console.log(
+        `⏱️ Mount Time - ${componentName}: ${mountDuration.toFixed(2)}ms`,
+      );
     };
   }, [componentName, enabled]);
 
@@ -56,7 +58,7 @@ export const useWhyDidYouUpdate = (name, props, enabled = false) => {
       const allKeys = Object.keys({ ...previousProps.current, ...props });
       const changedProps = {};
 
-      allKeys.forEach(key => {
+      allKeys.forEach((key) => {
         if (previousProps.current[key] !== props[key]) {
           changedProps[key] = {
             from: previousProps.current[key],
@@ -72,4 +74,39 @@ export const useWhyDidYouUpdate = (name, props, enabled = false) => {
 
     previousProps.current = props;
   });
+};
+
+// Hook for throttling function calls to improve performance
+export const useThrottle = (callback, delay = 16) => {
+  const lastRun = useRef(Date.now());
+  const timeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const throttledFunction = useRef((...args) => {
+    const now = Date.now();
+    const timeSinceLastRun = now - lastRun.current;
+
+    if (timeSinceLastRun >= delay) {
+      lastRun.current = now;
+      callback(...args);
+    } else {
+      // Schedule the call for later if not enough time has passed
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        lastRun.current = Date.now();
+        callback(...args);
+      }, delay - timeSinceLastRun);
+    }
+  }).current;
+
+  return throttledFunction;
 };

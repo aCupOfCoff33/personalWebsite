@@ -43,6 +43,39 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Performance optimizations for better INP */
+* {
+    /* Reduce layout recalculations */
+    box-sizing: border-box;
+}
+
+/* Optimize pointer events and interactions */
+img,
+video,
+iframe {
+    /* Prevent layout shifts during load */
+    max-width: 100%;
+    height: auto;
+}
+
+/* Optimize hover and focus interactions */
+a,
+button {
+    /* Reduce paint during interactions */
+    will-change: auto;
+}
+
+/* Optimize animations and transitions */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 /* Regular */
 @font-face {
     font-family: "Adamant_BG";
