@@ -74,7 +74,7 @@ function ContentCarousel({
       <div
         data-carousel-container
         data-carousel-id={carouselId}
-        className="pt-4 pl-4 pr-4 flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory will-change-transform [&::-webkit-scrollbar]:hidden"
+        className="pt-4 pl-4 pr-4 flex gap-8 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
       >
         {displayItems.map((item, index) => (
           <div

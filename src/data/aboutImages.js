@@ -1,86 +1,116 @@
 export const aboutImages = [
   {
-    src: "/about-gallery/hackmit-2024.jpg",
-    alt: "HackMIT 2024",
-    caption: "HackMIT 2024",
-    orientation: "horizontal",
-    priority: 3,
-  },
-  {
-    src: "/about-gallery/banff.jpg",
-    alt: "Banff trip",
-    caption: null,
-    orientation: "horizontal",
-    priority: 2,
-  },
-  {
-    src: "/about-gallery/art-museum.jpg",
-    alt: "Art museum visit",
-    caption: null,
+    src: "/about-gallery/ag-niagara.jpg",
+    alt: "AG Niagara",
+    caption: "Work Trip to Niagara Falls with AG",
     orientation: "horizontal",
     priority: 1,
   },
   {
-    src: "/about-gallery/hackathon-team.jpg",
-    alt: "Hackathon team",
-    caption: null,
-    orientation: "vertical",
-    priority: 2,
-  },
-  {
-    src: "/about-gallery/stripe-event.jpg",
-    alt: "Stripe event",
-    caption: "Congrats!",
-    orientation: "horizontal",
-    priority: 2,
-  },
-  {
-    src: "/about-gallery/cenote-swim.jpg",
-    alt: "Swimming in a cenote",
-    caption: null,
+    src: "/about-gallery/atlantic.jpg",
+    alt: "Atlantic",
+    caption: "$14,000 Scholarship Ceremony",
     orientation: "vertical",
     priority: 1,
   },
   {
-    src: "/about-gallery/vr-headset.jpg",
-    alt: "Trying VR headset",
-    caption: null,
-    orientation: "vertical",
-    priority: 1,
-  },
-  {
-    src: "/about-gallery/poetry-night.jpg",
-    alt: "Poetry night",
-    caption: "Poetry Night",
+    src: "/about-gallery/books at mexico city.jpg",
+    alt: "Books At Mexico City",
+    caption: "My Dream Library in Mexico City",
     orientation: "horizontal",
     priority: 1,
   },
   {
-    src: "/about-gallery/team-whiteboard.jpg",
-    alt: "Team working at whiteboard",
-    caption: null,
+    src: "/about-gallery/first day at ivey.jpg",
+    alt: "First Day At Ivey",
+    caption: "First Day At Ivey Business School",
+    orientation: "vertical",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/gov-canada-lunch.jpg",
+    alt: "Gov Canada Lunch",
+    caption: "Lunch with Colleagues at First Internship",
     orientation: "horizontal",
     priority: 1,
   },
   {
-    src: "/about-gallery/balloons-celebration.jpg",
-    alt: "Celebration with balloons",
-    caption: null,
+    src: "/about-gallery/gov-canada-speaking.jpg",
+    alt: "Gov Canada Speaking",
+    caption: "Presenting at Government of Canada",
     orientation: "vertical",
-    priority: 2,
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/grand-canyon.jpg",
+    alt: "Grand Canyon",
+    caption: "Grand Canyon",
+    orientation: "vertical",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/hack the north.jpg",
+    alt: "Hack The North",
+    caption: "Winning Hack the North with the Dream Team",
+    orientation: "horizontal",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/ivey marketing summit.jpg",
+    alt: "Ivey Marketing Summit",
+    caption: "Winning my First Case Competition",
+    orientation: "vertical",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/las vegas strip.jpg",
+    alt: "Las Vegas Strip",
+    caption: "Let's go Gambling...?",
+    orientation: "vertical",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/lunch with boss.jpg",
+    alt: "Lunch With Boss",
+    caption: "First Lunch at American Global!",
+    orientation: "horizontal",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/mexico city.jpg",
+    alt: "Mexico City",
+    caption: "Waterfall in Mexico City",
+    orientation: "vertical",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/switzerland-1.jpg",
+    alt: "Switzerland 1",
+    caption: "Switzerland... Need I Say More?",
+    orientation: "horizontal",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/vatican city.jpg",
+    alt: "Vatican City",
+    caption: "Vatican City",
+    orientation: "vertical",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/venice.jpg",
+    alt: "Venice",
+    caption: "The Beautiful Canals of Venice",
+    orientation: "vertical",
+    priority: 1,
+  },
+  {
+    src: "/about-gallery/wds-photo.jpg",
+    alt: "WDS Photo",
+    caption: "Western Developers Society Developers Team Photo",
+    orientation: "horizontal",
+    priority: 1,
   },
 ];
-
-/**
- * Add new images to the gallery by adding objects to the array above.
- * The PhotoMosaic component will automatically re-layout when images change.
- *
- * Recommended image specifications:
- * - Horizontal: 4:3 aspect ratio
- * - Vertical: 3:4 aspect ratio
- * - Square: 1:1 aspect ratio
- * - Minimum resolution: 800px on shortest side
- * - Format: JPG or WebP for best performance
- */
 
 export default aboutImages;

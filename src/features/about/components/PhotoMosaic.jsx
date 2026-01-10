@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 
 const PhotoMosaic = ({ images = [] }) => {
   const galleryRef = useRef(null);
+  const [loadedImages, setLoadedImages] = useState(new Set());
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -72,6 +73,10 @@ const PhotoMosaic = ({ images = [] }) => {
     return rows.flat();
   }, [images]);
 
+  const handleImageLoad = (index) => {
+    setLoadedImages((prev) => new Set([...prev, index]));
+  };
+
   if (!images.length) {
     return null;
   }
@@ -84,9 +89,9 @@ const PhotoMosaic = ({ images = [] }) => {
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 grid-flow-row-dense"
         >
           {layoutGrid.map((item, i) => {
-            // Dynamic grid span classes
             const colSpanClass =
               item.colSpan === 2 ? "col-span-2" : "col-span-1";
+            const isLoaded = loadedImages.has(item.index);
 
             return (
               <figure
@@ -97,32 +102,32 @@ const PhotoMosaic = ({ images = [] }) => {
                   ${colSpanClass} ${item.aspectClass}
                   opacity-0
                   group cursor-pointer
-                  transition-all duration-300 ease-out
-                  hover:scale-[1.02] hover:z-10
-                  ring-1 ring-white/10 hover:ring-white/20
+                  ring-1 ring-white/10
                 `}
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 animate-pulse" />
+                {/* Optimized placeholder - static background, no animation */}
+                <div
+                  className={`absolute inset-0 bg-neutral-800/50 transition-opacity duration-500 ${
+                    isLoaded ? "opacity-0" : "opacity-100"
+                  }`}
+                />
 
                 <img
                   src={item.src}
                   alt={item.alt || `Gallery image ${item.index + 1}`}
                   loading="lazy"
                   decoding="async"
-                  onLoad={(e) => {
-                    e.target.classList.remove("mosaic-image-loading");
-                  }}
-                  className="
-                    mosaic-image-loading
+                  onLoad={() => handleImageLoad(item.index)}
+                  className={`
                     absolute inset-0 w-full h-full object-cover
-                    transition-all duration-700 ease-out
-                    group-hover:scale-105
-                  "
+                    transition-opacity duration-700 ease-out
+                    ${isLoaded ? "opacity-100" : "opacity-0"}
+                  `}
                   sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
                 />
 
-                {/* Hover overlay with caption */}
+                {/* Optimized hover overlay - only transforms on hover */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {item.caption && (
@@ -143,13 +148,6 @@ const PhotoMosaic = ({ images = [] }) => {
           })}
         </div>
       </div>
-
-      <style>{`
-        .mosaic-image-loading {
-          opacity: 0;
-          transform: scale(1.05);
-        }
-      `}</style>
     </section>
   );
 };

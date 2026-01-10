@@ -62,15 +62,6 @@ function ContentCard({
             </div>
           )}
         </div>
-
-        {dates && (
-          <div
-            className="ml-auto text-right text-white/70 md:text-white/80 text-xs sm:text-sm font-normal font-adamant drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]"
-            style={{ fontVariantNumeric: "tabular-nums" }}
-          >
-            {dates}
-          </div>
-        )}
       </Wrapper>
     );
   }
@@ -154,10 +145,6 @@ function ContentCard({
                 {subtitle}
               </p>
             )}
-
-            {dates && (
-              <p className="text-xs font-medium text-white/70">{dates}</p>
-            )}
           </div>
         </a>
       ) : (
@@ -210,10 +197,6 @@ function ContentCard({
               <p className="text-sm font-semibold tracking-wide text-white/90">
                 {subtitle}
               </p>
-            )}
-
-            {dates && (
-              <p className="text-xs font-medium text-white/70">{dates}</p>
             )}
           </div>
         </div>

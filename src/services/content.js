@@ -15,11 +15,11 @@
 //   const experiences = await contentService.getExperiences();
 // ============================================================================
 
-import { experiences } from '../data/experiences';
-import { projects } from '../data/projects';
-import { storiesData } from '../data/stories';
-import { aboutImages } from '../data/aboutImages';
-import { notesIndex, getNoteBySlug as getNoteMock } from '../data/notes';
+import { experiences } from "../data/experiences";
+import { projects } from "../data/projects";
+import { storiesData } from "../data/stories";
+import { aboutImages } from "../data/aboutImages";
+import { notesIndex, getNoteBySlug as getNoteMock } from "../data/notes";
 
 /**
  * Content Service
@@ -38,43 +38,38 @@ export const contentService = {
    * @param {string} filters.category - Filter by category ('internship', 'leadership', 'consulting')
    * @param {boolean} filters.featured - Filter to only featured items
    * @param {boolean} filters.isActive - Filter to only active items (default: true)
-   * @returns {Promise<Array>} Array of experience objects
+   * @returns {Array} Array of experience objects
    */
-  async getExperiences(filters = {}) {
-    // Simulate async behavior (useful when migrating to real API)
-    return new Promise((resolve) => {
-      let data = [...experiences];
+  getExperiences(filters = {}) {
+    let data = [...experiences];
 
-      // Apply filters
-      if (filters.category) {
-        data = data.filter(exp => exp.category === filters.category);
-      }
+    // Apply filters
+    if (filters.category) {
+      data = data.filter((exp) => exp.category === filters.category);
+    }
 
-      if (filters.featured !== undefined) {
-        data = data.filter(exp => exp.featured === filters.featured);
-      }
+    if (filters.featured !== undefined) {
+      data = data.filter((exp) => exp.featured === filters.featured);
+    }
 
-      if (filters.isActive !== false) {
-        data = data.filter(exp => exp.isActive === true);
-      }
+    if (filters.isActive !== false) {
+      data = data.filter((exp) => exp.isActive === true);
+    }
 
-      // Sort by sortOrder
-      data.sort((a, b) => a.sortOrder - b.sortOrder);
+    // Sort by sortOrder
+    data.sort((a, b) => a.sortOrder - b.sortOrder);
 
-      resolve(data);
-    });
+    return data;
   },
 
   /**
    * Get a single experience by ID
    * @param {string} id - Experience ID
-   * @returns {Promise<Object|null>} Experience object or null if not found
+   * @returns {Object|null} Experience object or null if not found
    */
-  async getExperienceById(id) {
-    return new Promise((resolve) => {
-      const experience = experiences.find(exp => exp.id === id);
-      resolve(experience || null);
-    });
+  getExperienceById(id) {
+    const experience = experiences.find((exp) => exp.id === id);
+    return experience || null;
   },
 
   // ==========================================================================
@@ -87,41 +82,37 @@ export const contentService = {
    * @param {string} filters.category - Filter by category
    * @param {boolean} filters.featured - Filter to only featured items
    * @param {boolean} filters.isActive - Filter to only active items (default: true)
-   * @returns {Promise<Array>} Array of project objects
+   * @returns {Array} Array of project objects
    */
-  async getProjects(filters = {}) {
-    return new Promise((resolve) => {
-      let data = [...projects];
+  getProjects(filters = {}) {
+    let data = [...projects];
 
-      if (filters.category) {
-        data = data.filter(proj => proj.category === filters.category);
-      }
+    if (filters.category) {
+      data = data.filter((proj) => proj.category === filters.category);
+    }
 
-      if (filters.featured !== undefined) {
-        data = data.filter(proj => proj.featured === filters.featured);
-      }
+    if (filters.featured !== undefined) {
+      data = data.filter((proj) => proj.featured === filters.featured);
+    }
 
-      if (filters.isActive !== false) {
-        data = data.filter(proj => proj.isActive === true);
-      }
+    if (filters.isActive !== false) {
+      data = data.filter((proj) => proj.isActive === true);
+    }
 
-      // Sort by sortOrder
-      data.sort((a, b) => a.sortOrder - b.sortOrder);
+    // Sort by sortOrder
+    data.sort((a, b) => a.sortOrder - b.sortOrder);
 
-      resolve(data);
-    });
+    return data;
   },
 
   /**
    * Get a single project by ID
    * @param {string} id - Project ID
-   * @returns {Promise<Object|null>} Project object or null if not found
+   * @returns {Object|null} Project object or null if not found
    */
-  async getProjectById(id) {
-    return new Promise((resolve) => {
-      const project = projects.find(proj => proj.id === id);
-      resolve(project || null);
-    });
+  getProjectById(id) {
+    const project = projects.find((proj) => proj.id === id);
+    return project || null;
   },
 
   // ==========================================================================
@@ -133,34 +124,30 @@ export const contentService = {
    * @param {Object} filters - Optional filters
    * @param {string} filters.category - Filter by category
    * @param {string} filters.accent - Filter by accent color
-   * @returns {Promise<Array>} Array of story objects
+   * @returns {Array} Array of story objects
    */
-  async getStories(filters = {}) {
-    return new Promise((resolve) => {
-      let data = [...storiesData];
+  getStories(filters = {}) {
+    let data = [...storiesData];
 
-      if (filters.category) {
-        data = data.filter(story => story.category === filters.category);
-      }
+    if (filters.category) {
+      data = data.filter((story) => story.category === filters.category);
+    }
 
-      if (filters.accent) {
-        data = data.filter(story => story.accent === filters.accent);
-      }
+    if (filters.accent) {
+      data = data.filter((story) => story.accent === filters.accent);
+    }
 
-      resolve(data);
-    });
+    return data;
   },
 
   /**
    * Get a single story by ID
    * @param {string} id - Story ID
-   * @returns {Promise<Object|null>} Story object or null if not found
+   * @returns {Object|null} Story object or null if not found
    */
-  async getStoryById(id) {
-    return new Promise((resolve) => {
-      const story = storiesData.find(s => s.id === id);
-      resolve(story || null);
-    });
+  getStoryById(id) {
+    const story = storiesData.find((s) => s.id === id);
+    return story || null;
   },
 
   // ==========================================================================
@@ -169,20 +156,18 @@ export const contentService = {
 
   /**
    * Get all notes
-   * @returns {Promise<Array>} Array of note objects
+   * @returns {Array} Array of note objects
    */
-  async getNotes() {
-    return new Promise((resolve) => {
-      resolve([...notesIndex]);
-    });
+  getNotes() {
+    return [...notesIndex];
   },
 
   /**
    * Get a single note by slug
    * @param {string} slug - Note slug
-   * @returns {Promise<Object|null>} Note object or null if not found
+   * @returns {Object|null} Note object or null if not found
    */
-  async getNoteBySlug(slug) {
+  getNoteBySlug(slug) {
     return getNoteMock(slug);
   },
 
@@ -192,12 +177,10 @@ export const contentService = {
 
   /**
    * Get all about page images
-   * @returns {Promise<Array>} Array of image objects
+   * @returns {Array} Array of image objects
    */
-  async getAboutImages() {
-    return new Promise((resolve) => {
-      resolve([...aboutImages]);
-    });
+  getAboutImages() {
+    return [...aboutImages];
   },
 
   // ==========================================================================
@@ -207,27 +190,22 @@ export const contentService = {
   /**
    * Get all content items (projects + stories) for display in carousels
    * Useful for homepage or combined views
-   * @returns {Promise<Object>} Object with projects and stories arrays
+   * @returns {Object} Object with projects and stories arrays
    */
-  async getAllContent() {
-    const [projectsList, storiesList] = await Promise.all([
-      this.getProjects({ featured: true }),
-      this.getStories(),
-    ]);
-
+  getAllContent() {
     return {
-      projects: projectsList,
-      stories: storiesList,
+      projects: this.getProjects({ featured: true }),
+      stories: this.getStories(),
     };
   },
 
   /**
    * Search across all content types
    * @param {string} query - Search query
-   * @returns {Promise<Object>} Object with matching results from each content type
+   * @returns {Object} Object with matching results from each content type
    */
-  async search(query) {
-    if (!query || query.trim() === '') {
+  search(query) {
+    if (!query || query.trim() === "") {
       return {
         experiences: [],
         projects: [],
@@ -238,30 +216,32 @@ export const contentService = {
 
     const searchTerm = query.toLowerCase().trim();
 
-    const [allExperiences, allProjects, allStories, allNotes] = await Promise.all([
-      this.getExperiences(),
-      this.getProjects(),
-      this.getStories(),
-      this.getNotes(),
-    ]);
+    const allExperiences = this.getExperiences();
+    const allProjects = this.getProjects();
+    const allStories = this.getStories();
+    const allNotes = this.getNotes();
 
     return {
-      experiences: allExperiences.filter(exp =>
-        exp.companyName.toLowerCase().includes(searchTerm) ||
-        exp.position.toLowerCase().includes(searchTerm) ||
-        exp.description.toLowerCase().includes(searchTerm)
+      experiences: allExperiences.filter(
+        (exp) =>
+          exp.companyName.toLowerCase().includes(searchTerm) ||
+          exp.position.toLowerCase().includes(searchTerm) ||
+          exp.description.toLowerCase().includes(searchTerm),
       ),
-      projects: allProjects.filter(proj =>
-        proj.title.toLowerCase().includes(searchTerm) ||
-        proj.description.toLowerCase().includes(searchTerm)
+      projects: allProjects.filter(
+        (proj) =>
+          proj.title.toLowerCase().includes(searchTerm) ||
+          proj.description.toLowerCase().includes(searchTerm),
       ),
-      stories: allStories.filter(story =>
-        story.title.toLowerCase().includes(searchTerm) ||
-        story.category.toLowerCase().includes(searchTerm)
+      stories: allStories.filter(
+        (story) =>
+          story.title.toLowerCase().includes(searchTerm) ||
+          story.category.toLowerCase().includes(searchTerm),
       ),
-      notes: allNotes.filter(note =>
-        note.title.toLowerCase().includes(searchTerm) ||
-        note.summary.toLowerCase().includes(searchTerm)
+      notes: allNotes.filter(
+        (note) =>
+          note.title.toLowerCase().includes(searchTerm) ||
+          note.summary.toLowerCase().includes(searchTerm),
       ),
     };
   },

@@ -47,7 +47,7 @@ export const storiesData = [
     dates: "2025",
     readTime: "10 min read",
     image: "/imagesStories/wds-photo.png",
-    accent: "orange",
+    accent: "blue",
     category: "Design",
     link: "https://www.westerndevelopers.com",
   },
@@ -76,10 +76,10 @@ export const storiesData = [
     link: "https://www.westernu.ca/alumni",
   },
   {
-    id: "Hinge x Heart & Stroke",
-    title: "Hinge x Heart & Stroke",
+    id: "Heart & Stroke x Ivey Business School",
+    title: "Heart & Stroke x Ivey Business School",
     description:
-      "Presented a partnership strategy to the Heart & Stroke Foundation to tackle loneliness by collaborating with Hinge—senior leadership loved the approach.",
+      "Presented a partnership strategy to the Heart & Stroke Foundation to tackle loneliness by collaborating with Hinge who loved the approach.",
     dates: "2025",
     readTime: "10 min read",
     image: "/imagesStories/hinge-x-heart-and-stroke.jpg",
@@ -88,8 +88,8 @@ export const storiesData = [
     link: "https://www.heartandstroke.ca",
   },
   {
-    id: "Ivey FinTech x Pine",
-    title: "Ivey FinTech x Pine",
+    id: "Pine x Ivey FinTech",
+    title: "Pine x Ivey FinTech",
     description:
       "Partnered with Pine to deliver fintech consulting services, analyzing market opportunities and building financial models.",
     dates: "2025",
@@ -112,8 +112,8 @@ export const storiesData = [
     link: "https://americanglobal.com",
   },
   {
-    id: "BCG X Ivey Case Competition",
-    title: "BCG X Ivey Case Competition",
+    id: "BCG X Ivey Business School",
+    title: "BCG X Ivey Business School",
     description:
       "Competed in BCG's case competition, presenting strategic recommendations for a major business transformation initiative.",
     dates: "2025",

@@ -1,26 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import SectionHeading from "../../../components/ui/SectionHeading";
 import PhotoMosaic from "./PhotoMosaic";
 import { contentService } from "../../../services/content";
 
 const AboutMe = () => {
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const data = await contentService.getAboutImages();
-        setImages(data);
-      } catch (error) {
-        console.error("Error fetching about images:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchImages();
-  }, []);
+  const [images] = useState(() => {
+    try {
+      return contentService.getAboutImages();
+    } catch (error) {
+      console.error("Error fetching about images:", error);
+      return [];
+    }
+  });
 
   return (
     <>
@@ -35,9 +26,10 @@ const AboutMe = () => {
             <div className="w-full lg:w-auto flex-shrink-0">
               <img
                 className="w-full max-w-md lg:w-[580px] h-auto rounded-2xl object-cover shadow-2xl"
-                src="/aaryan-about.JPG"
+                src="/aaryan-about.jpg"
                 alt="Aaryan"
                 loading="lazy"
+                decoding="async"
               />
             </div>
 
@@ -95,13 +87,7 @@ const AboutMe = () => {
       </section>
 
       {/* Photo Gallery Mosaic */}
-      {loading ? (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center text-white/60">Loading gallery...</div>
-        </div>
-      ) : (
-        <PhotoMosaic images={images} />
-      )}
+      <PhotoMosaic images={images} />
     </>
   );
 };

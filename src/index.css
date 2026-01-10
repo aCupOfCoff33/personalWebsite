@@ -43,6 +43,66 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Performance optimizations for smooth scrolling and rendering */
+* {
+    /* Prevent layout shifts during animations */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* Optimize scroll containers */
+[data-scroll-container] {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* Enable GPU acceleration for scrolling */
+    transform: translateZ(0);
+    will-change: scroll-position;
+}
+
+/* Optimize carousel scrolling */
+[data-carousel-container] {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    /* Improve scrollbar performance */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* Optimize images for better performance */
+img {
+    /* Prevent layout shift while loading */
+    content-visibility: auto;
+}
+
+/* Optimize animations to use GPU */
+@media (prefers-reduced-motion: no-preference) {
+    .animate-card,
+    [data-mosaic-card] {
+        /* Use transform instead of other properties for better performance */
+        transform: translateZ(0);
+    }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Optimize hover effects */
+@media (hover: hover) and (pointer: fine) {
+    .group:hover img {
+        /* Use transform for smooth scaling */
+        transform: translateZ(0);
+    }
+}
+
 /* Regular */
 @font-face {
     font-family: "Adamant_BG";

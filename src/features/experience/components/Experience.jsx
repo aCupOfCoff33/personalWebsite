@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import SectionHeading from "../../../components/ui/SectionHeading";
 import ContentCard from "../../../components/ui/ContentCard";
 import { contentService } from "../../../services/content";
@@ -16,49 +16,15 @@ function formatYears(dateRange) {
 
 // Main Experience component
 const Experience = React.memo(() => {
-  const [experiences, setExperiences] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchExperiences = async () => {
-      try {
-        setLoading(true);
-        // Fetch active experiences through centralized service
-        const data = await contentService.getExperiences({ isActive: true });
-        setExperiences(data);
-      } catch (err) {
-        setError(err.message);
-        console.error("Error fetching experiences:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExperiences();
-  }, []);
-
-  if (loading) {
-    return (
-      <section className="w-full bg-transparent">
-        <SectionHeading title="Experience" />
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-          <div className="text-center text-white/60">Loading...</div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="w-full bg-transparent">
-        <SectionHeading title="Experience" />
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-          <div className="text-center text-red-400">Error: {error}</div>
-        </div>
-      </section>
-    );
-  }
+  const [experiences] = useState(() => {
+    try {
+      // Fetch active experiences through centralized service
+      return contentService.getExperiences({ isActive: true });
+    } catch (err) {
+      console.error("Error fetching experiences:", err);
+      return [];
+    }
+  });
 
   return (
     <section className="w-full bg-transparent">
