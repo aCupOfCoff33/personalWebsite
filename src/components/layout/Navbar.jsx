@@ -164,8 +164,14 @@ function ExternalLink({
     <Anchor
       {...(layoutId ? { layout: true, layoutId } : {})}
       href={href}
-      target={href.startsWith("http") ? "_blank" : undefined}
-      rel={href.startsWith("http") ? "noopener" : undefined}
+      target={
+        href.startsWith("http") || href.endsWith(".pdf") ? "_blank" : undefined
+      }
+      rel={
+        href.startsWith("http") || href.endsWith(".pdf")
+          ? "noopener noreferrer"
+          : undefined
+      }
       aria-label={label}
       className="text-neutral-300 hover:text-white"
       transition={
