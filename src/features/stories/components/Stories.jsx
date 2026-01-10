@@ -42,7 +42,7 @@ function Stories() {
       cardVariant="panel"
       showViewAll={true}
       maxItems={7}
-      onViewAllClick={() => navigate("/notes")}
+      onViewAllClick={() => navigate("/projects")}
       viewAllLabel={"Venture Deeper Into\nThe Woods"}
     />
   );

@@ -6,11 +6,13 @@ function ContentCard({
   variant = "default",
   title,
   subtitle,
+  description,
   dates,
   logo,
   image,
   gradient = "from-cyan-400 to-blue-500", // supply just the colour stops or a full bg-*
   href,
+  link,
   className = "",
 }) {
   // Track if the provided image failed to load so we can fall back to the gradient
@@ -73,12 +75,17 @@ function ContentCard({
     );
   }
 
+  // Use link if available, otherwise fall back to href
+  const cardLink = link || href;
+  const isExternalLink =
+    cardLink &&
+    (cardLink.startsWith("http://") || cardLink.startsWith("https://"));
+
   return (
     <div
       className={clsx(
         "group relative isolate p-px", // 1-px padding for gradient border
         "w-full max-w-[600px] mx-auto", // fill container up to a max width
-        "aspect-[16/12.5]",
         "transition-transform duration-300 ease-out hover:scale-[1.02]",
         className,
       )}
@@ -86,9 +93,11 @@ function ContentCard({
       <div className="absolute inset-0  bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
       {/* card body */}
-      {href ? (
+      {cardLink ? (
         <a
-          href={href}
+          href={cardLink}
+          target={isExternalLink ? "_blank" : undefined}
+          rel={isExternalLink ? "noopener noreferrer" : undefined}
           className="relative flex h-full w-full flex-col overflow-hidden rounded hover:backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 p-3 md:p-4 space-y-2 md:space-y-3 transition-colors duration-300 ease-out"
           onClick={() => {
             // allow anchor navigation to router; do not scroll to top of current page
@@ -96,7 +105,7 @@ function ContentCard({
         >
           {/* hero panel */}
           <div
-            className="relative flex-1 h-full rounded-xl overflow-hidden"
+            className="relative flex-shrink-0 w-full aspect-video rounded-xl overflow-hidden"
             style={{ willChange: "transform" }}
           >
             {/* If an image is provided, render it as the hero background; otherwise fall back to the gradient */}
@@ -118,36 +127,44 @@ function ContentCard({
           </div>
 
           {/* meta */}
-          <div className="flex items-center gap-4">
-            {logo && (
-              <img
-                src={logo}
-                alt=""
-                className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center gap-3">
+              {logo && (
+                <img
+                  src={logo}
+                  alt=""
+                  className="h-10 w-10 flex-shrink-0 rounded-lg object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              <h3 className="text-lg font-semibold leading-tight text-white">
+                {title}
+              </h3>
+            </div>
+
+            {description && (
+              <p className="text-sm text-white/70 line-clamp-2">
+                {description}
+              </p>
             )}
-            <h3 className="text-lg font-semibold leading-tight text-white">
-              {title}
-            </h3>
+
+            {subtitle && (
+              <p className="text-sm font-semibold tracking-wide text-white/90">
+                {subtitle}
+              </p>
+            )}
+
+            {dates && (
+              <p className="text-xs font-medium text-white/70">{dates}</p>
+            )}
           </div>
-
-          {subtitle && (
-            <p className="text-sm font-semibold tracking-wide text-white/90">
-              {subtitle}
-            </p>
-          )}
-
-          {dates && (
-            <p className="text-xs font-medium text-white/70">{dates}</p>
-          )}
         </a>
       ) : (
         <div className="relative flex h-full w-full flex-col overflow-hidden rounded p-3 md:p-4 space-y-2 md:space-y-3">
           {/* hero panel */}
           <div
-            className="relative flex-1 h-full rounded-xl overflow-hidden"
+            className="relative flex-shrink-0 w-full aspect-video rounded-xl overflow-hidden"
             style={{ willChange: "transform" }}
           >
             {image && !imageFailed ? (
@@ -167,30 +184,38 @@ function ContentCard({
           </div>
 
           {/* meta */}
-          <div className="flex items-center gap-4">
-            {logo && (
-              <img
-                src={logo}
-                alt=""
-                className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center gap-3">
+              {logo && (
+                <img
+                  src={logo}
+                  alt=""
+                  className="h-10 w-10 flex-shrink-0 rounded-lg object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              <h3 className="text-lg font-semibold leading-tight text-white">
+                {title}
+              </h3>
+            </div>
+
+            {description && (
+              <p className="text-sm text-white/70 line-clamp-2">
+                {description}
+              </p>
             )}
-            <h3 className="text-lg font-semibold leading-tight text-white">
-              {title}
-            </h3>
+
+            {subtitle && (
+              <p className="text-sm font-semibold tracking-wide text-white/90">
+                {subtitle}
+              </p>
+            )}
+
+            {dates && (
+              <p className="text-xs font-medium text-white/70">{dates}</p>
+            )}
           </div>
-
-          {subtitle && (
-            <p className="text-sm font-semibold tracking-wide text-white/90">
-              {subtitle}
-            </p>
-          )}
-
-          {dates && (
-            <p className="text-xs font-medium text-white/70">{dates}</p>
-          )}
         </div>
       )}
     </div>
@@ -204,12 +229,12 @@ ContentCard.propTypes = {
   variant: PropTypes.string,
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string,
+  description: PropTypes.string,
   dates: PropTypes.string,
   logo: PropTypes.string,
+  image: PropTypes.string,
   gradient: PropTypes.string,
   href: PropTypes.string,
+  link: PropTypes.string,
   className: PropTypes.string,
 };
-
-// Add optional image prop for hero backgrounds
-ContentCard.propTypes.image = PropTypes.string;
