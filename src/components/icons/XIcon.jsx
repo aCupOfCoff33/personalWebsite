@@ -1,7 +1,6 @@
-import React from 'react';
+import React from "react";
 
-// X (Twitter) icon using currentColor. Matches the SVG path you provided.
-export default function XIcon({ className = 'h-4 w-4' }) {
+export default function XIcon({ className = "h-4 w-4" }) {
   return (
     <svg
       className={className}
@@ -10,9 +9,7 @@ export default function XIcon({ className = 'h-4 w-4' }) {
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/>
+      <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z" />
     </svg>
   );
 }
-
-

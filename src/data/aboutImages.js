@@ -1,17 +1,3 @@
-/**
- * About Me Images Data
- *
- * Each image should have:
- * - src: path to the image (relative to public folder)
- * - alt: descriptive alt text for accessibility
- * - caption: optional overlay text shown on hover
- * - orientation: 'horizontal' | 'vertical' | 'square' (auto-detected if not provided)
- * - priority: optional number for layout priority (higher = more prominent placement)
- *
- * The PhotoMosaic component will automatically arrange these images
- * in an aesthetically pleasing grid layout.
- */
-
 export const aboutImages = [
   {
     src: "/about-gallery/hackmit-2024.jpg",

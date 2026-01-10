@@ -1,12 +1,22 @@
 /* HeroTypingAnimation.jsx */
 import React, { useEffect, useRef } from "react";
 import AnimatedCursor from "../../../components/common/AnimatedCursor";
-import { motion, useMotionValue } from "framer-motion";
+import {
+  motion as Motion,
+  useMotionValue,
+  AnimatePresence,
+} from "framer-motion";
 import useHeroAnimation from "../hooks/useHeroAnimation";
+import HeroFrame from "./HeroFrame";
+import TypewriterText from "./TypewriterText";
 
 /* ── constants ─────────────────────────────────────────────── */
 const HEADLINE = "Hey there! I'm Aaryan!";
 const HERO_INTRO_SESSION_KEY = "heroIntroSeen";
+
+// Set to true to skip typing animation and show final state immediately
+// Set to false to play the full typing animation sequence
+const SKIP_TYPING_ANIMATION = false;
 
 // Track whether the hero intro has already played in this SPA session
 let heroIntroHasPlayed = false;
@@ -20,7 +30,7 @@ const isSessionStorageReady = () => {
     window.sessionStorage.setItem(testKey, "1");
     window.sessionStorage.removeItem(testKey);
     sessionStorageStatus = true;
-  } catch (error) {
+  } catch {
     sessionStorageStatus = false;
   }
   return sessionStorageStatus;
@@ -80,7 +90,16 @@ if (detectNavigationType() === "reload" && isSessionStorageReady()) {
 const HeroTypingAnimation = React.memo(() => {
   const bodyRef = useRef(null);
   const headlineRef = useRef(null);
-  const shouldRunIntro = React.useRef(!getHeroIntroSeen()).current;
+  const shouldRunIntro = React.useRef(
+    !SKIP_TYPING_ANIMATION && !getHeroIntroSeen(),
+  ).current;
+  const [showDragHint, setShowDragHint] = React.useState(true);
+  const [hintPosition, setHintPosition] = React.useState({
+    x: 0,
+    y: 0,
+  });
+  const sectionRef = useRef(null);
+
   const markIntroSeen = React.useCallback(() => {
     markHeroIntroSeen();
   }, []);
@@ -114,85 +133,31 @@ const HeroTypingAnimation = React.memo(() => {
     handleCursorReadyToDragSnap,
   } = useHeroAnimation({ frameRef, bodyRef, x, y, markIntroSeen });
 
-  // Dynamic safe margins that respect the new layout:
-  // - desktop: reserve space for the fixed left sidebar (16rem) + padding
-  // - mobile: reserve space for the top bar height
-  const getSafeMargin = React.useCallback(() => {
-    const viewportWidth =
-      typeof window !== "undefined" ? window.innerWidth : 1024;
-    const isDesktop = viewportWidth >= 768; // md breakpoint
-    const SIDEBAR_WIDTH_PX = 240; // md:ml-60 (15rem)
-    const MOBILE_TOPBAR_PX = 64; // pt-16 on main
-    return {
-      left: isDesktop ? SIDEBAR_WIDTH_PX + 24 : 24,
-      right: 24,
-      top: isDesktop ? 24 : 24 + MOBILE_TOPBAR_PX,
-      bottom: 24,
-    };
-  }, []);
+  // Track frame's position relative to section for positioning the drag hint
+  // Calculate when dragOK becomes true (when hint is about to show) to ensure frame is in final position
+  useEffect(() => {
+    if (!state.showFrame || !state.dragOK) return;
+    if (!frameRef.current || !sectionRef.current) return;
 
-  // Calculate viewport bounds for clamping - returns {minX, maxX, minY, maxY} as delta limits
-  const getViewportBounds = React.useCallback(() => {
-    if (!frameRef.current)
-      return {
-        minX: -Infinity,
-        maxX: Infinity,
-        minY: -Infinity,
-        maxY: Infinity,
-      };
-    const rect = frameRef.current.getBoundingClientRect();
-    const SAFE_MARGIN = getSafeMargin();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    // Use requestAnimationFrame to ensure layout is complete
+    const rafId = requestAnimationFrame(() => {
+      if (!frameRef.current || !sectionRef.current) return;
 
-    // Current position in motion values
-    const currentX = x.get();
-    const currentY = y.get();
+      const frameRect = frameRef.current.getBoundingClientRect();
+      const sectionRect = sectionRef.current.getBoundingClientRect();
 
-    // Calculate the absolute position limits, then convert to motion value limits
-    // rect.left = some_origin + currentX, so some_origin = rect.left - currentX
-    const originX = rect.left - currentX;
-    const originY = rect.top - currentY;
+      // Calculate position relative to the section
+      // Position at the right edge of the frame (frameRect.right relative to section)
+      const frameRightEdge = frameRect.right - sectionRect.left;
 
-    const minX = SAFE_MARGIN.left - originX;
-    const maxX = viewportWidth - SAFE_MARGIN.right - rect.width - originX;
-    const minY = SAFE_MARGIN.top - originY;
-    const maxY = viewportHeight - SAFE_MARGIN.bottom - rect.height - originY;
+      setHintPosition({
+        x: frameRightEdge - 20, // 20px to the right of frame's right edge
+        y: frameRect.top - sectionRect.top - 110, // 110px above frame
+      });
+    });
 
-    return { minX, maxX, minY, maxY };
-  }, [getSafeMargin, x, y]);
-
-  const clampIntoViewport = React.useCallback(() => {
-    const bounds = getViewportBounds();
-    const currentX = x.get();
-    const currentY = y.get();
-
-    const clampedX = Math.max(bounds.minX, Math.min(bounds.maxX, currentX));
-    const clampedY = Math.max(bounds.minY, Math.min(bounds.maxY, currentY));
-
-    if (clampedX !== currentX) x.set(clampedX);
-    if (clampedY !== currentY) y.set(clampedY);
-  }, [getViewportBounds, x, y]);
-
-  // Proactive drag handler that prevents going out of bounds entirely
-  const handleDrag = React.useCallback(() => {
-    if (!frameRef.current) return;
-
-    // Get bounds based on current frame position
-    const bounds = getViewportBounds();
-
-    // Get the current motion values (already updated by framer)
-    const currentX = x.get();
-    const currentY = y.get();
-
-    // Clamp to bounds - this creates a "hard stop" effect
-    const clampedX = Math.max(bounds.minX, Math.min(bounds.maxX, currentX));
-    const clampedY = Math.max(bounds.minY, Math.min(bounds.maxY, currentY));
-
-    // Apply correction if needed
-    if (clampedX !== currentX) x.set(clampedX);
-    if (clampedY !== currentY) y.set(clampedY);
-  }, [x, y, getViewportBounds]);
+    return () => cancelAnimationFrame(rafId);
+  }, [state.showFrame, state.dragOK]);
 
   // Update x position when screen size changes
   useEffect(() => {
@@ -210,7 +175,7 @@ const HeroTypingAnimation = React.memo(() => {
       const newX = getInitialX();
       x.set(newX);
     }
-  }, [x, state.frameAligned]);
+  }, [x, state.frameAligned, dispatch]);
 
   /* ── orchestrate the sequence ───────────────────────────── */
   useEffect(() => {
@@ -237,7 +202,7 @@ const HeroTypingAnimation = React.memo(() => {
       dispatch({ type: "SET_SHOW_BODY", value: true });
       dispatch({ type: "SET_FRAME_FROZEN", value: true });
     })();
-  }, [shouldRunIntro, x, markIntroSeen]);
+  }, [shouldRunIntro, x, markIntroSeen, dispatch]);
 
   // Skip intro: immediately show final state when returning to Home without a hard refresh
   useEffect(() => {
@@ -257,11 +222,14 @@ const HeroTypingAnimation = React.memo(() => {
       if (headlineRef.current) headlineRef.current.textContent = HEADLINE;
     });
     return () => cancelAnimationFrame(rafId);
-  }, [shouldRunIntro, markIntroSeen]);
+  }, [shouldRunIntro, markIntroSeen, dispatch]);
 
   /* ── render ─────────────────────────────────────────────── */
   return (
-    <section className="relative w-full max-w-screen-xl mx-auto px-4 pt-8 md:px-6 md:pt-64 text-white font-adamant overflow-visible">
+    <section
+      ref={sectionRef}
+      className="relative w-full max-w-screen-xl mx-auto px-4 pt-8 md:px-6 md:pt-64 text-white font-adamant overflow-visible"
+    >
       {/* Animated cursor overlay - shown on both mobile and desktop */}
       {state.showAnimatedCursor && (
         <AnimatedCursor
@@ -272,91 +240,89 @@ const HeroTypingAnimation = React.memo(() => {
           shouldExit={state.cursorShouldExit}
         />
       )}
+
       {/* ── headline & draggable blue frame ── */}
-      <motion.div
-        ref={frameRef}
-        drag={state.dragOK && !state.isAnimatingBack}
-        dragMomentum={false}
-        dragElastic={0}
-        onDragStart={(event, info) => {
-          // Double-check: abort if animation is running (defensive)
-          if (state.isAnimatingBack || pendingSnapBack) {
-            return false;
-          }
-        }}
-        onDrag={handleDrag}
-        onDragEnd={() => {
-          // Only trigger snap-back if not already animating
-          if (!state.isAnimatingBack && !pendingSnapBack) {
-            clampIntoViewport();
-            // Ensure thin border right after user drops
-            dispatch({ type: "SET_FRAME_THICK", value: false });
-            snapBack();
-          }
-        }}
-        onMouseEnter={() =>
-          dispatch({ type: "SET_POINTER_HOVER", value: true })
-        }
-        onMouseLeave={() =>
-          dispatch({ type: "SET_POINTER_HOVER", value: false })
-        }
-        dragConstraints={false}
-        style={{
-          x: state.frameFrozen && !state.frameAligned ? getInitialX() : x,
-          y,
-        }}
-        className={`relative inline-block px-4 py-6 md:px-10 ${
-          state.dragOK && !state.isAnimatingBack
-            ? "cursor-grab active:cursor-grabbing"
-            : "cursor-default"
-        } max-w-full`}
+      <HeroFrame
+        frameRef={frameRef}
+        state={state}
+        pendingSnapBack={pendingSnapBack}
+        snapBack={snapBack}
+        dispatch={dispatch}
+        x={x}
+        y={y}
+        getInitialX={getInitialX}
+        onDragStart={() => setShowDragHint(false)}
       >
-        {state.showFrame && (
-          <>
-            {/* outline - dynamic thickness on hover and during animations */}
-            <motion.div
-              className="absolute inset-0 border-solid"
-              style={{ borderColor: "#198ce7" }}
-              initial={{ opacity: 0, borderWidth: 2 }}
-              animate={{
-                opacity: 1,
-                borderWidth: state.frameThick || state.pointerHover ? 6 : 2,
-              }}
-              transition={{ duration: 0.2 }}
-            />
+        <TypewriterText
+          headlineRef={headlineRef}
+          showCursor={state.showCursor}
+        />
+      </HeroFrame>
 
-            {/* Only 4 corner squares, white inside */}
-            {/* top-left */}
-            <div className="absolute w-3 h-3 bg-[#198ce7] -top-[4px] -left-[4px] flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded" />
+      {/* "drag me!" hint - positioned absolutely, independent of draggable frame */}
+      <AnimatePresence>
+        {state.showFrame && state.dragOK && showDragHint && (
+          <Motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.3,
+              exit: { duration: 0.8, ease: "easeOut" },
+            }}
+            className="hidden md:block absolute pointer-events-none z-50"
+            style={{
+              left: hintPosition.x,
+              top: hintPosition.y,
+              transform: "scale(1.25)",
+              transformOrigin: "top left",
+            }}
+          >
+            <div className="flex flex-col items-start">
+              <span className="text-2xl text-[#9b9cbe] font-medium italic whitespace-nowrap">
+                drag me!
+              </span>
+              {/* Hand-drawn curved arrow pointing down-left toward frame */}
+              <svg
+                width="60"
+                height="50"
+                viewBox="0 0 60 50"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-[#9b9cbe]"
+                style={{ marginLeft: "5px" }}
+              >
+                {/* Curved path from top-right sweeping down to bottom-left */}
+                <path
+                  d="M 50 8 Q 40 12, 30 22 Q 20 32, 12 42"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Arrowhead - both lines go backward from tip forming V */}
+                <path
+                  d="M 11 35 L 12 42"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M 20 41 L 12 42"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
-            {/* top-right */}
-            <div className="absolute w-3 h-3 bg-[#198ce7] -top-[4px] -right-[4px] flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded" />
-            </div>
-            {/* bottom-left */}
-            <div className="absolute w-3 h-3 bg-[#198ce7] -bottom-[4px] -left-[4px] flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded" />
-            </div>
-            {/* bottom-right */}
-            <div className="absolute w-3 h-3 bg-[#198ce7] -bottom-[4px] -right-[4px] flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded" />
-            </div>
-          </>
+          </Motion.div>
         )}
-
-        <h1
-          ref={headlineRef}
-          className="text-4xl md:text-6xl font-bold leading-none break-words whitespace-pre-line"
-        >
-          {/* The text is set via ref for performance. Only the cursor is rendered here. */}
-          {state.showCursor && <span className="animate-pulse">|</span>}
-        </h1>
-      </motion.div>
+      </AnimatePresence>
 
       {/* ── body: tagline + meta grid ── */}
       {state.showBody && (
-        <motion.div
+        <Motion.div
           ref={bodyRef}
           initial={false} // Avoid animating LCP content on mount
           className="mt-8 md:mt-12 space-y-10 md:space-y-12 max-w-[72rem] pb-20"
@@ -386,7 +352,7 @@ const HeroTypingAnimation = React.memo(() => {
               </p>
             </div>
           </div>
-        </motion.div>
+        </Motion.div>
       )}
     </section>
   );

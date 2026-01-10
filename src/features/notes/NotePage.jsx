@@ -2,8 +2,8 @@ import React, { useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useParams, Link } from "react-router-dom";
 import NoteSection from "./NoteSection";
-import { getNoteBySlug } from "./mockNotesData";
-import { useNotesTOCActions } from "./NotesContext";
+import { contentService } from "@/services/content";
+import { useNotesTOCActions } from "./NotesHooks";
 import { motion } from "framer-motion";
 
 // Presents a single note page at route /notes/:slug
@@ -22,7 +22,7 @@ export default function NotePage() {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    getNoteBySlug(slug).then((data) => {
+    contentService.getNoteBySlug(slug).then((data) => {
       if (!mounted) return;
       setNote(data);
       setLoading(false);
@@ -48,62 +48,45 @@ export default function NotePage() {
     setTocItems(tocItems);
   }, [tocItems, setTocItems]);
 
-  // Use an IntersectionObserver on heading elements to drive discrete section changes
-  // This updates readingProgress to index/tocItems.length when a major heading becomes active.
-  React.useEffect(() => {
-    if (!tocItems || tocItems.length === 0) return undefined;
-
-    // Slightly above-center sentinel to consider a heading "active" when it reaches near the top of the viewport
-    const observerOptions = {
-      root: null,
-      rootMargin: "-30% 0px -70% 0px",
-      threshold: 0.01,
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const id = entry.target.id;
-        const idx = tocItems.findIndex((t) => t.id === id);
-        if (idx >= 0) {
-          // Map discrete index to a readingProgress in [0, 1)
-          setReadingProgress(idx / tocItems.length);
-        }
-      });
-    }, observerOptions);
-
-    // Observe the actual heading elements by id
-    const observedEls = [];
-    tocItems.forEach((item) => {
-      const el = document.getElementById(item.id);
-      if (el) {
-        observer.observe(el);
-        observedEls.push(el);
-      }
-    });
-
-    return () => {
-      observer.disconnect();
-      // no need to individually unobserve; disconnect handles it
-    };
-  }, [tocItems, setReadingProgress]);
-
   // Do not compute published label until after we know `note` is loaded
 
-  // Scroll-driven sentinel with hysteresis to avoid flicker and keep state stable while reading.
+  // IntersectionObserver + scroll sentinel in one effect to avoid racey teardown/setup.
   React.useEffect(() => {
+    if (!note) return undefined;
+
     const readingRef = { current: false };
+    const scrollRoot =
+      sentinelRef.current?.closest('[data-scroll-container="main"]') || null;
+    const getScrollTop = () =>
+      scrollRoot && scrollRoot instanceof HTMLElement
+        ? scrollRoot.scrollTop
+        : window.scrollY;
+    const getContainerRect = () =>
+      scrollRoot && scrollRoot instanceof HTMLElement
+        ? scrollRoot.getBoundingClientRect()
+        : { top: 0 };
+    const tocIndexById = new Map(
+      (tocItems || []).map((item, index) => [item.id, index]),
+    );
+    const hasToc = tocIndexById.size > 0;
     let sentinelTop = 0;
+    let observer;
+    let lastProgressUpdate = 0;
+    let lastStateUpdate = 0;
 
     const updateSentinelPos = () => {
       const el = sentinelRef.current;
       if (!el) return;
-      sentinelTop = el.getBoundingClientRect().top + window.scrollY;
+      const containerRect = getContainerRect();
+      const scrollTop = getScrollTop();
+      sentinelTop =
+        el.getBoundingClientRect().top - containerRect.top + scrollTop;
     };
 
     const computeAndSet = () => {
       if (!sentinelTop) updateSentinelPos();
-      const scrollY = window.scrollY;
+      const scrollY = getScrollTop();
+      const now = performance.now();
 
       // Hysteresis: enter reading slightly below sentinel; exit only after moving well above it
       const enterY = sentinelTop - 32; // collapse once we pass near sentinel
@@ -114,7 +97,9 @@ export default function NotePage() {
       if (!current && scrollY >= enterY) next = true;
       else if (current && scrollY <= exitY) next = false;
 
-      if (next !== current) {
+      // Throttle state updates to max 60fps (16ms)
+      if (next !== current && now - lastStateUpdate > 16) {
+        lastStateUpdate = now;
         readingRef.current = next;
         setTocVisible(next);
         setContactCollapsed(next);
@@ -123,34 +108,71 @@ export default function NotePage() {
       // Compute progress from 0 (top) to 1 (just after sentinel hits top)
       const range = Math.max(1, enterY - exitY); // avoid divide by zero
       const progress = Math.min(1, Math.max(0, (scrollY - exitY) / range));
-      // Only use the continuous sentinel-based progress when there are no TOC headings to observe.
-      if (!tocItems || tocItems.length === 0) {
+
+      // Throttle progress updates to max 30fps (33ms) and only if changed significantly
+      if (!hasToc && now - lastProgressUpdate > 33) {
+        lastProgressUpdate = now;
         setReadingProgress(progress);
       }
     };
 
-    // Initial compute and on events
+    if (hasToc) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const idx = tocIndexById.get(entry.target.id);
+            if (idx !== undefined) {
+              setReadingProgress(idx / tocIndexById.size);
+            }
+          });
+        },
+        {
+          root: scrollRoot,
+          rootMargin: "-30% 0px -70% 0px",
+          threshold: 0.01,
+        },
+      );
+
+      tocItems.forEach((item) => {
+        const el = document.getElementById(item.id);
+        if (el) observer.observe(el);
+      });
+    }
+
     updateSentinelPos();
     computeAndSet();
+
+    let scrollRafId = null;
     const onScroll = () => {
-      // Use rAF to coalesce multiple scroll events
-      if (onScroll._raf) return;
-      onScroll._raf = requestAnimationFrame(() => {
-        onScroll._raf = null;
+      if (scrollRafId) return;
+      scrollRafId = requestAnimationFrame(() => {
+        scrollRafId = null;
         computeAndSet();
       });
     };
+
+    let resizeTimeoutId = null;
     const onResize = () => {
-      updateSentinelPos();
-      computeAndSet();
+      // Debounce resize to reduce computation during window resizing
+      if (resizeTimeoutId) clearTimeout(resizeTimeoutId);
+      resizeTimeoutId = setTimeout(() => {
+        updateSentinelPos();
+        computeAndSet();
+      }, 100);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
+    const scrollTarget =
+      scrollRoot && scrollRoot instanceof HTMLElement ? scrollRoot : window;
+    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      scrollTarget.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
-      if (onScroll._raf) cancelAnimationFrame(onScroll._raf);
+      if (scrollRafId) cancelAnimationFrame(scrollRafId);
+      if (resizeTimeoutId) clearTimeout(resizeTimeoutId);
+      if (observer) observer.disconnect();
     };
   }, [note, tocItems, setTocVisible, setContactCollapsed, setReadingProgress]);
 
@@ -185,12 +207,13 @@ export default function NotePage() {
     <article className="mx-auto w-full text-white">
       {/* Top heading — aligned to match hero spacing: push down considerably */}
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24">
-        <div className="mb-12">
+        <div className="mb-12" style={{ contain: "layout style" }}>
           <MotionH1
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className="text-4xl md:text-6xl font-semibold italic text-white font-adamant"
+            style={{ willChange: "auto" }}
           >
             {note.title}
           </MotionH1>
@@ -218,7 +241,14 @@ export default function NotePage() {
         {/* Content — add large spacer so Introduction is below the fold initially */}
         <div className="mt-28 flex flex-col gap-8 pb-24">
           {note.sections.map((section) => (
-            <section key={section.id} id={section.id}>
+            <section
+              key={section.id}
+              id={section.id}
+              style={{
+                contain: "layout style paint",
+                contentVisibility: "auto",
+              }}
+            >
               <NoteSection section={section} />
             </section>
           ))}

@@ -46,14 +46,17 @@ const PhotoMosaic = ({ images = [] }) => {
     let currentUnits = 0;
 
     sorted.forEach((img) => {
-      let colSpan = img.orientation === "horizontal" ? 2 : 1;
-      // give very high priority items a little extra emphasis
-      if (img.priority >= 3) colSpan = Math.max(colSpan, 2);
+      let colSpan =
+        img.orientation === "horizontal" && img.priority >= 2 ? 2 : 1;
 
-      const rowSpan =
-        img.orientation === "vertical" && img.priority >= 2 ? 2 : 1;
+      const aspectClass =
+        img.orientation === "vertical"
+          ? "aspect-[3/4]"
+          : img.orientation === "square"
+            ? "aspect-[1/1]"
+            : "aspect-[4/3]";
 
-      const item = { ...img, colSpan, rowSpan };
+      const item = { ...img, colSpan, aspectClass };
 
       if (currentUnits + colSpan <= COLS_DESKTOP) {
         currentRow.push(item);
@@ -78,14 +81,12 @@ const PhotoMosaic = ({ images = [] }) => {
       <div className="mx-auto max-w-screen-2xl">
         <div
           ref={galleryRef}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 auto-rows-[180px] sm:auto-rows-[220px] lg:auto-rows-[260px]"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 grid-flow-row-dense"
         >
           {layoutGrid.map((item, i) => {
             // Dynamic grid span classes
             const colSpanClass =
               item.colSpan === 2 ? "col-span-2" : "col-span-1";
-            const rowSpanClass =
-              item.rowSpan === 2 ? "row-span-2" : "row-span-1";
 
             return (
               <figure
@@ -93,11 +94,11 @@ const PhotoMosaic = ({ images = [] }) => {
                 data-mosaic-card
                 className={`
                   relative overflow-hidden rounded-[20px]
-                  ${colSpanClass} ${rowSpanClass}
+                  ${colSpanClass} ${item.aspectClass}
                   opacity-0
                   group cursor-pointer
                   transition-all duration-300 ease-out
-                  hover:scale-[1.02] hover:z-10
+                  hover:scale-[1.02] hover:z-20
                   ring-1 ring-white/10 hover:ring-white/20
                 `}
                 style={{ animationDelay: `${i * 0.05}s` }}
@@ -122,7 +123,7 @@ const PhotoMosaic = ({ images = [] }) => {
                 />
 
                 {/* Hover overlay with caption */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                 {item.caption && (
                   <figcaption

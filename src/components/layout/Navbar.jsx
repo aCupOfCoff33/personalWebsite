@@ -14,10 +14,9 @@ import {
   Instagram,
 } from "lucide-react";
 import XIcon from "../icons/XIcon";
-import TOC from "../notes/TOC";
-import { useNotesTOC } from "../notes/NotesContext";
-import { useBearState } from "../../hooks/useBearState";
-import UnifiedBearIcon from "../common/UnifiedBearIcon";
+import TOC from "../../features/notes/TOC";
+import { useNotesTOC } from "../../features/notes/NotesHooks";
+import UnifiedBearIcon from "../../features/bear/components/UnifiedBearIcon";
 
 const sections = [
   {
@@ -191,7 +190,6 @@ function Navbar() {
   const location = useLocation();
   const isNotesRoute = location.pathname.startsWith("/notes");
   // use bear state at top level so hooks are not called conditionally or inside callbacks
-  useBearState();
   // Collapse only based on contactCollapsed so it can revert when scrolling back up
   const collapsed = isNotesRoute && contactCollapsed;
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
 /**
  * Unified SectionHeading component
@@ -9,15 +9,16 @@ import PropTypes from 'prop-types';
 const SectionHeading = ({
   title,
   subtitle,
-  className = '',
-  titleClassName = '',
-  subtitleClassName = '',
+  className = "",
+  titleClassName = "",
+  subtitleClassName = "",
   noContainer = false,
 }) => {
   const content = (
-    <div className={`mb-12 ${className}`}>
+    <div className={`mb-12 ${className}`} style={{ contain: "layout style" }}>
       <h2
         className={`text-4xl font-normal italic text-white font-adamant ${titleClassName}`}
+        style={{ willChange: "auto" }}
       >
         {title}
       </h2>

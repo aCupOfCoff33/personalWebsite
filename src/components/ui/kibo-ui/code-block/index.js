@@ -1,10 +1,12 @@
-import React from 'react';
+import React from "react";
 
 // Types: we keep a loose contract compatible with example usage
 // BundledLanguage: a union in real lib; here just string
 
 export function CodeBlock({ data, defaultValue, children }) {
-  const [active, setActive] = React.useState(defaultValue || (data?.[0]?.language ?? ''));
+  const [active, setActive] = React.useState(
+    defaultValue || (data?.[0]?.language ?? ""),
+  );
   const itemsByLang = React.useMemo(() => {
     const map = new Map();
     (data || []).forEach((item) => map.set(item.language, item));
@@ -24,9 +26,11 @@ export function CodeBlock({ data, defaultValue, children }) {
               type="button"
               onClick={() => setActive(lang)}
               className={[
-                'px-2 py-1 rounded text-xs transition-colors',
-                active === lang ? 'bg-white/10 text-white' : 'text-neutral-300 hover:text-white'
-              ].join(' ')}
+                "px-2 py-1 rounded text-xs transition-colors",
+                active === lang
+                  ? "bg-white/10 text-white"
+                  : "text-neutral-300 hover:text-white",
+              ].join(" ")}
             >
               {itemsByLang.get(lang)?.filename || lang}
             </button>
@@ -41,16 +45,12 @@ export function CodeBlock({ data, defaultValue, children }) {
   );
 }
 
-const CodeBlockContext = React.createContext({ active: '' });
+const CodeBlockContext = React.createContext({ active: "" });
 
 export function CodeBlockBody({ children }) {
-  const { active } = React.useContext(CodeBlockContext);
+  React.useContext(CodeBlockContext);
   const render = (item) => children(item);
-  return (
-    <div>
-      {render}
-    </div>
-  );
+  return <div>{render}</div>;
 }
 
 export function CodeBlockItem({ value, children }) {
@@ -61,14 +61,20 @@ export function CodeBlockItem({ value, children }) {
 
 export function CodeBlockContent({ language, children }) {
   // Reuse existing notes CodeBlock for rendering the highlighted code
-  const LazyCode = React.useMemo(() => React.lazy(() => import('../../../notes/CodeBlock.jsx')), []);
+  const LazyCode = React.useMemo(
+    () => React.lazy(() => import("../../../../features/notes/CodeBlock.jsx")),
+    [],
+  );
   return (
-    <React.Suspense fallback={<pre className="text-sm text-neutral-300 p-4">Loading…</pre>}>
-      <LazyCode language={language} code={typeof children === 'string' ? children : String(children)} />
+    <React.Suspense
+      fallback={<pre className="text-sm text-neutral-300 p-4">Loading…</pre>}
+    >
+      <LazyCode
+        language={language}
+        code={typeof children === "string" ? children : String(children)}
+      />
     </React.Suspense>
   );
 }
 
 export default CodeBlock;
-
-
