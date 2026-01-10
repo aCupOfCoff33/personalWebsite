@@ -21,12 +21,12 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-transparent text-white py-6 px-4 sm:px-12 w-full relative z-10">
+    <footer className="bg-transparent text-gray-400 py-6 px-4 sm:px-12 w-full relative z-10 font-adamant">
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start sm:justify-between">
         {/* Left side text */}
-        <div className="text-center sm:text-left text-sm sm:text-base text-gray-400">
-          <p>Designed + Coded by Aaryan Joharapurkar</p>
-          <p>Designed from the depths of my cave.</p>
+        <div className="text-center sm:text-left text-sm sm:text-base">
+          <p>Designed & Coded by Aaryan</p>
+          <p>Designed From the Depths of My Cave 🐻</p>
         </div>
 
         {/* Right side social links */}
