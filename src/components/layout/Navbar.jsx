@@ -27,7 +27,7 @@ const sections = [
       { kind: "internal", to: "/about", label: "About", Icon: UserRound },
       {
         kind: "external",
-        href: "/Resume.pdf",
+        href: "/resume.pdf",
         label: "Resume",
         Icon: FileText,
       },
