@@ -11,7 +11,8 @@ export default {
         "icon-detail-light": "#fbfdfc",
       },
       fontFamily: {
-        adamant: ['"Adamant_BG"', "sans-serif"],
+        adamant: ['"P22Mackinac"', "serif"],
+        mackinac: ['"P22Mackinac"', "serif"],
       },
     },
   },
