@@ -1,7 +1,5 @@
 import React, { useId } from "react";
 import PropTypes from "prop-types";
-import { useReveal } from "../../hooks/useReveal";
-import { HIDDEN } from "../common/RevealStarter";
 import ContentCarousel from "./ContentCarousel";
 import ContentGrid from "./ContentGrid";
 import SectionHeading from "./SectionHeading";
@@ -23,7 +21,6 @@ function ContentSection({
   viewAllLabel = "Venture Deeper into the Woods",
   ...props
 }) {
-  const revealRef = useReveal();
   const carouselId = useId(); // Generate unique ID for this carousel instance
   // Removed dev logs to reduce noise/re-renders
 
@@ -33,7 +30,6 @@ function ContentSection({
 
   return (
     <section
-      ref={revealRef}
       className={`relative w-full z-[1] bg-transparent ${className}`}
       {...props}
     >
@@ -83,25 +79,21 @@ function ContentSection({
 
         {/* Content Layout */}
         {layout === "carousel" ? (
-          <div data-reveal className={HIDDEN}>
-            <ContentCarousel
-              items={items}
-              cardVariant={finalCardVariant}
-              carouselId={carouselId}
-              showViewAll={showViewAll}
-              maxItems={maxItems}
-              onViewAllClick={onViewAllClick}
-              viewAllLabel={viewAllLabel}
-            />
-          </div>
+          <ContentCarousel
+            items={items}
+            cardVariant={finalCardVariant}
+            carouselId={carouselId}
+            showViewAll={showViewAll}
+            maxItems={maxItems}
+            onViewAllClick={onViewAllClick}
+            viewAllLabel={viewAllLabel}
+          />
         ) : (
-          <div data-reveal className={HIDDEN}>
-            <ContentGrid
-              items={items}
-              columns={columns}
-              cardVariant={finalCardVariant}
-            />
-          </div>
+          <ContentGrid
+            items={items}
+            columns={columns}
+            cardVariant={finalCardVariant}
+          />
         )}
       </div>
     </section>
