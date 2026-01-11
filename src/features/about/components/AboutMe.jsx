@@ -28,8 +28,9 @@ const AboutMe = () => {
                 className="w-full max-w-md lg:w-[580px] h-auto rounded-2xl object-cover shadow-2xl"
                 src="/aaryan-about.jpg"
                 alt="Aaryan"
-                loading="lazy"
-                decoding="async"
+                loading="eager"
+                decoding="sync"
+                fetchpriority="high"
               />
             </div>
 

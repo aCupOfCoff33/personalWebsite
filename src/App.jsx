@@ -51,7 +51,15 @@ function App() {
 
                 <div className="flex-1 relative z-0">
                   {/* ---- ROUTE OUTLET ---- */}
-                  <Suspense fallback={null}>
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center min-h-screen">
+                        <div className="text-white/60 text-lg font-adamant">
+                          Loading...
+                        </div>
+                      </div>
+                    }
+                  >
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/projects" element={<Projects />} />

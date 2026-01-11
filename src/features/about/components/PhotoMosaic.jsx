@@ -1,30 +1,8 @@
-import React, { useRef, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 
 const PhotoMosaic = ({ images = [] }) => {
-  const galleryRef = useRef(null);
   const [loadedImages, setLoadedImages] = useState(new Set());
-
-  // Intersection Observer for scroll animations
-  useEffect(() => {
-    const cards = galleryRef.current?.querySelectorAll("[data-mosaic-card]");
-    if (!cards?.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-card");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { rootMargin: "0px 0px -5% 0px", threshold: 0.1 },
-    );
-
-    cards.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [images.length]);
 
   const handleImageLoad = (index) => {
     setLoadedImages((prev) => new Set([...prev, index]));
@@ -89,10 +67,7 @@ const PhotoMosaic = ({ images = [] }) => {
   return (
     <section className="relative z-10 w-full px-4 sm:px-8 lg:px-12 pb-12 sm:pb-16 lg:pb-24">
       <div className="mx-auto max-w-screen-2xl">
-        <div
-          ref={galleryRef}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 grid-flow-row-dense"
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 grid-flow-row-dense">
           {layoutGrid.map((item, i) => {
             // Dynamic grid span classes
             const colSpanClass =
@@ -104,17 +79,14 @@ const PhotoMosaic = ({ images = [] }) => {
             return (
               <figure
                 key={item.index}
-                data-mosaic-card
                 className={`
                   relative overflow-hidden rounded-[20px]
                   ${colSpanClass} ${item.aspectClass}
-                  opacity-0
                   group cursor-pointer
                   transition-all duration-300 ease-out
                   hover:scale-[1.02] hover:z-10
                   ring-1 ring-white/10 hover:ring-white/20
                 `}
-                style={{ animationDelay: `${i * 0.05}s` }}
               >
                 {/* Optimized placeholder - static background, no animation */}
                 <div

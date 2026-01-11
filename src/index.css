@@ -71,8 +71,7 @@ img {
 
 /* Optimize animations to use GPU */
 @media (prefers-reduced-motion: no-preference) {
-    .animate-card,
-    [data-mosaic-card] {
+    img {
         /* Use transform instead of other properties for better performance */
         transform: translateZ(0);
     }
