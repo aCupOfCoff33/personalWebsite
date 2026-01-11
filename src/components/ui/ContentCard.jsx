@@ -7,7 +7,6 @@ function ContentCard({
   title,
   subtitle,
   description,
-  dates,
   logo,
   image,
   gradient = "from-cyan-400 to-blue-500", // supply just the colour stops or a full bg-*
