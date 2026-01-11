@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import clsx from "clsx";
 
+// Generate WebP source path from original path
+const getWebPPath = (src) => {
+  if (!src) return null;
+  return src.replace(/\.(jpg|jpeg|png)$/i, ".webp");
+};
+
 function ContentCard({
   variant = "default",
   title,
@@ -13,6 +19,7 @@ function ContentCard({
   href,
   link,
   className = "",
+  priority = false, // Add priority prop for above-fold images
 }) {
   // Track if the provided image failed to load so we can fall back to the gradient
   const [imageFailed, setImageFailed] = useState(false);
@@ -101,15 +108,21 @@ function ContentCard({
             {/* If an image is provided, render it as the hero background; otherwise fall back to the gradient */}
             {/* Prefer the provided image, but if it fails to load (404 or other), fall back to the gradient */}
             {image && !imageFailed ? (
-              <img
-                src={image}
-                alt={title || ""}
-                className="absolute inset-0 w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-                onError={() => setImageFailed(true)}
-                onLoad={() => setImageFailed(false)}
-              />
+              <picture>
+                {getWebPPath(image) && (
+                  <source srcSet={getWebPPath(image)} type="image/webp" />
+                )}
+                <img
+                  src={image}
+                  alt={title || ""}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading={priority ? "eager" : "lazy"}
+                  decoding={priority ? "sync" : "async"}
+                  fetchPriority={priority ? "high" : "auto"}
+                  onError={() => setImageFailed(true)}
+                  onLoad={() => setImageFailed(false)}
+                />
+              </picture>
             ) : (
               <div className={clsx("absolute inset-0", gradientClass)} />
             )}
@@ -154,15 +167,21 @@ function ContentCard({
             style={{ willChange: "transform" }}
           >
             {image && !imageFailed ? (
-              <img
-                src={image}
-                alt={title || ""}
-                className="absolute inset-0 w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-                onError={() => setImageFailed(true)}
-                onLoad={() => setImageFailed(false)}
-              />
+              <picture>
+                {getWebPPath(image) && (
+                  <source srcSet={getWebPPath(image)} type="image/webp" />
+                )}
+                <img
+                  src={image}
+                  alt={title || ""}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading={priority ? "eager" : "lazy"}
+                  decoding={priority ? "sync" : "async"}
+                  fetchPriority={priority ? "high" : "auto"}
+                  onError={() => setImageFailed(true)}
+                  onLoad={() => setImageFailed(false)}
+                />
+              </picture>
             ) : (
               <div className={clsx("absolute inset-0", gradientClass)} />
             )}
@@ -219,4 +238,5 @@ ContentCard.propTypes = {
   href: PropTypes.string,
   link: PropTypes.string,
   className: PropTypes.string,
+  priority: PropTypes.bool,
 };

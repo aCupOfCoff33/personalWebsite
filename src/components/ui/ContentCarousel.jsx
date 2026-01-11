@@ -81,7 +81,7 @@ function ContentCarousel({
             key={item.id || index}
             className="shrink-0 snap-start w-[85vw] sm:w-[70vw] md:w-[500px] lg:w-[600px] max-w-[600px]"
           >
-            <ContentCard variant={cardVariant} {...item} />
+            <ContentCard variant={cardVariant} {...item} priority={index < 2} />
           </div>
         ))}
 

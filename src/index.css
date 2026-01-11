@@ -44,19 +44,14 @@
 }
 
 /* Performance optimizations for smooth scrolling and rendering */
-* {
-    /* Prevent layout shifts during animations */
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-}
+/* Removed global backface-visibility: hidden as it causes performance issues */
+/* Apply only to specific animated elements that need it */
 
 /* Optimize scroll containers */
 [data-scroll-container] {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-    /* Enable GPU acceleration for scrolling */
-    transform: translateZ(0);
-    will-change: scroll-position;
+    /* Removed will-change and transform - overuse causes memory issues */
 }
 
 /* Optimize carousel scrolling */

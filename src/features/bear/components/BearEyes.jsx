@@ -113,14 +113,17 @@ const BearEyes = forwardRef(function BearEyes(
   const schedulePeriodicBlink = useCallback(() => {
     if (periodicBlinkTimeoutRef.current)
       clearTimeout(periodicBlinkTimeoutRef.current);
+    // Don't schedule blinks when not in view to save CPU
+    if (!isInView) return;
     const delay = Math.random() * cfg.BLINK_JITTER + cfg.BLINK_MIN_DELAY;
     periodicBlinkTimeoutRef.current = setTimeout(() => {
       triggerBlink();
       schedulePeriodicBlink();
     }, delay);
-  }, [cfg.BLINK_JITTER, cfg.BLINK_MIN_DELAY, triggerBlink]);
+  }, [cfg.BLINK_JITTER, cfg.BLINK_MIN_DELAY, triggerBlink, isInView]);
 
   useEffect(() => {
+    if (!isInView) return;
     schedulePeriodicBlink();
     return () => {
       // Clear timers/rafs and make sure blink state is reset when effect re-runs
@@ -135,7 +138,7 @@ const BearEyes = forwardRef(function BearEyes(
       // Reset visible blink state when effect cleans up (e.g. mode change)
       if (isMountedRef.current) setIsBlinking(false);
     };
-  }, [schedulePeriodicBlink]);
+  }, [schedulePeriodicBlink, isInView]);
 
   useEffect(() => {
     if (
@@ -222,9 +225,12 @@ const BearEyes = forwardRef(function BearEyes(
   }, [mode, isInView]);
 
   // Projects/Stories: scanning + random looks
+  // Only run animation loop when in view to save CPU/battery
   useEffect(() => {
     if (!(mode === BEAR_MODES.PROJECTS || mode === BEAR_MODES.STORIES))
       return undefined;
+    // Stop animation when not in view
+    if (!isInView) return undefined;
     const left = leftIrisGroupRef.current;
     const right = rightIrisGroupRef.current;
     if (!left || !right) return undefined;
@@ -246,6 +252,7 @@ const BearEyes = forwardRef(function BearEyes(
     return () => cancelAnimationFrame(rafId);
   }, [
     mode,
+    isInView,
     cfg.SCAN_PERIOD_MS,
     cfg.SACCADE_THRESHOLD,
     cfg.SCAN_AMPLITUDE,
@@ -253,8 +260,10 @@ const BearEyes = forwardRef(function BearEyes(
   ]);
 
   // Random micro-looks for projects/stories
+  // Only schedule when in view to save CPU
   const scheduleRandomLook = useCallback(() => {
     if (!(mode === BEAR_MODES.PROJECTS || mode === BEAR_MODES.STORIES)) return;
+    if (!isInView) return;
     if (lookTimeoutRef.current) clearTimeout(lookTimeoutRef.current);
     const delay =
       Math.random() * (cfg.RANDOM_LOOK_MAX_MS - cfg.RANDOM_LOOK_MIN_MS) +
@@ -274,6 +283,7 @@ const BearEyes = forwardRef(function BearEyes(
     }, delay);
   }, [
     mode,
+    isInView,
     cfg.RANDOM_LOOK_MIN_MS,
     cfg.RANDOM_LOOK_MAX_MS,
     cfg.RANDOM_LOOK_MAX_PX,

@@ -25,7 +25,7 @@ export const storiesData = [
     image: "/imagesStories/imc-olay.jpg",
     accent: "blue",
     category: "Frontend",
-    link: "https://www.ivey.uwo.ca",
+    link: "https://www.figma.com/deck/1zKbc475PDVyBXMoV16XJS/Team9-Room1237?node-id=1-42&t=2NiESSDuplDFDcwy-1",
   },
   {
     id: "Ivey Tech Club",
@@ -37,7 +37,7 @@ export const storiesData = [
     image: "/imagesStories/itc.jpg",
     accent: "emerald",
     category: "AI/ML",
-    link: "https://www.linkedin.com/company/ivey-tech-club",
+    link: "https://www.iveytechclub.ca/",
   },
   {
     id: "Western Developers Society",
@@ -49,7 +49,7 @@ export const storiesData = [
     image: "/imagesStories/wds-photo.png",
     accent: "blue",
     category: "Design",
-    link: "https://www.westerndevelopers.com",
+    link: "https://www.mobility-tech.ai/projects/autonomous-multi-agent",
   },
   {
     id: "Unity Game Development",
@@ -61,7 +61,7 @@ export const storiesData = [
     image: "/imagesStories/unity.jpg",
     accent: "red",
     category: "Database",
-    link: "https://unity.com",
+    link: "https://github.com/shanew-uwo/SE2250_Project",
   },
   {
     id: "Western Alumni Network",
@@ -73,7 +73,7 @@ export const storiesData = [
     image: "/imagesStories/alumnidatabase.png",
     accent: "blue",
     category: "TypeScript",
-    link: "https://www.westernu.ca/alumni",
+    link: "https://github.com/aCupOfCoff33/alumniVersePersonalCopy",
   },
   {
     id: "Heart & Stroke x Ivey Business School",
@@ -85,7 +85,7 @@ export const storiesData = [
     image: "/imagesStories/hinge-x-heart-and-stroke.jpg",
     accent: "red",
     category: "Strategy",
-    link: "https://www.heartandstroke.ca",
+    link: "https://docs.google.com/presentation/d/1MUSDuaTF3N4BfR_E80F9q082NnQnxGAi/edit?usp=sharing&ouid=101814224520415864514&rtpof=true&sd=true",
   },
   {
     id: "Pine x Ivey FinTech",
@@ -97,7 +97,7 @@ export const storiesData = [
     image: "/imagesStories/pine-x-iveyfintech.jpg",
     accent: "blue",
     category: "Testing",
-    link: "https://www.ivey.uwo.ca",
+    link: "https://docs.google.com/presentation/d/1IxpYNE13cirPUGhxcASH0B9nil4HlGsu8Drigj7RTGY/edit?usp=sharing",
   },
   {
     id: "American Global Clients",
@@ -109,7 +109,7 @@ export const storiesData = [
     image: "/imagesStories/c-risq.jpg",
     accent: "blue",
     category: "Testing",
-    link: "https://americanglobal.com",
+    link: "https://www.youtube.com/watch?v=HWYuB8XJcns",
   },
   {
     id: "BCG X Ivey Business School",
@@ -121,7 +121,7 @@ export const storiesData = [
     image: "/imagesStories/bcg-x-ivey.png",
     accent: "green",
     category: "Testing",
-    link: "https://www.bcg.com",
+    link: "https://docs.google.com/presentation/d/1Ss86A4KRvtdKv0SLnNRtM1E9aYjGjCHI/edit?usp=sharing&ouid=101814224520415864514&rtpof=true&sd=true",
   },
   {
     id: "FEAS x OnePack",
