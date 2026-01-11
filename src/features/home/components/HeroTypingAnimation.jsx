@@ -11,7 +11,7 @@ import HeroFrame from "./HeroFrame";
 import TypewriterText from "./TypewriterText";
 
 /* ── constants ─────────────────────────────────────────────── */
-const HEADLINE = "Hey there! I'm Aaryan!";
+const HEADLINE = "Hey There! I'm Aaryan!";
 const HERO_INTRO_SESSION_KEY = "heroIntroSeen";
 
 // Set to true to skip typing animation and show final state immediately
@@ -192,7 +192,7 @@ const HeroTypingAnimation = React.memo(() => {
         if (headlineRef.current)
           headlineRef.current.textContent = HEADLINE.slice(0, i);
         // REMOVED: dispatch call that was causing 23 re-renders per typing sequence
-        await new Promise((r) => setTimeout(r, 65));
+        await new Promise((r) => setTimeout(r, 35));
       }
       setTimeout(
         () => dispatch({ type: "SET_SHOW_CURSOR", value: false }),

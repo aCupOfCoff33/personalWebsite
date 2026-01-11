@@ -39,7 +39,7 @@ function ContentSection({
         {/* Section Header */}
         {/* Fixed invalid z-index utility: use z-[1] instead of z-1 */}
         <div
-          className={`z-[1] ${layout === "carousel" ? "flex items-end justify-between mb-12" : ""}`}
+          className={`z-[1] ${layout === "carousel" ? "flex items-center justify-between mb-12" : ""}`}
         >
           <SectionHeading
             title={title}
@@ -50,7 +50,7 @@ function ContentSection({
 
           {/* Carousel Controls */}
           {layout === "carousel" && showControls && (
-            <div className="flex space-x-2 mb-2">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={() => {
                   const carousel = document.querySelector(
@@ -58,9 +58,21 @@ function ContentSection({
                   );
                   carousel?.scrollBy({ left: -300, behavior: "smooth" });
                 }}
-                className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 text-white hover:bg-white/10 focus:outline-none transition-colors"
+                className="flex items-center justify-center h-12 w-12 rounded-full border border-white/20 text-white hover:bg-white/10 focus:outline-none transition-colors"
               >
-                <span className="text-xl font-bold">‹</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
               </button>
               <button
                 onClick={() => {
@@ -69,9 +81,21 @@ function ContentSection({
                   );
                   carousel?.scrollBy({ left: 300, behavior: "smooth" });
                 }}
-                className="flex items-center justify-center h-10 w-10 rounded-full border border-white/20 text-white hover:bg-white/10 focus:outline-none transition-colors"
+                className="flex items-center justify-center h-12 w-12 rounded-full border border-white/20 text-white hover:bg-white/10 focus:outline-none transition-colors"
               >
-                <span className="text-xl font-bold">›</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
               </button>
             </div>
           )}

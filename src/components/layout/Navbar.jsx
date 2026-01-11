@@ -83,15 +83,15 @@ const CardButton = React.memo(function CardButton({
   return (
     <div
       className={[
-        "w-full rounded-xl border transition-colors min-h-[32px]",
+        "w-full rounded-lg border transition-colors",
         active
           ? "border-transparent bg-neutral-800/80 text-neutral-100 ring-1 ring-white/10 hover:bg-neutral-800/90"
           : "border-white/10 bg-neutral-900/40 hover:bg-white/5 text-neutral-300",
         className,
       ].join(" ")}
     >
-      <div className="flex items-center gap-2.5 px-3 py-1.5">
-        <div className="shrink-0 opacity-90 flex items-center justify-center">
+      <div className="flex items-center gap-2 px-2.5 py-1">
+        <div className="shrink-0 opacity-90 flex items-center justify-center w-3.5 h-3.5">
           {/* ensure icon stays centered */}
           {IconComponent ? (
             iconLayoutId ? (
@@ -109,16 +109,16 @@ const CardButton = React.memo(function CardButton({
                 }}
                 className="flex items-center justify-center"
               >
-                <IconComponent className="h-4 w-4" />
+                <IconComponent className="h-3.5 w-3.5" />
               </Motion.div>
             ) : (
-              <IconComponent className="h-4 w-4" />
+              <IconComponent className="h-3.5 w-3.5" />
             )
           ) : null}
         </div>
         <span
           className={[
-            "text-md leading-none font-normal font-adamant",
+            "text-sm leading-normal font-normal font-adamant flex items-center",
             active ? "text-neutral-100" : "text-neutral-200",
           ].join(" ")}
         >
@@ -141,7 +141,7 @@ function InternalLink({ to, label, Icon: IconComponent, onClick }) {
       to={to}
       onClick={handleClick}
       className={
-        "block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-xl"
+        "block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 rounded-lg overflow-visible"
       }
       aria-label={label}
     >
