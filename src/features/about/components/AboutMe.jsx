@@ -30,7 +30,7 @@ const AboutMe = () => {
                 alt="Aaryan"
                 loading="eager"
                 decoding="sync"
-                fetchpriority="high"
+                fetchPriority="high"
               />
             </div>
 

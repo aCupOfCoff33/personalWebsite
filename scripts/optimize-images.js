@@ -1,8 +1,8 @@
-import sharp from 'sharp';
-import { readdir, stat, mkdir } from 'fs/promises';
-import { join, extname, basename } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import sharp from "sharp";
+import { readdir, stat } from "fs/promises";
+import { join, extname, basename } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,10 +11,10 @@ const __dirname = dirname(__filename);
 const CONFIG = {
   // Maximum dimensions for different image types
   maxWidth: {
-    hero: 1200,      // Hero/feature images
-    card: 800,       // Card thumbnails
-    gallery: 1000,   // Gallery images
-    default: 1200,   // Default max width
+    hero: 1200, // Hero/feature images
+    card: 800, // Card thumbnails
+    gallery: 1000, // Gallery images
+    default: 1200, // Default max width
   },
   // Quality settings
   quality: {
@@ -24,9 +24,9 @@ const CONFIG = {
   },
   // Directories to process
   directories: [
-    { path: 'public/imagesStories', type: 'card' },
-    { path: 'public/about-gallery', type: 'gallery' },
-    { path: 'public', type: 'hero', files: ['aaryan-about.jpg'] },
+    { path: "public/imagesStories", type: "card" },
+    { path: "public/about-gallery", type: "gallery" },
+    { path: "public", type: "hero", files: ["aaryan-about.jpg"] },
   ],
 };
 
@@ -52,24 +52,24 @@ async function processImage(inputPath, outputPath, maxWidth, quality) {
     if (needsResize) {
       pipeline = pipeline.resize(maxWidth, null, {
         withoutEnlargement: true,
-        fit: 'inside',
+        fit: "inside",
       });
     }
 
     // Apply format-specific optimizations
-    if (ext === '.jpg' || ext === '.jpeg') {
+    if (ext === ".jpg" || ext === ".jpeg") {
       pipeline = pipeline.jpeg({
         quality: quality.jpg,
         progressive: true,
         mozjpeg: true,
       });
-    } else if (ext === '.png') {
+    } else if (ext === ".png") {
       pipeline = pipeline.png({
         quality: quality.png,
         compressionLevel: 9,
         progressive: true,
       });
-    } else if (ext === '.webp') {
+    } else if (ext === ".webp") {
       pipeline = pipeline.webp({
         quality: quality.webp,
       });
@@ -86,22 +86,22 @@ async function processImage(inputPath, outputPath, maxWidth, quality) {
 // Process all images in a directory
 async function processDirectory(dirConfig) {
   const { path: dirPath, type, files: specificFiles } = dirConfig;
-  const fullDirPath = join(__dirname, '..', dirPath);
+  const fullDirPath = join(__dirname, "..", dirPath);
   const maxWidth = CONFIG.maxWidth[type] || CONFIG.maxWidth.default;
 
   console.log(`\n📁 Processing: ${dirPath} (max width: ${maxWidth}px)`);
-  console.log('─'.repeat(50));
+  console.log("─".repeat(50));
 
   let filesToProcess = [];
 
   if (specificFiles) {
-    filesToProcess = specificFiles.map(f => join(fullDirPath, f));
+    filesToProcess = specificFiles.map((f) => join(fullDirPath, f));
   } else {
     try {
       const entries = await readdir(fullDirPath);
       filesToProcess = entries
-        .filter(f => /\.(jpg|jpeg|png|webp)$/i.test(f))
-        .map(f => join(fullDirPath, f));
+        .filter((f) => /\.(jpg|jpeg|png|webp)$/i.test(f))
+        .map((f) => join(fullDirPath, f));
     } catch (error) {
       console.error(`Error reading directory ${dirPath}:`, error.message);
       return;
@@ -115,9 +115,14 @@ async function processDirectory(dirConfig) {
     const beforeSize = await getFileSize(filePath);
 
     // Create a temp file for the optimized version
-    const tempPath = filePath + '.optimized';
+    const tempPath = filePath + ".optimized";
 
-    const success = await processImage(filePath, tempPath, maxWidth, CONFIG.quality);
+    const success = await processImage(
+      filePath,
+      tempPath,
+      maxWidth,
+      CONFIG.quality,
+    );
 
     if (success) {
       const afterSize = await getFileSize(tempPath);
@@ -126,15 +131,17 @@ async function processDirectory(dirConfig) {
 
       if (saved > 0) {
         // Replace original with optimized
-        const { rename, unlink } = await import('fs/promises');
+        const { rename, unlink } = await import("fs/promises");
         await unlink(filePath);
         await rename(tempPath, filePath);
 
         totalSaved += saved;
-        console.log(`✅ ${fileName}: ${beforeSize}KB → ${afterSize}KB (saved ${saved}KB, ${percent}%)`);
+        console.log(
+          `✅ ${fileName}: ${beforeSize}KB → ${afterSize}KB (saved ${saved}KB, ${percent}%)`,
+        );
       } else {
         // Keep original if optimized is larger
-        const { unlink } = await import('fs/promises');
+        const { unlink } = await import("fs/promises");
         await unlink(tempPath);
         console.log(`⏭️  ${fileName}: ${beforeSize}KB (already optimized)`);
       }
@@ -149,18 +156,21 @@ async function processDirectory(dirConfig) {
 
 // Generate WebP versions of images
 async function generateWebPVersions(dirPath) {
-  const fullDirPath = join(__dirname, '..', dirPath);
+  const fullDirPath = join(__dirname, "..", dirPath);
 
   console.log(`\n🖼️  Generating WebP versions for: ${dirPath}`);
-  console.log('─'.repeat(50));
+  console.log("─".repeat(50));
 
   try {
     const entries = await readdir(fullDirPath);
-    const images = entries.filter(f => /\.(jpg|jpeg|png)$/i.test(f));
+    const images = entries.filter((f) => /\.(jpg|jpeg|png)$/i.test(f));
 
     for (const fileName of images) {
       const inputPath = join(fullDirPath, fileName);
-      const outputPath = join(fullDirPath, fileName.replace(/\.(jpg|jpeg|png)$/i, '.webp'));
+      const outputPath = join(
+        fullDirPath,
+        fileName.replace(/\.(jpg|jpeg|png)$/i, ".webp"),
+      );
 
       try {
         await sharp(inputPath)
@@ -169,7 +179,9 @@ async function generateWebPVersions(dirPath) {
 
         const originalSize = await getFileSize(inputPath);
         const webpSize = await getFileSize(outputPath);
-        console.log(`✅ ${fileName} → .webp: ${originalSize}KB → ${webpSize}KB`);
+        console.log(
+          `✅ ${fileName} → .webp: ${originalSize}KB → ${webpSize}KB`,
+        );
       } catch (error) {
         console.log(`❌ ${fileName}: ${error.message}`);
       }
@@ -181,8 +193,8 @@ async function generateWebPVersions(dirPath) {
 
 // Main execution
 async function main() {
-  console.log('🚀 Image Optimization Script');
-  console.log('═'.repeat(50));
+  console.log("🚀 Image Optimization Script");
+  console.log("═".repeat(50));
 
   let grandTotalSaved = 0;
 
@@ -193,11 +205,13 @@ async function main() {
   }
 
   // Generate WebP versions
-  await generateWebPVersions('public/imagesStories');
-  await generateWebPVersions('public/about-gallery');
+  await generateWebPVersions("public/imagesStories");
+  await generateWebPVersions("public/about-gallery");
 
-  console.log('\n' + '═'.repeat(50));
-  console.log(`🎉 Optimization complete! Total saved: ${grandTotalSaved}KB (${Math.round(grandTotalSaved / 1024)}MB)`);
+  console.log("\n" + "═".repeat(50));
+  console.log(
+    `🎉 Optimization complete! Total saved: ${grandTotalSaved}KB (${Math.round(grandTotalSaved / 1024)}MB)`,
+  );
 }
 
 main().catch(console.error);
