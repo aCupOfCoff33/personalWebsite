@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import SectionHeading from "../../../components/ui/SectionHeading";
 import PhotoMosaic from "./PhotoMosaic";
 import { contentService } from "../../../services/content";
+import aboutImg from "../../../assets/aaryan-about.jpg";
 
 const AboutMe = () => {
   const [images] = useState(() => {
@@ -26,7 +27,7 @@ const AboutMe = () => {
             <div className="w-full lg:w-auto flex-shrink-0">
               <img
                 className="w-full max-w-md lg:w-[580px] h-auto rounded-2xl object-cover shadow-2xl"
-                src="/aaryan-about.jpg"
+                src={aboutImg}
                 alt="Aaryan"
                 loading="eager"
                 decoding="sync"
