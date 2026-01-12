@@ -6,7 +6,7 @@ export const experiences = [
     companyName: "American Global",
     position: "Data Analytics & Strategy Intern",
     dateRange: "May 2025 - Present",
-    logo: "https://media.licdn.com/dms/image/v2/C4E0BAQFxOWSzcQlx7w/company-logo_200_200/company-logo_200_200/0/1672776000338/american_global_llc_logo?e=2147483647&v=beta&t=6eASPMK3qET6z-fVO8yv4YWrhgf7l7wjaAwu_iF8q2s",
+    logo: "/experiences-logo/american-global.jpeg",
     location: "Oakville, ON",
     description:
       "One of the first interns on the Data Analytics team, contributing to impactful initiatives within the construction insurance sector.",
@@ -23,7 +23,7 @@ export const experiences = [
     companyName: "Western Developers Society",
     position: "Vice President of Developers",
     dateRange: "Sept 2023 – Present",
-    logo: "https://media.licdn.com/dms/image/v2/D4E0BAQEuc4ov6cWAtw/company-logo_200_200/company-logo_200_200/0/1736450937302/western_dev_society_logo?e=2147483647&v=beta&t=oYKXg7b_w-tYzt847EjXLG_VgKi9qecWt6vndmafe_g",
+    logo: "/experiences-logo/western-developers-society.jpeg",
     location: "University Campus",
     description:
       "Led 120+ developers on AI/ML and robotics projects, driving innovation through agile methods and building competition-ready systems.",
@@ -40,7 +40,7 @@ export const experiences = [
     companyName: "Ivey FinTech",
     position: "Consultant Analyst",
     dateRange: "Sept 2024 – Present",
-    logo: "https://miro.medium.com/v2/resize:fit:512/1*429tXOeB5sYvQ37L-zasBQ.jpeg",
+    logo: "/experiences-logo/ivey-fintech.jpg",
     location: "Ivey Business School",
     description:
       "Provided strategic recommendations to enhance mortgage UX, integrate AI, and improve operational efficiency for a digital mortgage company.",
@@ -57,7 +57,7 @@ export const experiences = [
     companyName: "ESDC / Government of Canada",
     position: "Financial Services Intern",
     dateRange: "May 2024 – Aug 2024",
-    logo: "https://yt3.googleusercontent.com/ddUhKuKyfw_os57z9BTnVKo5FK_tWb5KD6ujp3nJdg1NqbE9fLf98zOH0ChubscuGblCKfvT=s900-c-k-c0x00ffffff-no-rj",
+    logo: "/experiences-logo/gov-canada.jpg",
     location: "North York, ON",
     description:
       "Streamlined financial processes using SAP and Power BI, clearing $150,000 in suspense transactions and optimizing workflows across Canada.",
@@ -74,7 +74,7 @@ export const experiences = [
     companyName: "Minimart",
     position: "Business Analyst",
     dateRange: "Sept 2022 – Mar 2023",
-    logo: "https://banner2.cleanpng.com/20180630/xcw/aax01zjeu.webp",
+    logo: "/experiences-logo/minimart.webp",
     location: "London, ON",
     description:
       "Designed financial models and collaborated with stakeholders to enable sustainable growth, increasing profitability in competitive markets.",

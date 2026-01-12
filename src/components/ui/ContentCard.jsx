@@ -34,7 +34,7 @@ function ContentCard({
       <Wrapper
         {...wrapperProps}
         className={clsx(
-          "w-full py-5 md:py-6 px-4 sm:px-5 relative inline-flex items-center gap-4 rounded-xl overflow-hidden",
+          "w-full py-4 md:py-5 px-4 sm:px-5 relative inline-flex items-center gap-4 rounded-xl overflow-hidden",
           "after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-0 after:h-px",
           "after:bg-gradient-to-r after:from-white/10 after:to-transparent",
           "first:before:content-[''] first:before:absolute first:before:left-0 first:before:right-0 first:before:top-0 first:before:h-px",
@@ -47,9 +47,9 @@ function ContentCard({
         )}
       >
         {logo && (
-          <div className="size-10 sm:size-[42px] p-[5px] rounded-[10px] flex justify-center items-center shadow-[0_1px_8px_rgba(255,255,255,0.08)] bg-gradient-to-br from-white to-white/90 flex-shrink-0">
+          <div className="size-9 sm:size-10 p-[5px] rounded-[10px] flex justify-center items-center shadow-[0_1px_8px_rgba(255,255,255,0.08)] bg-gradient-to-br from-white to-white/90 flex-shrink-0">
             <img
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded-md object-contain"
+              className="h-7 w-7 sm:h-8 sm:w-8 rounded-md object-contain"
               src={logo}
               alt=""
               loading="lazy"
@@ -58,12 +58,12 @@ function ContentCard({
           </div>
         )}
 
-        <div className="flex flex-wrap items-baseline gap-[6px]">
-          <div className="text-white text-xl md:text-2xl font-normal font-adamant">
+        <div className="flex flex-wrap items-baseline gap-[4px]">
+          <div className="text-white text-lg md:text-xl font-normal font-adamant leading-tight">
             {title}
           </div>
           {subtitle && (
-            <div className="text-white/70 md:text-white/75 text-base md:text-lg font-normal font-adamant">
+            <div className="text-white/70 md:text-white/75 text-base md:text-lg font-normal font-adamant leading-tight">
               {subtitle}
             </div>
           )}

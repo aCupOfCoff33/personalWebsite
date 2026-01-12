@@ -328,7 +328,7 @@ const HeroTypingAnimation = React.memo(() => {
           className="mt-8 md:mt-12 space-y-10 md:space-y-12 max-w-[72rem] pb-20"
         >
           {/* tagline */}
-          <p className="text-2xl md:text-3xl leading-relaxed">
+          <p className="text-2xl md:text-[2.4rem] leading-relaxed md:leading-tight">
             A Software Engineering&nbsp;&amp;&nbsp;Business student at Ivey
             Business School based near Toronto, building tools that{" "}
             <em>(ideally)</em> make life easier — or at least break things in
@@ -336,16 +336,16 @@ const HeroTypingAnimation = React.memo(() => {
           </p>
 
           {/* "currently / driven by" grid */}
-          <div className="grid gap-y-10 gap-x-24 sm:grid-cols-2 text-xl">
+          <div className="grid gap-y-10 gap-x-24 sm:grid-cols-2 text-xl md:text-[1.625rem]">
             <div>
-              <p className="italic text-2xl mb-2">currently</p>
+              <p className="italic text-2xl md:text-3xl mb-2">currently</p>
               <p className="text-[#9b9cbe] font-semibold leading-snug">
                 data analytics &amp; strategy intern
                 <br />@ american global
               </p>
             </div>
             <div>
-              <p className="italic text-2xl mb-2">driven by</p>
+              <p className="italic text-2xl md:text-3xl mb-2">driven by</p>
               <p className="text-[#9b9cbe] font-semibold leading-snug">
                 curiosity, creative problem-solving &amp; an arguably unhealthy
                 obsession with bears.

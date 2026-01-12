@@ -7,7 +7,7 @@ const TypewriterText = React.memo(function TypewriterText({
   return (
     <h1
       ref={headlineRef}
-      className="text-4xl md:text-6xl font-bold leading-none break-words whitespace-pre-line"
+      className="text-4xl md:text-[4.875rem] font-bold leading-none break-words whitespace-pre-line"
     >
       {/* The text is set via ref for performance. Only the cursor is rendered here. */}
       {showCursor && <span className="animate-pulse">|</span>}

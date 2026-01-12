@@ -75,10 +75,11 @@ const AboutMe = () => {
                     , and listen to random songs on{" "}
                     <span className="text-white font-semibold">Spotify</span>.
                   </p>
-                  <p className="text-neutral-300 text-lg font-normal font-adamant leading-relaxed">
+                  <p className="text-neutral-300 text-lg font-normal leading-relaxed">
                     No big story behind the bear. He's just cool. And he's
                     staying. <br />
-                    <br />
+                  </p>
+                  <p className="text-neutral-300 text-lg font-normal leading-relaxed">
                     Peek into my world through these snapshots below!
                   </p>
                 </div>
