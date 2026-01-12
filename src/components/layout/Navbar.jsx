@@ -118,7 +118,7 @@ const CardButton = React.memo(function CardButton({
         </div>
         <span
           className={[
-            "text-base leading-normal font-normal font-adamant flex items-center",
+            "text-lg leading-normal font-normal font-adamant flex items-center",
             active ? "text-neutral-100" : "text-neutral-200",
           ].join(" ")}
         >
