@@ -192,7 +192,7 @@ const HeroTypingAnimation = React.memo(() => {
         if (headlineRef.current)
           headlineRef.current.textContent = HEADLINE.slice(0, i);
         // REMOVED: dispatch call that was causing 23 re-renders per typing sequence
-        await new Promise((r) => setTimeout(r, 35));
+        await new Promise((r) => setTimeout(r, 55));
       }
       setTimeout(
         () => dispatch({ type: "SET_SHOW_CURSOR", value: false }),
