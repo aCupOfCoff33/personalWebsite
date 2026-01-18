@@ -3,10 +3,6 @@ import React from "react";
 const Footer = () => {
   const socialLinks = [
     {
-      label: "Instagram",
-      href: "https://www.instagram.com/aaryanj05/",
-    },
-    {
       label: "LinkedIn",
       href: "https://www.linkedin.com/in/aaryanj/",
     },
@@ -25,8 +21,7 @@ const Footer = () => {
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start sm:justify-between">
         {/* Left side text */}
         <div className="text-center sm:text-left text-sm sm:text-base">
-          <p>Designed & Coded by Aaryan</p>
-          <p>Designed From the Depths of My Cave 🐻</p>
+          <p>Designed & Coded From the Depths of My Cave 🐻</p>
         </div>
 
         {/* Right side social links */}

@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const STORAGE_KEY = "app:scroll-positions";
+const VISITED_PAGES_KEY = "app:visited-pages";
 
 function readStoredPositions() {
   try {
@@ -18,6 +19,24 @@ function readStoredPositions() {
 function writeStoredPositions(obj) {
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+  } catch {
+    // ignore storage errors (private mode etc.)
+  }
+}
+
+function readVisitedPages() {
+  try {
+    const raw = sessionStorage.getItem(VISITED_PAGES_KEY);
+    if (!raw) return new Set();
+    return new Set(JSON.parse(raw));
+  } catch {
+    return new Set();
+  }
+}
+
+function writeVisitedPages(set) {
+  try {
+    sessionStorage.setItem(VISITED_PAGES_KEY, JSON.stringify(Array.from(set)));
   } catch {
     // ignore storage errors (private mode etc.)
   }
@@ -45,9 +64,12 @@ function setScroll(el, { top = 0, left = 0 } = {}) {
 
 export default function ScrollRestoration({ containerRef }) {
   const location = useLocation();
-  // positionsRef stores scroll positions keyed by location.key (or pathname fallback)
+  // positionsRef stores scroll positions keyed by a stable page ID (pathname + search + hash)
   const positionsRef = useRef(new Map());
-  const prevKeyRef = useRef(null);
+  const prevPageIdRef = useRef(null);
+
+  // Track visited pages in a ref
+  const visitedPagesRef = useRef(new Set());
 
   // Hydrate from sessionStorage on mount
   useEffect(() => {
@@ -59,6 +81,10 @@ export default function ScrollRestoration({ containerRef }) {
         positionsRef.current.set(k, value);
       }
     });
+
+    // Hydrate visited pages from sessionStorage
+    const visited = readVisitedPages();
+    visitedPagesRef.current = visited;
   }, []);
 
   // Persist to sessionStorage whenever positionsRef changes (on unmount or before unload)
@@ -80,35 +106,61 @@ export default function ScrollRestoration({ containerRef }) {
 
   // Save previous position and restore new one when location.key changes
   useEffect(() => {
-    const key = location.key || location.pathname; // location.key can be undefined in some setups; fallback to pathname
-    const prevKey = prevKeyRef.current;
+    const pageId = `${location.pathname}${location.search}${location.hash || ""}`;
+    const prevPageId = prevPageIdRef.current;
 
-    // Save current scroll for the previous key
-    if (prevKey != null) {
+    // Save current scroll for the previous page
+    if (prevPageId != null) {
       try {
         const el = containerRef?.current ?? null;
         const pos = getScroll(el);
-        positionsRef.current.set(prevKey, pos);
+        positionsRef.current.set(prevPageId, pos);
       } catch {
         // swallow
       }
     }
 
-    // Restore scroll for the new location (if exists)
-    const saved = positionsRef.current.get(key);
-    if (saved) {
-      // Use requestAnimationFrame to ensure DOM/layout is ready
+    // Check if this is a first-time visit to this page
+    const isFirstVisit = !visitedPagesRef.current.has(pageId);
+
+    if (isFirstVisit) {
+      // First visit: mark as visited and scroll to top
+      visitedPagesRef.current.add(pageId);
+      writeVisitedPages(visitedPagesRef.current);
+
       requestAnimationFrame(() => {
         try {
           const el = containerRef?.current ?? null;
-          setScroll(el, saved);
+          setScroll(el, { top: 0, left: 0 });
         } catch {
           // swallow
         }
       });
+    } else {
+      // Returning visit: restore saved position if exists; otherwise fall back to top
+      const saved = positionsRef.current.get(pageId);
+      if (saved) {
+        requestAnimationFrame(() => {
+          try {
+            const el = containerRef?.current ?? null;
+            setScroll(el, saved);
+          } catch {
+            // swallow
+          }
+        });
+      } else {
+        requestAnimationFrame(() => {
+          try {
+            const el = containerRef?.current ?? null;
+            setScroll(el, { top: 0, left: 0 });
+          } catch {
+            // swallow
+          }
+        });
+      }
     }
 
-    prevKeyRef.current = key;
+    prevPageIdRef.current = pageId;
 
     // Whenever location changes, also persist a snapshot to sessionStorage (cheap)
     const obj = {};
@@ -118,12 +170,12 @@ export default function ScrollRestoration({ containerRef }) {
     writeStoredPositions(obj);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.key, location.pathname]);
+  }, [location.pathname, location.search, location.hash]);
 
   // Optionally track scroll events and update the stored position live for the active route key.
   // This reduces chance of losing position if user navigates away quickly.
   useEffect(() => {
-    const key = location.key || location.pathname;
+    const pageId = `${location.pathname}${location.search}${location.hash || ""}`;
     let ticking = false;
 
     // Capture the event target and positions map so cleanup doesn't reference changing refs
@@ -137,7 +189,7 @@ export default function ScrollRestoration({ containerRef }) {
         try {
           const targetEl = containerRef?.current ?? null;
           const pos = getScroll(targetEl);
-          positionsMap.set(key, pos);
+          positionsMap.set(pageId, pos);
         } finally {
           ticking = false;
         }
@@ -152,12 +204,12 @@ export default function ScrollRestoration({ containerRef }) {
       // store final position for this key on detach using captured values
       try {
         const finalPos = getScroll(eventTarget === window ? null : eventTarget);
-        positionsMap.set(key, finalPos);
+        positionsMap.set(pageId, finalPos);
       } catch {
         // swallow
       }
     };
-  }, [containerRef, location.key, location.pathname]);
+  }, [containerRef, location.pathname, location.search, location.hash]);
 
   return null;
 }

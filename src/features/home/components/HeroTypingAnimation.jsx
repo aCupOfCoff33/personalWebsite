@@ -11,7 +11,7 @@ import HeroFrame from "./HeroFrame";
 import TypewriterText from "./TypewriterText";
 
 /* ── constants ─────────────────────────────────────────────── */
-const HEADLINE = "Hey There! I'm Aaryan!";
+const HEADLINE = "Hey there! I'm Aaryan!";
 const HERO_INTRO_SESSION_KEY = "heroIntroSeen";
 
 // Set to true to skip typing animation and show final state immediately
@@ -330,25 +330,30 @@ const HeroTypingAnimation = React.memo(() => {
           {/* tagline */}
           <p className="text-2xl md:text-[2.4rem] leading-relaxed md:leading-tight">
             A Software Engineering&nbsp;&amp;&nbsp;Business student at Ivey
-            Business School based near Toronto, building tools that{" "}
-            <em>(ideally)</em> make life easier — or at least break things in
-            more interesting ways.
+            Business School, building tools that <em>(ideally)</em> make life
+            easier — or at least break things in more interesting ways.
           </p>
 
           {/* "currently / driven by" grid */}
-          <div className="grid gap-y-10 gap-x-24 sm:grid-cols-2 text-xl md:text-[1.625rem]">
-            <div>
-              <p className="italic text-2xl md:text-3xl mb-2">currently</p>
-              <p className="text-[#9b9cbe] font-semibold leading-snug">
-                data analytics &amp; strategy intern
-                <br />@ american global
+          <div className="grid gap-y-10 gap-x-24 sm:grid-cols-2 items-stretch">
+            <div className="flex flex-col h-full">
+              <p className="italic text-base md:text-lg text-white/70 tracking-wide mb-2">
+                currently
+              </p>
+              <p className="text-[#9b9cbe] font-extrabold uppercase tracking-[0.08em] leading-[1.25] antialiased text-[1.125rem] md:text-[1.25rem] -mt-1 mb-0">
+                <span className="block">data analytics &amp; strategy</span>
+                <span className="block">@ american global</span>
               </p>
             </div>
-            <div>
-              <p className="italic text-2xl md:text-3xl mb-2">driven by</p>
-              <p className="text-[#9b9cbe] font-semibold leading-snug">
-                curiosity, creative problem-solving &amp; an arguably unhealthy
-                obsession with bears.
+            <div className="flex flex-col h-full">
+              <p className="italic text-base md:text-lg text-white/70 tracking-wide mb-2">
+                driven by
+              </p>
+              <p className="text-[#9b9cbe] font-extrabold uppercase tracking-[0.08em] leading-[1.25] antialiased text-[1.125rem] md:text-[1.25rem] -mt-1 mb-0">
+                <span className="block">
+                  writing code, data and an arguably unhealthy obsession with
+                  bears.
+                </span>
               </p>
             </div>
           </div>

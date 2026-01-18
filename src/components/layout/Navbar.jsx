@@ -90,8 +90,8 @@ const CardButton = React.memo(function CardButton({
         className,
       ].join(" ")}
     >
-      <div className="flex items-center gap-2 px-2.5 py-1">
-        <div className="shrink-0 opacity-90 flex items-center justify-center w-3.5 h-3.5">
+      <div className="flex items-center gap-2 px-2.5 py-2">
+        <div className="shrink-0 opacity-90 flex items-center justify-center w-5 h-5">
           {/* ensure icon stays centered */}
           {IconComponent ? (
             iconLayoutId ? (
@@ -109,16 +109,16 @@ const CardButton = React.memo(function CardButton({
                 }}
                 className="flex items-center justify-center"
               >
-                <IconComponent className="h-3.5 w-3.5" />
+                <IconComponent className="h-5 w-5" />
               </Motion.div>
             ) : (
-              <IconComponent className="h-3.5 w-3.5" />
+              <IconComponent className="h-5 w-5" />
             )
           ) : null}
         </div>
         <span
           className={[
-            "text-lg leading-normal font-normal font-adamant flex items-center",
+            "text-lg leading-none font-normal font-adamant flex items-center",
             active ? "text-neutral-100" : "text-neutral-200",
           ].join(" ")}
         >

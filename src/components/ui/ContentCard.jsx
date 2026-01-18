@@ -87,7 +87,7 @@ function ContentCard({
         className,
       )}
     >
-      <div className="absolute inset-0  bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
       {/* card body */}
       {cardLink ? (
@@ -95,7 +95,7 @@ function ContentCard({
           href={cardLink}
           target={isExternalLink ? "_blank" : undefined}
           rel={isExternalLink ? "noopener noreferrer" : undefined}
-          className="relative flex h-full w-full flex-col overflow-hidden rounded hover:backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 p-3 md:p-4 space-y-2 md:space-y-3 transition-colors duration-300 ease-out"
+          className="relative flex h-full w-full flex-col overflow-hidden rounded-xl hover:backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 p-3 md:p-4 space-y-2 md:space-y-3 transition-colors duration-300 ease-out"
           onClick={() => {
             // allow anchor navigation to router; do not scroll to top of current page
           }}
@@ -160,7 +160,7 @@ function ContentCard({
           </div>
         </a>
       ) : (
-        <div className="relative flex h-full w-full flex-col overflow-hidden rounded p-3 md:p-4 space-y-2 md:space-y-3">
+        <div className="relative flex h-full w-full flex-col overflow-hidden rounded-xl p-3 md:p-4 space-y-2 md:space-y-3">
           {/* hero panel */}
           <div
             className="relative flex-shrink-0 w-full aspect-video rounded-xl overflow-hidden"
