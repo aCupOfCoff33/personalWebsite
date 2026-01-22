@@ -337,18 +337,14 @@ const HeroTypingAnimation = React.memo(() => {
           {/* "currently / driven by" grid */}
           <div className="grid gap-y-10 gap-x-24 sm:grid-cols-2 items-stretch">
             <div className="flex flex-col h-full">
-              <p className="italic text-base md:text-lg text-white/70 tracking-wide mb-2">
-                currently
-              </p>
+              <p className="italic text-2xl md:text-3xl mb-2">currently</p>
               <p className="text-[#9b9cbe] font-extrabold uppercase tracking-[0.08em] leading-[1.25] antialiased text-[1.125rem] md:text-[1.25rem] -mt-1 mb-0">
                 <span className="block">data analytics &amp; strategy</span>
                 <span className="block">@ american global</span>
               </p>
             </div>
             <div className="flex flex-col h-full">
-              <p className="italic text-base md:text-lg text-white/70 tracking-wide mb-2">
-                driven by
-              </p>
+              <p className="italic text-2xl md:text-3xl mb-2">driven by</p>
               <p className="text-[#9b9cbe] font-extrabold uppercase tracking-[0.08em] leading-[1.25] antialiased text-[1.125rem] md:text-[1.25rem] -mt-1 mb-0">
                 <span className="block">
                   writing code, data and an arguably unhealthy obsession with

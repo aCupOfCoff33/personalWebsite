@@ -97,7 +97,9 @@ const PhotoMosaic = ({ images = [] }) => {
 
                 {/* Use picture element for WebP with fallback */}
                 <picture>
-                  <source srcSet={getWebPPath(item.src)} type="image/webp" />
+                  {getWebPPath(item.src) && (
+                    <source srcSet={getWebPPath(item.src)} type="image/webp" />
+                  )}
                   <img
                     src={item.src}
                     alt={item.alt || `Gallery image ${item.index + 1}`}
