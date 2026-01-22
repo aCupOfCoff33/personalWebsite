@@ -118,7 +118,7 @@ function ContentCard({
                   className="absolute inset-0 w-full h-full object-cover"
                   loading={priority ? "eager" : "lazy"}
                   decoding={priority ? "sync" : "async"}
-                  fetchPriority={priority ? "high" : "auto"}
+                  fetchpriority={priority ? "high" : "auto"}
                   onError={() => setImageFailed(true)}
                   onLoad={() => setImageFailed(false)}
                 />
@@ -177,7 +177,7 @@ function ContentCard({
                   className="absolute inset-0 w-full h-full object-cover"
                   loading={priority ? "eager" : "lazy"}
                   decoding={priority ? "sync" : "async"}
-                  fetchPriority={priority ? "high" : "auto"}
+                  fetchpriority={priority ? "high" : "auto"}
                   onError={() => setImageFailed(true)}
                   onLoad={() => setImageFailed(false)}
                 />
