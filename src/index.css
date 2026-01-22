@@ -49,7 +49,7 @@
 
 /* Optimize scroll containers */
 [data-scroll-container] {
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth removed - conflicts with programmatic scroll restoration */
     -webkit-overflow-scrolling: touch;
     /* Removed will-change and transform - overuse causes memory issues */
 }

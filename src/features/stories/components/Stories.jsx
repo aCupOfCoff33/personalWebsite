@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ContentSection from "../../../components/ui/ContentSection";
 import { contentService } from "../../../services/content";
 import { useNavigate } from "react-router-dom";
+import { markForceScrollTop } from "../../../utils/scrollUtils";
 
 // Stories section using the reusable ContentSection with horizontal carousel layout
 function Stories() {
@@ -25,8 +26,11 @@ function Stories() {
       cardVariant="panel"
       showViewAll={true}
       maxItems={7}
-      onViewAllClick={() => navigate("/projects")}
-      viewAllLabel={"Venture Deeper Into\nThe Woods"}
+      onViewAllClick={() => {
+        markForceScrollTop();
+        navigate("/projects");
+      }}
+      viewAllLabel="View All Stories"
     />
   );
 }

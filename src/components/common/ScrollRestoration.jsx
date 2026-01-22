@@ -1,17 +1,18 @@
-import React, { useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useRef, useLayoutEffect, useCallback } from "react";
+import { useLocation, useNavigationType } from "react-router-dom";
 import PropTypes from "prop-types";
+import { shouldForceTop } from "../../utils/scrollUtils";
 
 const STORAGE_KEY = "app:scroll-positions";
 const VISITED_PAGES_KEY = "app:visited-pages";
 
+// Read/write helpers for sessionStorage
 function readStoredPositions() {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
     return JSON.parse(raw);
   } catch {
-    // If parsing fails, ignore and start fresh
     return {};
   }
 }
@@ -38,7 +39,7 @@ function writeVisitedPages(set) {
   try {
     sessionStorage.setItem(VISITED_PAGES_KEY, JSON.stringify(Array.from(set)));
   } catch {
-    // ignore storage errors (private mode etc.)
+    // ignore storage errors
   }
 }
 
@@ -49,32 +50,35 @@ function getScroll(el) {
       left: window.scrollX || 0,
     };
   }
-  // DOM element with scrollTop/scrollLeft
   return { top: el.scrollTop || 0, left: el.scrollLeft || 0 };
 }
 
 function setScroll(el, { top = 0, left = 0 } = {}) {
   if (!el) {
-    window.scrollTo({ top, left });
+    window.scrollTo({ top, left, behavior: "auto" });
     return;
   }
-  el.scrollTo?.({ top, left, behavior: "auto" }) ??
-    ((el.scrollTop = top), (el.scrollLeft = left));
+  // Force instant scroll by setting scrollTop directly (bypasses CSS scroll-behavior: smooth)
+  el.scrollTop = top;
+  el.scrollLeft = left;
 }
 
 export default function ScrollRestoration({ containerRef }) {
   const location = useLocation();
-  // positionsRef stores scroll positions keyed by a stable page ID (pathname + search + hash)
+  const navigationType = useNavigationType();
+
+  // Refs for storing positions and tracking state
   const positionsRef = useRef(new Map());
   const prevPageIdRef = useRef(null);
-
-  // Track visited pages in a ref
   const visitedPagesRef = useRef(new Set());
+  const isHydratedRef = useRef(false);
+  const pendingScrollRef = useRef(null);
 
-  // Hydrate from sessionStorage on mount
-  useEffect(() => {
+  // Hydrate from sessionStorage on mount (synchronous before first render effect)
+  useLayoutEffect(() => {
+    if (isHydratedRef.current) return;
+
     const stored = readStoredPositions();
-    // stored is an object mapping keys -> {top,left}
     Object.keys(stored).forEach((k) => {
       const value = stored[k];
       if (value && typeof value.top === "number") {
@@ -82,12 +86,12 @@ export default function ScrollRestoration({ containerRef }) {
       }
     });
 
-    // Hydrate visited pages from sessionStorage
     const visited = readVisitedPages();
     visitedPagesRef.current = visited;
+    isHydratedRef.current = true;
   }, []);
 
-  // Persist to sessionStorage whenever positionsRef changes (on unmount or before unload)
+  // Persist positions on beforeunload
   useEffect(() => {
     const onBeforeUnload = () => {
       const obj = {};
@@ -104,15 +108,93 @@ export default function ScrollRestoration({ containerRef }) {
     };
   }, []);
 
-  // Save previous position and restore new one when location.key changes
+  // Function to apply scroll position with retry logic for lazy-loaded content
+  const applyScrollPosition = useCallback((el, targetPos, maxRetries = 10) => {
+    let retries = 0;
+
+    const attemptScroll = () => {
+      if (!el) return;
+
+      // Set the scroll position
+      setScroll(el, targetPos);
+
+      // Verify it was applied (content might not be tall enough yet)
+      const currentPos = getScroll(el);
+      const targetTop = targetPos.top || 0;
+
+      // If we're trying to scroll to 0, or the scroll was successful, we're done
+      if (targetTop === 0 || Math.abs(currentPos.top - targetTop) < 5) {
+        pendingScrollRef.current = null;
+        return;
+      }
+
+      // Content might not be ready, retry
+      retries++;
+      if (retries < maxRetries) {
+        requestAnimationFrame(attemptScroll);
+      } else {
+        pendingScrollRef.current = null;
+      }
+    };
+
+    // Use double RAF to wait for paint
+    requestAnimationFrame(() => {
+      requestAnimationFrame(attemptScroll);
+    });
+  }, []);
+
+  // Immediately scroll to top when location changes (before lazy content loads)
+  // Using useLayoutEffect to run synchronously before paint
+  useLayoutEffect(() => {
+    const el = containerRef?.current;
+    if (!el) return;
+
+    const pageId = `${location.pathname}${location.search}${location.hash || ""}`;
+    const forceTop = shouldForceTop();
+    const isFirstVisit = !visitedPagesRef.current.has(pageId);
+
+    // Determine what scroll position we want
+    let targetPos = { top: 0, left: 0 };
+
+    if (forceTop || isFirstVisit) {
+      // Force scroll to top
+      targetPos = { top: 0, left: 0 };
+    } else if (navigationType === "POP") {
+      // Browser back/forward - try to restore saved position
+      const saved = positionsRef.current.get(pageId);
+      if (saved) {
+        targetPos = saved;
+      }
+    } else {
+      // Regular navigation to previously visited page - scroll to top
+      // This is the expected behavior for clicking links
+      targetPos = { top: 0, left: 0 };
+    }
+
+    // Apply scroll immediately (synchronously) to prevent flash of wrong position
+    setScroll(el, targetPos);
+
+    // Store pending scroll for retry after lazy content loads
+    pendingScrollRef.current = targetPos;
+  }, [
+    location.pathname,
+    location.search,
+    location.hash,
+    containerRef,
+    navigationType,
+  ]);
+
+  // After render, retry scroll application to handle lazy-loaded content
   useEffect(() => {
+    const el = containerRef?.current;
+    if (!el) return;
+
     const pageId = `${location.pathname}${location.search}${location.hash || ""}`;
     const prevPageId = prevPageIdRef.current;
 
-    // Save current scroll for the previous page
-    if (prevPageId != null) {
+    // Save scroll position for the previous page
+    if (prevPageId != null && prevPageId !== pageId) {
       try {
-        const el = containerRef?.current ?? null;
         const pos = getScroll(el);
         positionsRef.current.set(prevPageId, pos);
       } catch {
@@ -120,65 +202,39 @@ export default function ScrollRestoration({ containerRef }) {
       }
     }
 
-    // Check if this is a first-time visit to this page
-    const isFirstVisit = !visitedPagesRef.current.has(pageId);
-
-    if (isFirstVisit) {
-      // First visit: mark as visited and scroll to top
+    // Mark current page as visited
+    if (!visitedPagesRef.current.has(pageId)) {
       visitedPagesRef.current.add(pageId);
       writeVisitedPages(visitedPagesRef.current);
-
-      requestAnimationFrame(() => {
-        try {
-          const el = containerRef?.current ?? null;
-          setScroll(el, { top: 0, left: 0 });
-        } catch {
-          // swallow
-        }
-      });
-    } else {
-      // Returning visit: restore saved position if exists; otherwise fall back to top
-      const saved = positionsRef.current.get(pageId);
-      if (saved) {
-        requestAnimationFrame(() => {
-          try {
-            const el = containerRef?.current ?? null;
-            setScroll(el, saved);
-          } catch {
-            // swallow
-          }
-        });
-      } else {
-        requestAnimationFrame(() => {
-          try {
-            const el = containerRef?.current ?? null;
-            setScroll(el, { top: 0, left: 0 });
-          } catch {
-            // swallow
-          }
-        });
-      }
     }
 
+    // Update prev page ref
     prevPageIdRef.current = pageId;
 
-    // Whenever location changes, also persist a snapshot to sessionStorage (cheap)
+    // Apply pending scroll with retry logic (handles lazy content)
+    if (pendingScrollRef.current) {
+      applyScrollPosition(el, pendingScrollRef.current);
+    }
+
+    // Persist positions
     const obj = {};
     positionsRef.current.forEach((value, k) => {
       obj[k] = value;
     });
     writeStoredPositions(obj);
+  }, [
+    location.pathname,
+    location.search,
+    location.hash,
+    containerRef,
+    applyScrollPosition,
+  ]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, location.search, location.hash]);
-
-  // Optionally track scroll events and update the stored position live for the active route key.
-  // This reduces chance of losing position if user navigates away quickly.
+  // Track scroll position live
   useEffect(() => {
     const pageId = `${location.pathname}${location.search}${location.hash || ""}`;
     let ticking = false;
 
-    // Capture the event target and positions map so cleanup doesn't reference changing refs
     const eventTarget = containerRef?.current ?? window;
     const positionsMap = positionsRef.current;
 
@@ -196,12 +252,10 @@ export default function ScrollRestoration({ containerRef }) {
       });
     };
 
-    // Use the captured event target for add/remove
     eventTarget.addEventListener("scroll", handler, { passive: true });
 
     return () => {
       eventTarget.removeEventListener("scroll", handler);
-      // store final position for this key on detach using captured values
       try {
         const finalPos = getScroll(eventTarget === window ? null : eventTarget);
         positionsMap.set(pageId, finalPos);
@@ -215,7 +269,5 @@ export default function ScrollRestoration({ containerRef }) {
 }
 
 ScrollRestoration.propTypes = {
-  // A React ref object pointing at the scrollable container element.
-  // If omitted or null, the component falls back to window scroll.
   containerRef: PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
 };

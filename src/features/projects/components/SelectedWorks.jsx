@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import ContentSection from "../../../components/ui/ContentSection";
 import { useNavigate } from "react-router-dom";
 import { contentService } from "../../../services/content";
+import { markForceScrollTop } from "../../../utils/scrollUtils";
 
 // Selected Works section using the reusable ContentSection
 function SelectedWorks() {
@@ -25,6 +26,7 @@ function SelectedWorks() {
   }, []);
 
   const handleViewAllClick = React.useCallback(() => {
+    markForceScrollTop();
     navigate("/projects");
   }, [navigate]);
 

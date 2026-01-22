@@ -55,32 +55,36 @@ const AboutMe = () => {
                     Technically a{" "}
                     <span className="text-white font-semibold">
                       Business + SWE Student at Ivey Business School
-                    </span>{" "}
-                    but most of what I care about happens outside the classroom.
-                    I'm in third year, graduating in 2027 and based near
-                    Toronto.
+                    </span>
+                    , but most of what I care about happens outside the
+                    classroom. I’m in third year, graduating in 2027, and based
+                    near Toronto.
                   </p>
+
                   <p className="text-neutral-300 text-lg font-normal font-adamant leading-relaxed">
-                    I like spending time in{" "}
-                    <span className="text-white font-semibold">Figma</span> &
-                    finding cool relationships in diverse{" "}
-                    <span className="text-white font-semibold">datasets</span>{" "}
-                    and presenting time, especially in a financial context.
+                    I spend most of my time building at the intersection of
+                    design and engineering, turning rough ideas into
+                    high-fidelity interfaces that actually ship. I care about
+                    craft, clean systems, and closing the gap between design
+                    intent and real, usable code.
                   </p>
+
                   <p className="text-neutral-300 text-lg font-normal font-adamant leading-relaxed">
                     Outside of that, I swim (un)competitively, follow{" "}
                     <span className="text-white font-semibold">
                       Mercedes in F1
                     </span>
-                    , and listen to random songs on{" "}
+                    , and listen to an unhealthy mix of random playlists on{" "}
                     <span className="text-white font-semibold">Spotify</span>.
                   </p>
+
                   <p className="text-neutral-300 text-lg font-normal leading-relaxed">
-                    No big story behind the bear. He's just cool. And he's
-                    staying. <br />
+                    No big story behind the bear. He’s just cool. And he’s
+                    staying.
                   </p>
+
                   <p className="text-neutral-300 text-lg font-normal leading-relaxed">
-                    Peek into my world through these snapshots below!
+                    A few snapshots from my world are down below.
                   </p>
                 </div>
               </div>

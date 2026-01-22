@@ -2,48 +2,52 @@ import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import ContentCard from "./ContentCard";
 
-// View All Projects Button Component - matches navbar card style and small size
+// View All Projects Button Component - matches content card styling and size
 function ViewAllButton({
   onClick,
   className = "",
-  label = "Venture Deeper Into\nThe Woods",
+  label = "View All Projects",
 }) {
-  // normalize either literal '/n' in label to real newline
-  const normalized = String(label)
-    .replace(/\/n/g, "\n")
-    .replace(/\/\\n/g, "\n");
-  const normalized2 = normalized.replace(/\/\/?n/g, "\n");
-  const lines = normalized2.split("\n");
-
   return (
-    <div className="snap-start shrink-0 w-44 flex items-center justify-center min-h-[300px] md:min-h-[340px]">
+    <div className="snap-start shrink-0 w-64 md:w-72 flex items-center justify-center">
       <button
         onClick={onClick}
-        className={`group w-full rounded-xl border transition-colors min-h-[40px] border-white/10 bg-neutral-900/40 hover:bg-white/5 text-neutral-300 px-3 py-2.5 flex items-center justify-center gap-3 ${className}`}
+        className={`group relative isolate w-full h-full min-h-[300px] md:min-h-[340px] rounded-xl overflow-hidden transition-all duration-300 ease-out hover:scale-[1.02] ${className}`}
       >
-        <span className="text-md leading-tight font-normal font-adamant text-neutral-300 group-hover:text-neutral-100 transition-colors duration-200 text-center">
-          {lines.map((line, i) => (
-            <span key={i} className="block">
-              {line}
-            </span>
-          ))}
-        </span>
+        {/* Hover glow effect */}
+        <div className="absolute inset-0 rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="text-white/70 transform transition-transform duration-200 ease-out group-hover:translate-x-2 group-hover:-translate-y-2"
-        >
-          <path
-            d="M7 17L17 7M17 7H7M17 7V17"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        {/* Border ring */}
+        <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
+
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-neutral-900/80 via-neutral-900/60 to-neutral-900/80" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 py-8 text-center gap-3">
+          <span className="text-lg font-semibold leading-tight text-white group-hover:text-white transition-colors duration-200">
+            {label}
+          </span>
+
+          <div className="flex items-center gap-2 text-white/70 group-hover:text-white/90 transition-colors duration-200">
+            <span className="text-sm font-medium">Explore More</span>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              className="transform transition-transform duration-200 ease-out group-hover:translate-x-1"
+            >
+              <path
+                d="M5 12h14M12 5l7 7-7 7"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
       </button>
     </div>
   );
@@ -58,7 +62,7 @@ function ContentCarousel({
   showViewAll = false,
   maxItems = 6,
   onViewAllClick = () => {},
-  viewAllLabel = "Venture Deeper Into\nThe Woods",
+  viewAllLabel = "View All Projects",
 }) {
   // Show first maxItems only if showViewAll is true, otherwise show all items
   const displayItems = useMemo(

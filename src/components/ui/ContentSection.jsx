@@ -18,7 +18,7 @@ function ContentSection({
   showViewAll = false,
   maxItems = 6,
   onViewAllClick = () => {},
-  viewAllLabel = "Venture Deeper into the Woods",
+  viewAllLabel = "View All Projects",
   ...props
 }) {
   const carouselId = useId(); // Generate unique ID for this carousel instance
