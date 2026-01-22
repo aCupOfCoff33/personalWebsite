@@ -7,14 +7,36 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependency directories
 node_modules
+.pnp
+.pnp.js
+
+# Build output
 dist
 dist-ssr
+build
 *.local
+
+# Testing
+coverage
+.nyc_output
+*.lcov
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 .idea
 .DS_Store
 *.suo
@@ -22,7 +44,79 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env
+*.swp
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Certificates and keys
 *.pem
 *.perm
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# pnpm specific
+.pnpm-store
+.pnpm-debug.log
+
+# Optional: Uncomment if you want to ignore lock files (NOT recommended)
+# pnpm-lock.yaml
+# package-lock.json
+# yarn.lock
+
+# Vite specific
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+.turbo
+.vercel
+.netlify
+.cache
+.parcel-cache
+.eslintcache
+.stylelintcache
+
+# Documentation output
 repomix-output.xml
+*.md.backup
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.temp
+
+# Debug
+.vscode-test
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Storybook
+storybook-static
