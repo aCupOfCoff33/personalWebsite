@@ -23,9 +23,7 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
       <h2 className="text-2xl font-semibold text-white mt-4">
         software engineer
       </h2>
-      <p className="text-lg text-white mt-6">
-        software engineering & ivey hba
-      </p>
+      <p className="text-lg text-white mt-6">software engineering & ivey hba</p>
       <div className="mt-8 flex space-x-4">
         <button
           onClick={handleHomeClick}
@@ -83,7 +81,7 @@ const LeftSide = ({ setCurrentSection, scrollToSection }) => {
           {/* Social Media Links */}
           <div className="mt-4 flex space-x-4 justify-center pt-2">
             <a
-              href="https://github.com/aCupOfCoff33"
+              href="https://github.com/aaryanj05"
               target="_blank"
               rel="noopener noreferrer"
               className="group"

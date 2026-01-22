@@ -8,7 +8,7 @@ const Footer = () => {
     },
     {
       label: "GitHub",
-      href: "https://github.com/aCupOfCoff33",
+      href: "https://github.com/aaryanj05",
     },
     {
       label: "X (Twitter)",

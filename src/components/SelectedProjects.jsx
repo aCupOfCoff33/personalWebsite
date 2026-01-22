@@ -9,7 +9,7 @@ const SelectedProjects = () => {
       description:
         "developed onepack, a sustainable packaging solution that combines reusability with convenience for eco-conscious consumers. conducted market research to identify demand for alternatives to single-use containers, then designed an affordable product using recycled materials. created a business model balancing environmental impact with practicality for on-the-go use.",
       tags: ["market research", "financial projections", "react three fiber"],
-      link: "https://onepack.aaryanj.tech/", 
+      link: "https://onepack.aaryanj.tech/",
     },
     {
       date: "dec 2024",
@@ -17,7 +17,7 @@ const SelectedProjects = () => {
       description:
         "built an algorithmic trading system leveraging python, pandas, and streamlit. used moving average crossover strategies and financial metrics to optimize trading workflows and enhance portfolio returns.",
       tags: ["python", "streamlit", "pandas"],
-      link: null, 
+      link: null,
     },
     {
       date: "dec 2024",
@@ -25,7 +25,7 @@ const SelectedProjects = () => {
       description:
         "designed and deployed a real-time ai-powered chat platform with flan-t5 language models. implemented robust api management and advanced similarity checks to enable dynamic, interactive conversations.",
       tags: ["python", "react", "tailwind", "ai/ml", "fast.api"],
-      link: "https://github.com/aCupOfCoff33/chatBot2202",
+      link: "https://github.com/aaryanj05/chatBot2202",
     },
     {
       date: "sept 2024 - nov 2024",
@@ -33,7 +33,7 @@ const SelectedProjects = () => {
       description:
         "developed a react-based alumni networking platform for seamless navigation and scalability. connected 2,000+ students with 300+ alumni, fostering meaningful professional relationships.",
       tags: ["javascript", "react", "tailwind", "typescript", "python"],
-      link: "https://github.com/aCupOfCoff33/alumniVersePersonalCopy",
+      link: "https://github.com/aaryanj05/alumniVersePersonalCopy",
     },
     {
       date: "sept 2024 - oct 2024",

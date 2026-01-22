@@ -50,7 +50,7 @@ const sections = [
       },
       {
         kind: "external",
-        href: "https://github.com/aCupOfCoff33",
+        href: "https://github.com/aaryanj05",
         label: "GitHub",
         Icon: Github,
       },

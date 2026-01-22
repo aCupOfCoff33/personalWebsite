@@ -73,7 +73,7 @@ export const storiesData = [
     image: "/imagesStories/alumnidatabase.png",
     accent: "blue",
     category: "TypeScript",
-    link: "https://github.com/aCupOfCoff33/alumniVersePersonalCopy",
+    link: "https://github.com/aaryanj05/alumniVersePersonalCopy",
   },
   {
     id: "Heart & Stroke x Ivey Business School",

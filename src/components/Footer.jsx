@@ -21,7 +21,7 @@ const Footer = () => {
           LinkedIn
         </a>
         <a
-          href="https://github.com"
+          href="https://github.com/aaryanj05"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"
