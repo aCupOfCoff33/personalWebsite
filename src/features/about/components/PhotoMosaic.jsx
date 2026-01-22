@@ -61,7 +61,14 @@ const PhotoMosaic = ({ images = [] }) => {
 
   // Generate WebP source path from original path
   const getWebPPath = (src) => {
-    return src.replace(/\.(jpg|jpeg|png)$/i, ".webp");
+    if (!src) return null;
+    // Replace extension and encode URL to handle spaces and special characters
+    const webpPath = src.replace(/\.(jpg|jpeg|png)$/i, ".webp");
+    // Split path and encode only the filename part
+    const parts = webpPath.split("/");
+    const filename = parts[parts.length - 1];
+    parts[parts.length - 1] = encodeURIComponent(filename);
+    return parts.join("/");
   };
 
   return (
@@ -101,7 +108,7 @@ const PhotoMosaic = ({ images = [] }) => {
                     <source srcSet={getWebPPath(item.src)} type="image/webp" />
                   )}
                   <img
-                    src={item.src}
+                    src={encodeURI(item.src)}
                     alt={item.alt || `Gallery image ${item.index + 1}`}
                     loading={isPriority ? "eager" : "lazy"}
                     decoding={isPriority ? "sync" : "async"}

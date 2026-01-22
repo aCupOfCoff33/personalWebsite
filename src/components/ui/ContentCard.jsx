@@ -5,7 +5,13 @@ import clsx from "clsx";
 // Generate WebP source path from original path
 const getWebPPath = (src) => {
   if (!src) return null;
-  return src.replace(/\.(jpg|jpeg|png)$/i, ".webp");
+  // Replace extension and encode URL to handle spaces and special characters
+  const webpPath = src.replace(/\.(jpg|jpeg|png)$/i, ".webp");
+  // Split path and encode only the filename part
+  const parts = webpPath.split("/");
+  const filename = parts[parts.length - 1];
+  parts[parts.length - 1] = encodeURIComponent(filename);
+  return parts.join("/");
 };
 
 function ContentCard({
@@ -113,12 +119,12 @@ function ContentCard({
                   <source srcSet={getWebPPath(image)} type="image/webp" />
                 )}
                 <img
-                  src={image}
+                  src={encodeURI(image)}
                   alt={title || ""}
                   className="absolute inset-0 w-full h-full object-cover"
                   loading={priority ? "eager" : "lazy"}
                   decoding={priority ? "sync" : "async"}
-                  fetchpriority={priority ? "high" : "auto"}
+                  fetchPriority={priority ? "high" : "auto"}
                   onError={() => setImageFailed(true)}
                   onLoad={() => setImageFailed(false)}
                 />
@@ -172,12 +178,12 @@ function ContentCard({
                   <source srcSet={getWebPPath(image)} type="image/webp" />
                 )}
                 <img
-                  src={image}
+                  src={encodeURI(image)}
                   alt={title || ""}
                   className="absolute inset-0 w-full h-full object-cover"
                   loading={priority ? "eager" : "lazy"}
                   decoding={priority ? "sync" : "async"}
-                  fetchpriority={priority ? "high" : "auto"}
+                  fetchPriority={priority ? "high" : "auto"}
                   onError={() => setImageFailed(true)}
                   onLoad={() => setImageFailed(false)}
                 />
