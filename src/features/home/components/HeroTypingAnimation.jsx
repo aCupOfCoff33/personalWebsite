@@ -135,12 +135,12 @@ const HeroTypingAnimation = React.memo(() => {
 
   // Track frame's position relative to section for positioning the drag hint
   // Calculate when dragOK becomes true (when hint is about to show) to ensure frame is in final position
+  // Also recalculate on window resize to handle desktop/mobile switching
   useEffect(() => {
     if (!state.showFrame || !state.dragOK) return;
     if (!frameRef.current || !sectionRef.current) return;
 
-    // Use requestAnimationFrame to ensure layout is complete
-    const rafId = requestAnimationFrame(() => {
+    const updateHintPosition = () => {
       if (!frameRef.current || !sectionRef.current) return;
 
       const frameRect = frameRef.current.getBoundingClientRect();
@@ -154,9 +154,18 @@ const HeroTypingAnimation = React.memo(() => {
         x: frameRightEdge - 20, // 20px to the right of frame's right edge
         y: frameRect.top - sectionRect.top - 110, // 110px above frame
       });
-    });
+    };
 
-    return () => cancelAnimationFrame(rafId);
+    // Use requestAnimationFrame to ensure layout is complete
+    const rafId = requestAnimationFrame(updateHintPosition);
+
+    // Add resize listener to recalculate position when switching between desktop/mobile
+    window.addEventListener("resize", updateHintPosition);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", updateHintPosition);
+    };
   }, [state.showFrame, state.dragOK]);
 
   // Update x position when screen size changes
