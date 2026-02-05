@@ -11,7 +11,7 @@ import HeroFrame from "./HeroFrame";
 import TypewriterText from "./TypewriterText";
 
 /* ── constants ─────────────────────────────────────────────── */
-const HEADLINE = "Hey there! I'm Aaryan!";
+const HEADLINE = "Aaryan Joharapurkar";
 const HERO_INTRO_SESSION_KEY = "heroIntroSeen";
 
 // Set to true to skip typing animation and show final state immediately
